@@ -1,20 +1,14 @@
-import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-change-this';
 const COOKIE_NAME = 'fh_admin_token';
 
 export function signAdminToken(): string {
-  return jwt.sign({ role: 'admin', iat: Date.now() }, JWT_SECRET, { expiresIn: '7d' });
+  return `${JWT_SECRET}-admin-token-secure`;
 }
 
 export function verifyAdminToken(token: string): boolean {
-  try {
-    const payload = jwt.verify(token, JWT_SECRET) as { role: string };
-    return payload.role === 'admin';
-  } catch {
-    return false;
-  }
+  return token === `${JWT_SECRET}-admin-token-secure`;
 }
 
 export function getAdminTokenFromRequest(req: NextRequest): string | null {
