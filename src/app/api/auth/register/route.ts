@@ -40,17 +40,18 @@ export async function POST(req: NextRequest) {
 
     const docRef = await usersRef.add(newUser);
     
-    // Gửi email chào mừng và báo admin (không block luồng)
-    sendNewUserWelcome({
-      fullName: newUser.full_name,
-      email: newUser.email,
-    }).catch(console.error);
-
-    sendNewUserAdminNotification({
-      fullName: newUser.full_name,
-      email: newUser.email,
-      zalo: newUser.zalo,
-    }).catch(console.error);
+    // Gửi email chào mừng và báo admin (await để không bị Vercel kill)
+    await Promise.allSettled([
+      sendNewUserWelcome({
+        fullName: newUser.full_name,
+        email: newUser.email,
+      }),
+      sendNewUserAdminNotification({
+        fullName: newUser.full_name,
+        email: newUser.email,
+        zalo: newUser.zalo,
+      })
+    ]);
 
     // Auto login
     const token = await signUserToken(docRef.id, emailLower);

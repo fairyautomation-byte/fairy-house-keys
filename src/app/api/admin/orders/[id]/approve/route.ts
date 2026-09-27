@@ -58,13 +58,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const userDoc = await db.collection('users').doc(order.user_id).get();
     if (userDoc.exists) {
       const userData = userDoc.data()!;
-      sendKeyToCustomer({
-        fullName: userData.full_name || 'Khách hàng',
-        email: userData.email || '',
-        key: licenseKey,
-        packageType: keyType,
-        expiresAt: KEY_DURATIONS[keyType] ? expiresAt : null
-      }).catch(console.error);
+      try {
+        await sendKeyToCustomer({
+          fullName: userData.full_name || 'Khách hàng',
+          email: userData.email || '',
+          key: licenseKey,
+          packageType: keyType,
+          expiresAt: KEY_DURATIONS[keyType] ? expiresAt : null
+        });
+      } catch (err) {
+        console.error('Email send failed:', err);
+      }
     }
 
     return NextResponse.json({ ok: true, message: 'Approved successfully', licenseKey });

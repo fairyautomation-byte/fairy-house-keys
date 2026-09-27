@@ -54,12 +54,16 @@ export async function POST(req: NextRequest) {
       await db.collection('licenses').add(newLicense);
       await userRef.update({ trial_used: true });
 
-      // Gửi email cho khách (trial cấp ngay)
-      sendCustomerConfirmation({
-        fullName: userData.full_name || 'Khách hàng',
-        email: user.email || userData.email || '',
-        packageType: 'trial'
-      }).catch(console.error);
+      // Gửi email cho khách (trial cấp ngay) - await
+      try {
+        await sendCustomerConfirmation({
+          fullName: userData.full_name || 'Khách hàng',
+          email: user.email || userData.email || '',
+          packageType: 'trial'
+        });
+      } catch (err) {
+        console.error('Email send failed:', err);
+      }
 
       return NextResponse.json({ ok: true, message: 'Kích hoạt Trial thành công' });
     } else {
@@ -81,21 +85,22 @@ export async function POST(req: NextRequest) {
 
       const orderRef = await db.collection('orders').add(newOrder);
 
-      // Gửi email thông báo
-      sendAdminNotification({
-        fullName: userData.full_name || 'Khách hàng',
-        email: user.email || userData.email || '',
-        zalo: userData.zalo || '',
-        packageType: keyType,
-        purpose: 'Mua từ hệ thống mới',
-        requestId: orderRef.id
-      }).catch(console.error);
-
-      sendCustomerConfirmation({
-        fullName: userData.full_name || 'Khách hàng',
-        email: user.email || userData.email || '',
-        packageType: keyType
-      }).catch(console.error);
+      // Gửi email thông báo (await)
+      await Promise.allSettled([
+        sendAdminNotification({
+          fullName: userData.full_name || 'Khách hàng',
+          email: user.email || userData.email || '',
+          zalo: userData.zalo || '',
+          packageType: keyType,
+          purpose: 'Mua từ hệ thống mới',
+          requestId: orderRef.id
+        }),
+        sendCustomerConfirmation({
+          fullName: userData.full_name || 'Khách hàng',
+          email: user.email || userData.email || '',
+          packageType: keyType
+        })
+      ]);
 
       return NextResponse.json({ 
         ok: true, 
