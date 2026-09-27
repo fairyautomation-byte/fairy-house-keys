@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        router.push('/admin/requests');
+        router.push('/admin/orders');
         router.refresh();
       } else {
         setError(data.error || 'Sai thông tin đăng nhập');
