@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     }
 
     const snapshot = await db.collection('users').orderBy('created_at', 'desc').get();
-    const users = snapshot.docs.map(doc => ({
+    const users = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
