@@ -49,7 +49,9 @@ export async function POST(req: NextRequest) {
           currentUsed = 0;
         }
 
-        if (dailyLimit !== -1 && dailyLimit !== null && currentUsed >= dailyLimit) {
+        // Thêm cơ chế grace margin (cho phép vượt quá dưới 10 UID)
+        const GRACE_MARGIN = 10;
+        if (dailyLimit !== -1 && dailyLimit !== null && (currentUsed + count) > (dailyLimit + GRACE_MARGIN)) {
           throw new Error('DAILY_LIMIT_REACHED');
         }
 
