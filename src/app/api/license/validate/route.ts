@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
       daily_limit: dailyLimit,
       daily_used: dailyUsed,
       remaining: remaining,
+      total_scans: license.total_scans || 0,
     });
   } catch (err) {
     console.error('Validate license error:', err);
