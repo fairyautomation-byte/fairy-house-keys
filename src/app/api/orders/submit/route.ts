@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { generateKey, KEY_DURATIONS, KEY_SCAN_LIMITS, KEY_PRICES, KeyType } from '@/lib/key-generator';
-import { sendAdminNotification, sendCustomerConfirmation } from '@/lib/mailer';
+import { sendAdminNotification, sendCustomerConfirmation, sendKeyToCustomer } from '@/lib/mailer';
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,10 +56,12 @@ export async function POST(req: NextRequest) {
 
       // Gửi email cho khách (trial cấp ngay) - await
       try {
-        await sendCustomerConfirmation({
+        await sendKeyToCustomer({
           fullName: userData.full_name || 'Khách hàng',
           email: user.email || userData.email || '',
-          packageType: 'trial'
+          key: licenseKey,
+          packageType: 'trial',
+          expiresAt: expiresAt
         });
       } catch (err) {
         console.error('Email send failed:', err);
