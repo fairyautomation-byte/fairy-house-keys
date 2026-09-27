@@ -5,7 +5,7 @@ import { validateKeyFormat } from '@/lib/key-generator';
 
 export async function POST(req: NextRequest) {
   try {
-    const { licenseKey } = await req.json();
+    const { licenseKey, action = 'consume', count = 1 } = await req.json();
 
     if (!licenseKey || !validateKeyFormat(licenseKey).valid) {
       return NextResponse.json({ success: false, code: 'INVALID_LICENSE' }, { status: 400 });
@@ -53,13 +53,16 @@ export async function POST(req: NextRequest) {
           throw new Error('DAILY_LIMIT_REACHED');
         }
 
-        newDailyUsed = currentUsed + 1;
-
-        transaction.update(licenseRef, {
-          daily_used: newDailyUsed,
-          last_reset_date: today,
-          total_scans: FieldValue.increment(1)
-        });
+        if (action === 'check') {
+          newDailyUsed = currentUsed;
+        } else {
+          newDailyUsed = currentUsed + count;
+          transaction.update(licenseRef, {
+            daily_used: newDailyUsed,
+            last_reset_date: today,
+            total_scans: FieldValue.increment(count)
+          });
+        }
       });
     } catch (e: any) {
       if (e.message === 'DAILY_LIMIT_REACHED') {
