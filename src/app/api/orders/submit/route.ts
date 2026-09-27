@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { generateKey, KEY_DURATIONS, KEY_SCAN_LIMITS, KEY_PRICES, KeyType } from '@/lib/key-generator';
+import { sendAdminNotification, sendCustomerConfirmation } from '@/lib/mailer';
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,6 +54,13 @@ export async function POST(req: NextRequest) {
       await db.collection('licenses').add(newLicense);
       await userRef.update({ trial_used: true });
 
+      // Gửi email cho khách (trial cấp ngay)
+      sendCustomerConfirmation({
+        fullName: userData.full_name || 'Khách hàng',
+        email: user.email || userData.email || '',
+        packageType: 'trial'
+      }).catch(console.error);
+
       return NextResponse.json({ ok: true, message: 'Kích hoạt Trial thành công' });
     } else {
       // Create Order for Paid plan
@@ -72,6 +80,22 @@ export async function POST(req: NextRequest) {
       };
 
       const orderRef = await db.collection('orders').add(newOrder);
+
+      // Gửi email thông báo
+      sendAdminNotification({
+        fullName: userData.full_name || 'Khách hàng',
+        email: user.email || userData.email || '',
+        zalo: userData.zalo || '',
+        packageType: keyType,
+        purpose: 'Mua từ hệ thống mới',
+        requestId: orderRef.id
+      }).catch(console.error);
+
+      sendCustomerConfirmation({
+        fullName: userData.full_name || 'Khách hàng',
+        email: user.email || userData.email || '',
+        packageType: keyType
+      }).catch(console.error);
 
       return NextResponse.json({ 
         ok: true, 

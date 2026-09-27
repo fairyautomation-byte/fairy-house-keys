@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { generateKey, KEY_DURATIONS, KEY_SCAN_LIMITS, KeyType } from '@/lib/key-generator';
 import { isAdminAuthenticated } from '@/lib/auth';
+import { sendKeyToCustomer } from '@/lib/mailer';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -52,6 +53,19 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     batch.update(orderRef, { status: 'PAID' });
     
     await batch.commit();
+
+    // Fetch user details to send email
+    const userDoc = await db.collection('users').doc(order.user_id).get();
+    if (userDoc.exists) {
+      const userData = userDoc.data()!;
+      sendKeyToCustomer({
+        fullName: userData.full_name || 'Khách hàng',
+        email: userData.email || '',
+        key: licenseKey,
+        packageType: keyType,
+        expiresAt: KEY_DURATIONS[keyType] ? expiresAt : null
+      }).catch(console.error);
+    }
 
     return NextResponse.json({ ok: true, message: 'Approved successfully', licenseKey });
   } catch (err) {
