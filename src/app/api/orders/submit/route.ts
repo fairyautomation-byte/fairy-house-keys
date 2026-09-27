@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       const orderRef = await db.collection('orders').add(newOrder);
 
       // Gửi email thông báo (await)
-      await Promise.allSettled([
+      const emailResults = await Promise.allSettled([
         sendAdminNotification({
           fullName: userData.full_name || 'Khách hàng',
           email: user.email || userData.email || '',
@@ -101,6 +101,12 @@ export async function POST(req: NextRequest) {
           packageType: keyType
         })
       ]);
+
+      emailResults.forEach((res, index) => {
+        if (res.status === 'rejected') {
+          console.error(`Order email send failed for index ${index}:`, res.reason);
+        }
+      });
 
       return NextResponse.json({ 
         ok: true, 

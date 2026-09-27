@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const docRef = await usersRef.add(newUser);
     
     // Gửi email chào mừng và báo admin (await để không bị Vercel kill)
-    await Promise.allSettled([
+    const emailResults = await Promise.allSettled([
       sendNewUserWelcome({
         fullName: newUser.full_name,
         email: newUser.email,
@@ -52,6 +52,12 @@ export async function POST(req: NextRequest) {
         zalo: newUser.zalo,
       })
     ]);
+
+    emailResults.forEach((res, index) => {
+      if (res.status === 'rejected') {
+        console.error(`Email send failed for index ${index}:`, res.reason);
+      }
+    });
 
     // Auto login
     const token = await signUserToken(docRef.id, emailLower);
