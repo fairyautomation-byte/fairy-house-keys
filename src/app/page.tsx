@@ -116,7 +116,7 @@ export default function Home() {
               <div className="text-4xl font-bold text-slate-900 mb-6">FREE</div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center text-slate-600"><span className="text-green-500 mr-2">✓</span> Thời hạn: 3 ngày</li>
-                <li className="flex items-center text-slate-600"><span className="text-green-500 mr-2">✓</span> Tối đa 50 scan / ngày</li>
+                <li className="flex items-center text-slate-600"><span className="text-green-500 mr-2">✓</span> Tối đa 100 scan / ngày</li>
                 <li className="flex items-center text-slate-600"><span className="text-green-500 mr-2">✓</span> Mỗi user nhận 1 lần</li>
               </ul>
               <Link href="/register?plan=trial" className="w-full block text-center py-3 px-4 rounded-xl font-semibold bg-slate-100 text-slate-900 hover:bg-slate-200 transition-colors">
@@ -184,7 +184,7 @@ export default function Home() {
           </div>
           <div className="space-y-6">
             {[
-              { q: 'Trial có miễn phí không?', a: 'Có, Trial hoàn toàn miễn phí trong 3 ngày và tối đa 50 lượt scan mỗi ngày.' },
+              { q: 'Trial có miễn phí không?', a: 'Có, Trial hoàn toàn miễn phí trong 3 ngày và tối đa 100 lượt scan mỗi ngày.' },
               { q: 'Trial có được dùng lại nhiều lần không?', a: 'Không. Mỗi tài khoản (email) chỉ được nhận Trial một lần duy nhất.' },
               { q: 'Khi hết quota trong ngày thì sao?', a: 'Bạn sẽ không thể scan tiếp cho đến khi quota được tự động reset vào lúc 00:00 (giờ Việt Nam) ngày hôm sau.' },
               { q: 'License hết hạn thì sao?', a: 'Extension sẽ tạm khóa tính năng scan cho đến khi bạn gia hạn hoặc mua License mới hợp lệ.' }

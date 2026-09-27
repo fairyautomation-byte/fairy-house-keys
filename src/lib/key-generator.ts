@@ -21,7 +21,7 @@ export const KEY_DURATIONS: Record<KeyType, number | null> = {
 
 // Giới hạn scan mỗi ngày (-1 = không giới hạn)
 export const KEY_SCAN_LIMITS: Record<KeyType, number> = {
-  trial:     50,     // tối đa 50 lần/ngày
+  trial:     100,    // tối đa 100 lần/ngày
   monthly:   1000,   // tối đa 1000 lần/ngày
   quarterly: 3000,   // tối đa 3000 lần/ngày
   yearly:    -1,     // không giới hạn

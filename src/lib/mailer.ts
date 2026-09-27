@@ -14,7 +14,7 @@ const ADMIN_EMAIL = process.env.GMAIL_USER || '';
 const SUPPORT_ZALO = '0378791667';
 
 const PACKAGE_LABELS: Record<string, { label: string; price: string; scanLimit: string }> = {
-  trial:     { label: '🆓 Dùng Thử (3 ngày)',    price: 'Miễn phí',  scanLimit: '50 lần/ngày' },
+  trial:     { label: '🆓 Dùng Thử (3 ngày)',    price: 'Miễn phí',  scanLimit: '100 lần/ngày' },
   monthly:   { label: '⭐ Gói Tháng (1 tháng)',   price: '69.000đ',   scanLimit: '1.000 lần/ngày' },
   quarterly: { label: '🚀 Tiết Kiệm (3 tháng)',   price: '179.000đ',  scanLimit: '3.000 lần/ngày' },
   yearly:    { label: '💎 Doanh Nghiệp (1 năm)',  price: '629.000đ',  scanLimit: 'Không giới hạn' },
