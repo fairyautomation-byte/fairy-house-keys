@@ -17,13 +17,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     // Find and delete all licenses associated with this user
     const licensesSnapshot = await db.collection('licenses').where('user_id', '==', id).get();
     const batch = db.batch();
-    licensesSnapshot.docs.forEach(doc => {
+    licensesSnapshot.docs.forEach((doc: any) => {
       batch.delete(doc.ref);
     });
 
     // Find and delete all orders associated with this user
     const ordersSnapshot = await db.collection('orders').where('user_id', '==', id).get();
-    ordersSnapshot.docs.forEach(doc => {
+    ordersSnapshot.docs.forEach((doc: any) => {
       batch.delete(doc.ref);
     });
 
