@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Zoo Target Pro';
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Fairy House Auto Data';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://your-domain.vercel.app';
 const ADMIN_EMAIL = process.env.GMAIL_USER || '';
 const SUPPORT_ZALO = '0378791667';
@@ -38,7 +38,7 @@ export async function sendAdminNotification(data: {
   await transporter.sendMail({
     from: `"${APP_NAME} System" <${ADMIN_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `🔔 [Zoo Target Pro] Đơn xin key mới từ ${data.fullName} — ${pkg.label}`,
+    subject: `🔔 [Fairy House Auto Data] Đơn xin key mới từ ${data.fullName} — ${pkg.label}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -47,7 +47,7 @@ export async function sendAdminNotification(data: {
         <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
           <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
             <h1 style="margin: 0; color: white; font-size: 20px;">🔔 Đơn Xin Key Mới</h1>
-            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.85);">Zoo Target Pro — AI Automation Facebook</p>
+            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.85);">Fairy House Auto Data — AI Automation Facebook</p>
           </div>
           <div style="padding: 24px;">
             <table style="width: 100%; border-collapse: collapse;">
@@ -84,7 +84,7 @@ export async function sendCustomerConfirmation(data: {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
     to: data.email,
-    subject: `✅ [Zoo Target Pro] Chúng tôi đã nhận yêu cầu của bạn`,
+    subject: `✅ [Fairy House Auto Data] Chúng tôi đã nhận yêu cầu của bạn`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -92,7 +92,7 @@ export async function sendCustomerConfirmation(data: {
       <body style="font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
           <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
-            <h1 style="margin: 0; color: white; font-size: 22px;">🎯 Zoo Target Pro</h1>
+            <h1 style="margin: 0; color: white; font-size: 22px;">🎯 Fairy House Auto Data</h1>
             <p style="margin: 8px 0 0; color: rgba(255,255,255,0.8);">AI Automation Facebook Extension</p>
           </div>
           <div style="padding: 24px;">
@@ -133,7 +133,7 @@ export async function sendKeyToCustomer(data: {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
     to: data.email,
-    subject: `🎉 [Zoo Target Pro] Key kích hoạt của bạn đã sẵn sàng!`,
+    subject: `🎉 [Fairy House Auto Data] Key kích hoạt của bạn đã sẵn sàng!`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -142,11 +142,11 @@ export async function sendKeyToCustomer(data: {
         <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
           <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
             <h1 style="margin: 0; color: white; font-size: 20px;">🎉 Key Của Bạn Đã Sẵn Sàng!</h1>
-            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.8);">Zoo Target Pro — AI Automation Facebook</p>
+            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.8);">Fairy House Auto Data — AI Automation Facebook</p>
           </div>
           <div style="padding: 24px;">
             <p>Chào <strong>${data.fullName}</strong>,</p>
-            <p>Key kích hoạt <strong>Zoo Target Pro</strong> của bạn:</p>
+            <p>Key kích hoạt <strong>Fairy House Auto Data</strong> của bạn:</p>
             <div style="background: #0f172a; border: 2px solid #7c3aed; border-radius: 10px; padding: 20px; margin: 16px 0; text-align: center;">
               <p style="margin: 0; font-family: monospace; font-size: 16px; font-weight: bold; color: #a78bfa; letter-spacing: 2px; word-break: break-all;">${data.key}</p>
             </div>
@@ -158,7 +158,7 @@ export async function sendKeyToCustomer(data: {
             <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin: 16px 0;">
               <p style="margin: 0 0 8px; font-weight: bold; color: #f1f5f9;">📖 Hướng dẫn kích hoạt:</p>
               <ol style="margin: 0; padding-left: 20px; color: #94a3b8; font-size: 14px; line-height: 1.8;">
-                <li>Mở Extension <strong style="color: #a78bfa;">Zoo Target Pro</strong> trên Chrome</li>
+                <li>Mở Extension <strong style="color: #a78bfa;">Fairy House Auto Data</strong> trên Chrome</li>
                 <li>Vào tab <strong style="color: #a78bfa;">"License Key"</strong></li>
                 <li>Dán key vào ô nhập và bấm <strong style="color: #a78bfa;">"Kích hoạt"</strong></li>
               </ol>
@@ -184,7 +184,7 @@ export async function sendNewUserAdminNotification(data: {
   await transporter.sendMail({
     from: `"${APP_NAME} System" <${ADMIN_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `🔔 [Zoo Target Pro] User mới đăng ký tài khoản: ${data.fullName}`,
+    subject: `🔔 [Fairy House Auto Data] User mới đăng ký tài khoản: ${data.fullName}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -216,7 +216,7 @@ export async function sendNewUserWelcome(data: {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
     to: data.email,
-    subject: `🎉 Chào mừng bạn đến với Zoo Target Pro!`,
+    subject: `🎉 Chào mừng bạn đến với Fairy House Auto Data!`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -228,7 +228,7 @@ export async function sendNewUserWelcome(data: {
           </div>
           <div style="padding: 24px;">
             <p>Chào <strong>${data.fullName}</strong>,</p>
-            <p>Cảm ơn bạn đã đăng ký tài khoản tại hệ thống <strong>Zoo Target Pro</strong>.</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản tại hệ thống <strong>Fairy House Auto Data</strong>.</p>
             <p>Bây giờ bạn đã có thể đăng nhập vào trang quản lý và trải nghiệm tự động đăng ký các gói Dịch Vụ.</p>
             <div style="text-align: center; margin: 24px 0;">
               <a href="${APP_URL}/login" style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #7c3aed); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Đăng nhập ngay</a>
