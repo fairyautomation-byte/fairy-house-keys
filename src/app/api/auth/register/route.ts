@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { signUserToken, USER_COOKIE_NAME } from '@/lib/auth';
+import { sendNewUserWelcome, sendNewUserAdminNotification } from '@/lib/mailer';
 import * as crypto from 'crypto';
 
 function hashPassword(password: string) {
@@ -39,6 +40,18 @@ export async function POST(req: NextRequest) {
 
     const docRef = await usersRef.add(newUser);
     
+    // Gửi email chào mừng và báo admin (không block luồng)
+    sendNewUserWelcome({
+      fullName: newUser.full_name,
+      email: newUser.email,
+    }).catch(console.error);
+
+    sendNewUserAdminNotification({
+      fullName: newUser.full_name,
+      email: newUser.email,
+      zalo: newUser.zalo,
+    }).catch(console.error);
+
     // Auto login
     const token = await signUserToken(docRef.id, emailLower);
     

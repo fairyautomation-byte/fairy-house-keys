@@ -174,3 +174,73 @@ export async function sendKeyToCustomer(data: {
     `,
   });
 }
+
+// ─── Gửi email cho Admin khi có ĐĂNG KÝ USER MỚI ─────────────────────────────────────
+export async function sendNewUserAdminNotification(data: {
+  fullName: string;
+  email: string;
+  zalo: string;
+}) {
+  await transporter.sendMail({
+    from: `"${APP_NAME} System" <${ADMIN_EMAIL}>`,
+    to: ADMIN_EMAIL,
+    subject: `🔔 [Zoo Target Pro] User mới đăng ký tài khoản: ${data.fullName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
+          <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
+            <h1 style="margin: 0; color: white; font-size: 20px;">🔔 User Mới Đăng Ký</h1>
+          </div>
+          <div style="padding: 24px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 0; color: #94a3b8; width: 140px;">👤 Họ tên:</td><td style="padding: 8px 0; color: #f1f5f9; font-weight: bold;">${data.fullName}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">📧 Email:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.email}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">📱 Zalo:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.zalo}</td></tr>
+            </table>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
+}
+
+// ─── Gửi email chào mừng cho Khách khi ĐĂNG KÝ TÀI KHOẢN ─────────────────────────────────────
+export async function sendNewUserWelcome(data: {
+  fullName: string;
+  email: string;
+}) {
+  await transporter.sendMail({
+    from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
+    to: data.email,
+    subject: `🎉 Chào mừng bạn đến với Zoo Target Pro!`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
+          <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
+            <h1 style="margin: 0; color: white; font-size: 20px;">🎉 Tạo Tài Khoản Thành Công!</h1>
+          </div>
+          <div style="padding: 24px;">
+            <p>Chào <strong>${data.fullName}</strong>,</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản tại hệ thống <strong>Zoo Target Pro</strong>.</p>
+            <p>Bây giờ bạn đã có thể đăng nhập vào trang quản lý và trải nghiệm tự động đăng ký các gói Dịch Vụ.</p>
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${APP_URL}/login" style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #7c3aed); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Đăng nhập ngay</a>
+            </div>
+            <p>Nếu cần hỗ trợ, đừng ngần ngại liên hệ Zalo Admin nhé!</p>
+          </div>
+          <div style="background: #0f172a; padding: 16px 24px; text-align: center; border-top: 1px solid #334155;">
+            <p style="margin: 0; color: #94a3b8; font-size: 14px;">📱 Zalo hỗ trợ: <strong style="color: #06b6d4;">${SUPPORT_ZALO}</strong></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
+}
