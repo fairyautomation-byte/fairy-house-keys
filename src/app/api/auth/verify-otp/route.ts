@@ -33,18 +33,23 @@ export async function POST(req: NextRequest) {
     const sessionsRef = db.collection('email_otp_sessions');
     const snapshot = await sessionsRef
       .where('email', '==', emailLower)
-      .where('used', '==', false)
-      .where('invalidated', '==', false)
-      .orderBy('created_at', 'desc')
-      .limit(1)
       .get();
 
     if (snapshot.empty) {
       return NextResponse.json({ error: 'Không tìm thấy phiên xác thực hợp lệ' }, { status: 404 });
     }
 
-    const sessionDoc = snapshot.docs[0];
-    const session = sessionDoc.data();
+    // Sort in memory to avoid Firestore composite index requirement
+    const docs = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+    docs.sort((a, b) => b.data.created_at.toMillis() - a.data.created_at.toMillis());
+    
+    const sessionDoc = docs.find(doc => doc.data.used === false && doc.data.invalidated === false);
+
+    if (!sessionDoc) {
+      return NextResponse.json({ error: 'Không tìm thấy phiên xác thực hợp lệ' }, { status: 404 });
+    }
+
+    const session = sessionDoc.data;
     const sessionId = sessionDoc.id;
 
     // 3. Kiểm tra hết hạn

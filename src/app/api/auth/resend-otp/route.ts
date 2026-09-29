@@ -54,16 +54,19 @@ export async function POST(req: NextRequest) {
 
     // 4. Find latest OTP session to check cooldown
     const sessionsRef = db.collection('email_otp_sessions');
-    const lastSessionSnapshot = await sessionsRef
+    const allSessionsSnapshot = await sessionsRef
       .where('email', '==', emailLower)
-      .orderBy('created_at', 'desc')
-      .limit(1)
       .get();
 
     let resendCount = 1;
 
-    if (!lastSessionSnapshot.empty) {
-      const lastSession = lastSessionSnapshot.docs[0].data();
+    if (!allSessionsSnapshot.empty) {
+      // Sort in memory to avoid index requirements
+      const docs = allSessionsSnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+      docs.sort((a, b) => b.data.created_at.toMillis() - a.data.created_at.toMillis());
+      
+      const lastSessionDoc = docs[0];
+      const lastSession = lastSessionDoc.data;
       
       // Check 60s cooldown
       const lastSentAt = lastSession.last_sent_at.toDate();
@@ -76,8 +79,8 @@ export async function POST(req: NextRequest) {
         }, { status: 429 });
       }
 
-      // Invalidate old sessions
-      await sessionsRef.doc(lastSessionSnapshot.docs[0].id).update({ invalidated: true });
+      // Invalidate old session
+      await sessionsRef.doc(lastSessionDoc.id).update({ invalidated: true });
       
       resendCount = (lastSession.resend_count || 1) + 1;
     }
