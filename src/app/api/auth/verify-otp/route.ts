@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, data: doc.data() }));
     docs.sort((a: any, b: any) => b.data.created_at.toMillis() - a.data.created_at.toMillis());
     
-    const sessionDoc = docs.find(doc => doc.data.used === false && doc.data.invalidated === false);
+    const sessionDoc = docs.find((doc: any) => doc.data.used === false && doc.data.invalidated === false);
 
     if (!sessionDoc) {
       return NextResponse.json({ error: 'Không tìm thấy phiên xác thực hợp lệ' }, { status: 404 });
