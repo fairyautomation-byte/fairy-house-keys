@@ -2,11 +2,11 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const PLAN_PRICES: Record<string, {name: string, price: number}> = {
-  trial: { name: '3 Ngày Dùng Thử', price: 0 },
-  monthly: { name: '1 Tháng', price: 69000 },
-  quarterly: { name: '3 Tháng', price: 179000 },
-  yearly: { name: '1 Năm', price: 479000 },
+const PLAN_PRICES: Record<string, {name: string, price: number, features: string[]}> = {
+  trial: { name: '3 Ngày Dùng Thử', price: 0, features: ['100 lượt scan/ngày', 'Dùng 1 lần duy nhất'] },
+  monthly: { name: '1 Tháng', price: 69000, features: ['1.000 lượt scan/ngày', 'Nâng cấp linh hoạt'] },
+  quarterly: { name: '3 Tháng', price: 179000, features: ['3.000 lượt scan/ngày', 'Tiết kiệm chi phí'] },
+  yearly: { name: '1 Năm', price: 479000, features: ['Không giới hạn scan', 'Hỗ trợ ưu tiên 24/7'] },
 };
 
 function CheckoutContent() {
@@ -95,12 +95,21 @@ function CheckoutContent() {
                 <div 
                   key={id}
                   onClick={() => setSelectedPlanId(id)}
-                  className={`cursor-pointer rounded-2xl p-4 border transition-all ${selectedPlanId === id ? 'bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'bg-slate-950/50 border-slate-700/80 hover:border-slate-500'}`}
+                  className={`cursor-pointer rounded-2xl p-5 border transition-all flex flex-col relative overflow-hidden ${selectedPlanId === id ? 'bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]' : 'bg-slate-950/50 border-slate-700/80 hover:border-slate-500'}`}
                 >
-                  <h3 className="text-lg font-bold text-slate-200">{p.name}</h3>
-                  <p className={`mt-2 font-black text-xl ${selectedPlanId === id ? 'text-cyan-400' : 'text-slate-400'}`}>
+                  {selectedPlanId === id && <div className="absolute top-0 right-0 bg-cyan-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">ĐANG CHỌN</div>}
+                  <h3 className="text-lg font-bold text-slate-200 mb-1">{p.name}</h3>
+                  <p className={`font-black text-2xl mb-4 pb-4 border-b border-slate-800/80 ${selectedPlanId === id ? 'text-cyan-400' : 'text-slate-400'}`}>
                     {p.price === 0 ? 'Miễn phí' : `${p.price.toLocaleString('vi-VN')}đ`}
                   </p>
+                  <ul className="space-y-2 mt-auto">
+                    {p.features.map((f, i) => (
+                      <li key={i} className="text-[13px] text-slate-400 flex items-start gap-2">
+                        <span className={`font-bold mt-0.5 ${selectedPlanId === id ? 'text-cyan-400' : 'text-slate-600'}`}>✓</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
@@ -115,9 +124,17 @@ function CheckoutContent() {
             <button 
               onClick={handleCheckout} 
               disabled={loading}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all disabled:opacity-50 text-lg"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all disabled:opacity-50 text-lg mb-4"
             >
               {loading ? 'Đang xử lý...' : (isTrial ? 'Kích hoạt ngay' : 'Tiến hành thanh toán')}
+            </button>
+
+            <button
+              onClick={() => router.push('/')}
+              className="w-full py-3.5 rounded-xl bg-transparent border border-slate-700 text-slate-400 font-medium hover:bg-slate-800 hover:text-white transition-all text-sm flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+              Để tôi suy nghĩ thêm, về Trang Chủ
             </button>
           </div>
         ) : (
