@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { cookies } from 'next/headers';
 import { USER_COOKIE_NAME } from '@/lib/auth';
 
@@ -17,7 +18,9 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center text-white font-black text-lg shadow-[0_0_15px_rgba(6,182,212,0.4)]">F</div>
+            <div className="w-10 h-10 relative flex items-center justify-center rounded-xl bg-slate-800/50 p-1 border border-slate-700/50 shadow-[0_0_15px_rgba(6,182,212,0.2)] overflow-hidden">
+              <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
+            </div>
             <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">Fairy House</span>
           </div>
           <div className="flex gap-4">

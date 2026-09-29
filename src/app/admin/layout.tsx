@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 
 const NAV = [
@@ -21,27 +22,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (pathname === '/admin/login') return <>{children}</>;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-slate-900 flex items-center justify-center text-white font-bold">A</div>
-            <div>
-              <span className="font-bold text-slate-900 block leading-tight">Fairy House</span>
-              <span className="text-slate-500 text-xs block">Admin Portal</span>
+    <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col font-sans selection:bg-cyan-500/30 overflow-hidden relative">
+      {/* Background Aurora */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-600/10 blur-[120px]"></div>
+      </div>
+
+      <header className="bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-8">
+          <Link href="/admin" className="flex items-center gap-3 hover:scale-105 transition-transform">
+            <div className="w-10 h-10 relative flex items-center justify-center rounded-xl bg-slate-800/50 p-1 border border-slate-700/50 shadow-[0_0_15px_rgba(6,182,212,0.2)] overflow-hidden">
+              <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
             </div>
-          </div>
-          <nav className="hidden md:flex gap-1">
+            <div>
+              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400 block leading-tight text-lg">Fairy House</span>
+              <span className="text-cyan-500/80 font-bold text-[10px] tracking-widest uppercase block mt-0.5">Admin Portal</span>
+            </div>
+          </Link>
+          <nav className="hidden md:flex gap-2">
             {NAV.map(n => {
               const isActive = n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href);
               return (
                 <Link
                   key={n.href}
                   href={n.href}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.1)]'
+                      : 'text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-800/50'
                   }`}
                 >
                   {n.label}
@@ -52,13 +61,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <button
           onClick={handleLogout}
-          className="text-sm font-medium text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
+          className="text-sm font-bold text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 px-5 py-2 rounded-xl transition-all flex items-center gap-2"
         >
           Đăng xuất
         </button>
       </header>
 
-      <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full relative z-10">
         {children}
       </main>
     </div>

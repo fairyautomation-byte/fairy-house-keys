@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function UserDashboard() {
   const router = useRouter();
@@ -46,8 +47,8 @@ export default function UserDashboard() {
       <header className="bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center text-white font-black text-sm shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:scale-105 transition-transform">
-              F
+            <Link href="/" className="w-10 h-10 relative flex items-center justify-center rounded-xl bg-slate-800/50 p-1 border border-slate-700/50 shadow-[0_0_15px_rgba(6,182,212,0.2)] overflow-hidden hover:scale-105 transition-transform">
+              <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
             </Link>
             <span className="font-bold text-lg text-slate-100 hidden sm:block">Dashboard</span>
             <Link href="/" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/20 transition-colors">
