@@ -168,7 +168,70 @@ export default function UserDashboard() {
           </div>
         </section>
 
+        {/* Change Password */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Bảo mật tài khoản</h2>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-xl">
+            <ChangePasswordForm />
+          </div>
+        </section>
+
       </main>
+    </div>
+  );
+}
+
+function ChangePasswordForm() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [form, setForm] = useState({ oldPassword: '', newPassword: '' });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const res = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra');
+      
+      setSuccess(data.message);
+      setForm({ oldPassword: '', newPassword: '' });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <h3 className="text-lg font-semibold text-slate-900 mb-4">Đổi mật khẩu</h3>
+      
+      {error && <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+      {success && <div className="mb-4 p-3 rounded-xl bg-green-50 text-green-600 text-sm">{success}</div>}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Mật khẩu cũ</label>
+          <input required type="password" value={form.oldPassword} onChange={e => setForm({...form, oldPassword: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Mật khẩu mới</label>
+          <input required minLength={6} type="password" value={form.newPassword} onChange={e => setForm({...form, newPassword: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+        </div>
+        <button disabled={loading || !form.oldPassword || form.newPassword.length < 6} type="submit" className="px-6 py-2 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors">
+          {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+        </button>
+      </form>
     </div>
   );
 }

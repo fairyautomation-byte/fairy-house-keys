@@ -81,7 +81,12 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Mật khẩu</label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Mật khẩu</label>
+                <Link href="/forgot-password" className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline transition-colors">
+                  Quên mật khẩu?
+                </Link>
+              </div>
               <input required type="password" className="w-full px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700/80 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition-all" value={form.password} onChange={e => setForm({...form, password: e.target.value})} placeholder="••••••••" />
             </div>
 

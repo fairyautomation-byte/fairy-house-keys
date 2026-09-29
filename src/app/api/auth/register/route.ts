@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
         
       if (!oldSessions.empty) {
         const batch = db.batch();
-        oldSessions.docs.forEach(doc => {
+        oldSessions.docs.forEach((doc: any) => {
           batch.update(doc.ref, { invalidated: true });
         });
         await batch.commit();

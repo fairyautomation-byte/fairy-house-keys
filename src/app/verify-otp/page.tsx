@@ -219,6 +219,7 @@ function VerifyOTPContent() {
               {loading ? 'Đang xác thực...' : 'XÁC THỰC'}
             </button>
           </form>
+          )}
 
           <div className="mt-8 flex flex-col items-center gap-4">
             {!success && (
