@@ -224,13 +224,19 @@ function ChangePasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [form, setForm] = useState({ oldPassword: '', newPassword: '' });
+  const [form, setForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess('');
+
+    if (form.newPassword !== form.confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/user/change-password', {
@@ -243,7 +249,7 @@ function ChangePasswordForm() {
       if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
       setSuccess(data.message);
-      setForm({ oldPassword: '', newPassword: '' });
+      setForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -266,6 +272,10 @@ function ChangePasswordForm() {
         <div>
           <label className="block text-sm font-bold text-slate-400 mb-2">Mật khẩu mới</label>
           <input required minLength={6} type="password" value={form.newPassword} onChange={e => setForm({...form, newPassword: e.target.value})} className="w-full px-5 py-3 rounded-xl bg-slate-950 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all text-white" placeholder="Ít nhất 6 ký tự" />
+        </div>
+        <div>
+          <label className="block text-sm font-bold text-slate-400 mb-2">Xác nhận mật khẩu mới</label>
+          <input required minLength={6} type="password" value={form.confirmPassword} onChange={e => setForm({...form, confirmPassword: e.target.value})} className="w-full px-5 py-3 rounded-xl bg-slate-950 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all text-white" placeholder="Ít nhất 6 ký tự" />
         </div>
         <button disabled={loading || !form.oldPassword || form.newPassword.length < 6} type="submit" className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 border border-slate-600 disabled:opacity-50 transition-colors mt-2">
           {loading ? 'Đang lưu...' : 'Lưu thay đổi'}

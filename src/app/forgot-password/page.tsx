@@ -14,6 +14,7 @@ function ForgotPasswordContent() {
   
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [success, setSuccess] = useState(false);
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -101,6 +102,10 @@ function ForgotPasswordContent() {
     }
     if (newPassword.length < 6) {
       setError('Mật khẩu mới phải từ 6 ký tự');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');
       return;
     }
 
@@ -213,6 +218,11 @@ function ForgotPasswordContent() {
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 mt-2">Mật khẩu mới</label>
                 <input required type="password" minLength={6} className="w-full px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700/80 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition-all" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 mt-2">Xác nhận mật khẩu</label>
+                <input required type="password" minLength={6} className="w-full px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700/80 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition-all" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" />
               </div>
 
               <button 
