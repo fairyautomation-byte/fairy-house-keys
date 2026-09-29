@@ -27,7 +27,7 @@ export default function UserDashboard() {
   );
   if (!data) return null;
 
-  const { user, license, orders } = data;
+  const { user, licenses = [], orders } = data;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -70,83 +70,85 @@ export default function UserDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8 relative z-10">
         
-        {/* Active License */}
+        {/* Active Licenses */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-extrabold text-white">License hiện tại</h2>
-            {license && (
-              <Link href="/#pricing" className="text-sm font-bold bg-gradient-to-r from-cyan-500 to-violet-500 text-white px-4 py-2 rounded-xl hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                Gia hạn / Nâng cấp gói
-              </Link>
-            )}
+            <h2 className="text-2xl font-extrabold text-white">License của bạn</h2>
+            <Link href="/#pricing" className="text-sm font-bold bg-gradient-to-r from-cyan-500 to-violet-500 text-white px-4 py-2 rounded-xl hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              Mua thêm / Gia hạn
+            </Link>
           </div>
           
-          {license ? (
-            <div className="bg-slate-900/60 backdrop-blur-md rounded-3xl p-8 border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-cyan-500/30 transition-colors">
-              <div className="absolute top-0 right-0 p-6">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  {license.status}
-                </span>
-              </div>
-              
-              <div className="mb-10 mt-2">
-                <h3 className="text-xs font-bold text-cyan-500/80 uppercase tracking-widest mb-3">License Key Bảo Mật</h3>
-                <div className="flex items-center gap-3">
-                  <code className="text-xl sm:text-2xl font-black text-white bg-slate-950 px-5 py-3 rounded-2xl tracking-widest border border-slate-800 shadow-inner break-all">{license.license_key}</code>
-                  <button onClick={() => handleCopy(license.license_key)} className="p-4 rounded-2xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shadow-[0_0_15px_rgba(6,182,212,0.1)] shrink-0" title="Sao chép Key">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800/80">
-                  <div className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Gói dịch vụ</div>
-                  <div className="font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400 uppercase">{license.plan_id}</div>
-                </div>
-                <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800/80">
-                  <div className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Ngày hết hạn</div>
-                  <div className="font-bold text-xl text-slate-200">
-                    {license.expires_at ? new Date(license.expires_at._seconds * 1000).toLocaleDateString('vi-VN') : 'Không giới hạn ♾️'}
+          {licenses.length > 0 ? (
+            <div className="space-y-6">
+              {licenses.map((license: any, idx: number) => (
+                <div key={idx} className="bg-slate-900/60 backdrop-blur-md rounded-3xl p-8 border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-cyan-500/30 transition-colors">
+                  <div className="absolute top-0 right-0 p-6">
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      {license.status}
+                    </span>
                   </div>
-                </div>
-                <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800/80">
-                  <div className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Tổng lượt scan</div>
-                  <div className="font-bold text-xl text-slate-200">{license.total_scans.toLocaleString()}</div>
-                </div>
-              </div>
+                  
+                  <div className="mb-10 mt-2">
+                    <h3 className="text-xs font-bold text-cyan-500/80 uppercase tracking-widest mb-3">License Key Bảo Mật #{idx + 1}</h3>
+                    <div className="flex items-center gap-3">
+                      <code className="text-xl sm:text-2xl font-black text-white bg-slate-950 px-5 py-3 rounded-2xl tracking-widest border border-slate-800 shadow-inner break-all">{license.license_key}</code>
+                      <button onClick={() => handleCopy(license.license_key)} className="p-4 rounded-2xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shadow-[0_0_15px_rgba(6,182,212,0.1)] shrink-0" title="Sao chép Key">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </button>
+                    </div>
+                  </div>
 
-              {/* Progress bar */}
-              <div className="mt-8 p-6 rounded-2xl border border-slate-800/80 bg-slate-950/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-violet-500/5"></div>
-                <div className="relative z-10">
-                  <div className="flex justify-between items-end mb-3">
-                    <div>
-                      <div className="text-xs font-bold text-cyan-500/80 uppercase tracking-widest mb-1">Hạn mức hôm nay</div>
-                      <div className="font-black text-2xl text-slate-200">
-                        <span className="text-cyan-400">{license.daily_used}</span>
-                        <span className="text-slate-600 mx-2">/</span>
-                        {license.daily_limit === -1 || license.daily_limit === null ? '∞' : license.daily_limit}
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800/80">
+                      <div className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Gói dịch vụ</div>
+                      <div className="font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400 uppercase">{license.plan_id}</div>
+                    </div>
+                    <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800/80">
+                      <div className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Ngày hết hạn</div>
+                      <div className="font-bold text-xl text-slate-200">
+                        {license.expires_at ? new Date(license.expires_at._seconds ? license.expires_at._seconds * 1000 : license.expires_at).toLocaleDateString('vi-VN') : 'Không giới hạn ♾️'}
                       </div>
                     </div>
-                    {license.daily_limit !== -1 && license.daily_limit !== null && (
-                      <div className="text-sm font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
-                        Còn lại: <span className="text-white">{license.daily_limit - license.daily_used}</span>
-                      </div>
-                    )}
-                  </div>
-                  {license.daily_limit !== -1 && license.daily_limit !== null && (
-                    <div className="w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800 shadow-inner">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ${license.daily_used / license.daily_limit > 0.9 ? 'bg-gradient-to-r from-rose-500 to-red-500' : 'bg-gradient-to-r from-cyan-500 to-violet-500'}`}
-                        style={{ width: `${Math.min(100, (license.daily_used / license.daily_limit) * 100)}%` }}
-                      ></div>
+                    <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800/80">
+                      <div className="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Tổng lượt scan</div>
+                      <div className="font-bold text-xl text-slate-200">{license.total_scans?.toLocaleString() || 0}</div>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mt-8 p-6 rounded-2xl border border-slate-800/80 bg-slate-950/50 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-violet-500/5"></div>
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-end mb-3">
+                        <div>
+                          <div className="text-xs font-bold text-cyan-500/80 uppercase tracking-widest mb-1">Hạn mức hôm nay</div>
+                          <div className="font-black text-2xl text-slate-200">
+                            <span className="text-cyan-400">{license.daily_used || 0}</span>
+                            <span className="text-slate-600 mx-2">/</span>
+                            {license.daily_limit === -1 || license.daily_limit === null ? '∞' : license.daily_limit}
+                          </div>
+                        </div>
+                        {license.daily_limit !== -1 && license.daily_limit !== null && (
+                          <div className="text-sm font-bold text-slate-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                            Còn lại: <span className="text-white">{Math.max(0, license.daily_limit - (license.daily_used || 0))}</span>
+                          </div>
+                        )}
+                      </div>
+                      {license.daily_limit !== -1 && license.daily_limit !== null && (
+                        <div className="w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${(license.daily_used || 0) / license.daily_limit > 0.9 ? 'bg-gradient-to-r from-rose-500 to-red-500' : 'bg-gradient-to-r from-cyan-500 to-violet-500'}`}
+                            style={{ width: `${Math.min(100, ((license.daily_used || 0) / license.daily_limit) * 100)}%` }}
+                          ></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           ) : (
             <div className="bg-slate-900/60 backdrop-blur-md rounded-3xl p-12 text-center border border-slate-700/50 shadow-xl">

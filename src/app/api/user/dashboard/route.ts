@@ -13,16 +13,13 @@ export async function GET(req: NextRequest) {
     const userDoc = await db.collection('users').doc(user.uid).get();
     const userData = userDoc.data();
 
-    // Get current license (if any)
+    // Get current licenses
     const licenseSnap = await db.collection('licenses')
       .where('user_id', '==', user.uid)
       .where('status', 'in', ['ACTIVE', 'SUSPENDED'])
       .get();
       
-    let activeLicense = null;
-    if (!licenseSnap.empty) {
-      activeLicense = licenseSnap.docs[0].data();
-    }
+    const activeLicenses = licenseSnap.docs.map(doc => doc.data());
 
     // Get pending orders
     const orderSnap = await db.collection('orders')
@@ -33,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       user: userData,
-      license: activeLicense,
+      licenses: activeLicenses,
       orders: orders
     });
   } catch (err) {
