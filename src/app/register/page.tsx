@@ -89,8 +89,15 @@ function RegisterContent() {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-slate-400">
-            Đã có tài khoản? <Link href={`/login?plan=${defaultPlan}`} className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors hover:underline">Đăng nhập</Link>
+          <div className="mt-8 text-center text-sm text-slate-400 flex flex-col gap-3">
+            <div>
+              Đã có tài khoản? <Link href={`/login?plan=${defaultPlan}`} className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors hover:underline">Đăng nhập</Link>
+            </div>
+            <div>
+              <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors mt-2 text-xs">
+                &larr; Quay lại trang chủ
+              </Link>
+            </div>
           </div>
         </div>
       </div>

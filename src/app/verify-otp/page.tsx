@@ -15,6 +15,7 @@ function VerifyOTPContent() {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
   const [countdown, setCountdown] = useState(60);
+  const [success, setSuccess] = useState(false);
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -101,11 +102,14 @@ function VerifyOTPContent() {
       }
 
       // Success
-      if (plan) {
-        router.push(`/checkout?plan=${plan}`);
-      } else {
-        router.push('/dashboard');
-      }
+      setSuccess(true);
+      setTimeout(() => {
+        if (plan) {
+          router.push(`/checkout?plan=${plan}`);
+        } else {
+          router.push('/dashboard');
+        }
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       // Clear OTP on error if it's max attempts or expired
@@ -170,13 +174,24 @@ function VerifyOTPContent() {
             </div>
           )}
 
-          {resendMessage && (
+          {resendMessage && !success && (
             <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 text-emerald-400 text-sm font-medium border border-emerald-500/20">
               {resendMessage}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {success ? (
+            <div className="py-12 text-center animate-fade-in flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Xác thực thành công!</h3>
+              <p className="text-emerald-400 text-sm">Đang chuyển hướng...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex justify-between gap-2 sm:gap-3">
               {otp.map((digit, index) => (
                 <input
@@ -206,16 +221,23 @@ function VerifyOTPContent() {
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4">
-            <button
-              onClick={handleResend}
-              disabled={resendLoading || countdown > 0}
-              className="text-sm font-medium text-slate-400 hover:text-white transition-colors disabled:opacity-50 disabled:hover:text-slate-400"
-            >
-              {resendLoading ? 'Đang gửi...' : countdown > 0 ? `Gửi lại mã ⏱️ ${countdown}s` : 'Gửi lại mã'}
-            </button>
-            
-            <Link href="/register" className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
-              &larr; Quay lại đăng ký
+            {!success && (
+              <>
+                <button
+                  onClick={handleResend}
+                  disabled={resendLoading || countdown > 0}
+                  className="text-sm font-medium text-slate-400 hover:text-white transition-colors disabled:opacity-50 disabled:hover:text-slate-400"
+                >
+                  {resendLoading ? 'Đang gửi...' : countdown > 0 ? `Gửi lại mã ⏱️ ${countdown}s` : 'Gửi lại mã'}
+                </button>
+                
+                <Link href="/register" className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
+                  &larr; Quay lại đăng ký
+                </Link>
+              </>
+            )}
+            <Link href="/" className="text-sm text-slate-500 hover:text-slate-300 transition-colors mt-2">
+              Trang chủ
             </Link>
           </div>
         </div>

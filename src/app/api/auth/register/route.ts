@@ -45,14 +45,21 @@ export async function POST(req: NextRequest) {
     const usersRef = db.collection('users');
     const existing = await usersRef.where('email', '==', emailLower).limit(1).get();
     
+    let userIdToUpdate = null;
     if (!existing.empty) {
-      return NextResponse.json({ error: 'Email đã được sử dụng' }, { status: 409 });
+      const existingUser = existing.docs[0].data();
+      if (existingUser.email_verified) {
+        return NextResponse.json({ error: 'Email đã được sử dụng' }, { status: 409 });
+      } else {
+        // Email exists but unverified, allow overwrite to prevent squatting
+        userIdToUpdate = existing.docs[0].id;
+      }
     }
 
     // 4. Hash password
     const hashedPassword = hashPassword(password);
     
-    // 5. Create user (email_verified: false)
+    // 5. Create or Update user (email_verified: false)
     const newUser = {
       full_name: fullName.trim(),
       email: emailLower,
@@ -64,7 +71,28 @@ export async function POST(req: NextRequest) {
       email_verified: false,
     };
 
-    const docRef = await usersRef.add(newUser);
+    let docRefId;
+    if (userIdToUpdate) {
+      await usersRef.doc(userIdToUpdate).set(newUser);
+      docRefId = userIdToUpdate;
+      
+      // Invalidate old OTP sessions
+      const oldSessions = await db.collection('email_otp_sessions')
+        .where('email', '==', emailLower)
+        .where('invalidated', '==', false)
+        .get();
+        
+      if (!oldSessions.empty) {
+        const batch = db.batch();
+        oldSessions.docs.forEach(doc => {
+          batch.update(doc.ref, { invalidated: true });
+        });
+        await batch.commit();
+      }
+    } else {
+      const docRef = await usersRef.add(newUser);
+      docRefId = docRef.id;
+    }
     
     // 6. Generate and store OTP
     const otp = generateOTP();
@@ -72,7 +100,7 @@ export async function POST(req: NextRequest) {
     const now = new Date();
     
     await db.collection('email_otp_sessions').add({
-      uid: docRef.id,
+      uid: docRefId,
       email: emailLower,
       otp_hash: otpHash,
       expires_at: new Date(now.getTime() + 5 * 60 * 1000), // +5 mins

@@ -90,8 +90,15 @@ function LoginContent() {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-slate-400">
-            Chưa có tài khoản? <Link href={`/register${defaultPlan ? `?plan=${defaultPlan}` : ''}`} className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors hover:underline">Đăng ký ngay</Link>
+          <div className="mt-8 text-center text-sm text-slate-400 flex flex-col gap-3">
+            <div>
+              Chưa có tài khoản? <Link href={`/register${defaultPlan ? `?plan=${defaultPlan}` : ''}`} className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors hover:underline">Đăng ký ngay</Link>
+            </div>
+            <div>
+              <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors mt-2 text-xs">
+                &larr; Quay lại trang chủ
+              </Link>
+            </div>
           </div>
         </div>
       </div>

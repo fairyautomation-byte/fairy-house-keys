@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       const userData = userDoc.data()!;
       // Only send if it's the first time verifying
       if (userData.email_verified === false) {
-        Promise.allSettled([
+        await Promise.allSettled([
           sendNewUserWelcome({
             fullName: userData.full_name,
             email: emailLower,
