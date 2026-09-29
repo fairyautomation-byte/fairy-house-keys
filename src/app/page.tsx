@@ -69,17 +69,23 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Placeholder for Video/Dashboard Image */}
-          <div className="mt-20 relative mx-auto max-w-4xl rounded-2xl border border-slate-800 bg-slate-900/50 p-2 shadow-2xl backdrop-blur-sm overflow-hidden group">
-             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10"></div>
-             <div className="aspect-[16/9] bg-slate-950 rounded-xl flex items-center justify-center border border-slate-800/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
-                <div className="text-center z-20">
-                  <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700 group-hover:scale-110 transition-transform cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-                    <svg className="w-6 h-6 text-cyan-400 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                  <p className="text-slate-500 font-medium">Video Demo Sản Phẩm (Sắp ra mắt)</p>
-                </div>
+          {/* Video Demo Section */}
+          <div className="mt-20 relative mx-auto max-w-4xl rounded-2xl border border-slate-800 bg-slate-900/50 p-2 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-cyan-500/50 transition-colors duration-500">
+             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 pointer-events-none"></div>
+             <div className="aspect-[16/9] bg-slate-950 rounded-xl border border-slate-800/50 relative overflow-hidden z-20">
+                {/* 
+                  TODO: BẠN HÃY THAY ĐỔI ĐƯỜNG LINK TRONG THUỘC TÍNH src="" DƯỚI ĐÂY THÀNH LINK NHÚNG YOUTUBE CỦA BẠN.
+                  Ví dụ: src="https://www.youtube.com/embed/ABCXYZ"
+                */}
+                <iframe 
+                  className="w-full h-full rounded-xl"
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=abcdef" 
+                  title="YouTube video player" 
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  allowFullScreen
+                ></iframe>
              </div>
           </div>
         </div>
