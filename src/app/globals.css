@@ -13,6 +13,10 @@
   --color-accent: #10b981;
 }
 
+html {
+  font-size: 13.5px; /* Shrinks the entire UI by ~85% (matches ~80% zoom request) since Tailwind uses rems */
+}
+
 * {
   box-sizing: border-box;
 }
