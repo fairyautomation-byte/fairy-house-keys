@@ -18,10 +18,10 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 relative flex items-center justify-center rounded-xl bg-slate-800/50 p-1 border border-slate-700/50 shadow-[0_0_15px_rgba(6,182,212,0.2)] overflow-hidden">
-              <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
+            <div className="w-12 h-12 relative flex items-center justify-center overflow-hidden">
+              <Image src="/logo.png" alt="Fairy House Auto Data" width={48} height={48} className="object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
             </div>
-            <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">Fairy House</span>
+            <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">Fairy House Auto Data</span>
           </div>
           <div className="flex gap-4">
             {isLoggedIn ? (
@@ -95,7 +95,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { t: 'Quét Data Thông Minh', d: 'Thu thập thông tin khách hàng tiềm năng cực kỳ nhanh chóng và chính xác.', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
-              { t: 'Tự Động Hóa Nhắn Tin', d: 'Gửi tin nhắn hàng loạt theo kịch bản cá nhân hóa, tối ưu tỷ lệ phản hồi.', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' },
+              { t: 'Tự Động Kết Bạn', d: 'Gửi lời mời kết bạn hàng loạt theo danh sách UID, mở rộng tệp khách hàng tự động 100%.', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
               { t: 'Bảo Mật Cao Cấp', d: 'Hệ thống License Key cá nhân hóa, xác thực OTP chống hack tài khoản.', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
               { t: 'Quản Lý Quota Tự Động', d: 'Tự động tính toán số lượt quét mỗi ngày, reset vào 0h đúng chuẩn giờ VN.', icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
               { t: 'Dashboard Trực Quan', d: 'Bảng điều khiển hiện đại giúp bạn theo dõi chi tiết lịch sử và gói dịch vụ.', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
@@ -248,8 +248,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-slate-950 text-slate-500 py-12 border-t border-slate-900 relative z-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex justify-center items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center text-white font-black text-xs">F</div>
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <Image src="/logo.png" alt="Fairy House Auto Data" width={24} height={24} className="object-contain drop-shadow-md grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
             <span className="font-bold text-slate-300">Fairy House Auto Data</span>
           </div>
           <p className="text-sm">© 2026 Bản quyền thuộc về Fairy House Auto Data. All rights reserved.</p>

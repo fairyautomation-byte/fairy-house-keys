@@ -65,13 +65,13 @@ function LoginContent() {
       <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-700/50 overflow-hidden relative z-10">
         <div className="p-8">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 relative flex items-center justify-center rounded-2xl bg-slate-800/50 p-2 border border-slate-700/50 shadow-[0_0_20px_rgba(6,182,212,0.2)] overflow-hidden">
-              <Image src="/logo.png" alt="Logo" width={48} height={48} className="object-contain" />
+            <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
+              <Image src="/logo.png" alt="Fairy House Auto Data" width={80} height={80} className="object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]" />
             </div>
           </div>
           <div className="text-center mb-8">
             <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400 mb-2">Đăng nhập</h1>
-            <p className="text-slate-400 text-sm">Chào mừng trở lại <strong className="text-emerald-400">Fairy House</strong></p>
+            <p className="text-slate-400 text-sm">Chào mừng trở lại <strong className="text-emerald-400">Fairy House Auto Data</strong></p>
           </div>
 
           {error && (
