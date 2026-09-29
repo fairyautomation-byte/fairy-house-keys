@@ -9,7 +9,7 @@ export async function checkRateLimit(
   const docRef = db.collection('rate_limits').doc(key);
 
   try {
-    return await db.runTransaction(async (transaction) => {
+    return await db.runTransaction(async (transaction: any) => {
       const doc = await transaction.get(docRef);
       const now = new Date();
 
