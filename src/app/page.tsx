@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { USER_COOKIE_NAME } from '@/lib/auth';
 
 export default function Home() {
+  const cookieStore = cookies();
+  const isLoggedIn = cookieStore.has(USER_COOKIE_NAME);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 overflow-hidden relative">
       {/* Aurora Background Effects */}
@@ -16,12 +21,21 @@ export default function Home() {
             <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">Fairy House</span>
           </div>
           <div className="flex gap-4">
-            <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-cyan-400 flex items-center transition-colors">
-              Đăng nhập
-            </Link>
-            <Link href="/register" className="text-sm font-bold bg-gradient-to-r from-cyan-500 to-violet-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] text-white px-5 py-2.5 rounded-full transition-all">
-              Đăng ký ngay
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-sm font-bold bg-gradient-to-r from-cyan-500 to-violet-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] text-white px-5 py-2.5 rounded-full transition-all flex items-center gap-2">
+                Vào Dashboard
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-cyan-400 flex items-center transition-colors">
+                  Đăng nhập
+                </Link>
+                <Link href="/register" className="text-sm font-bold bg-gradient-to-r from-cyan-500 to-violet-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] text-white px-5 py-2.5 rounded-full transition-all">
+                  Đăng ký ngay
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
