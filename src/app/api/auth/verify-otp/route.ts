@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Sort in memory to avoid Firestore composite index requirement
-    const docs = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+    const docs = snapshot.docs.map((doc: any) => ({ id: doc.id, data: doc.data() }));
     docs.sort((a, b) => b.data.created_at.toMillis() - a.data.created_at.toMillis());
     
     const sessionDoc = docs.find(doc => doc.data.used === false && doc.data.invalidated === false);
