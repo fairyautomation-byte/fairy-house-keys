@@ -210,7 +210,7 @@ function CheckoutContent() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Lưu ý quan trọng
                   </strong>
-                  Vui lòng nhập chính xác <strong>Nội dung CK</strong> ở trên. Sau khi chuyển khoản thành công, hãy chụp lại biên lai và gửi qua Zalo để được duyệt và kích hoạt tài khoản thủ công nhanh nhất.
+                  Vui lòng nhập chính xác <strong>Nội dung CK</strong> ở trên. Sau khi chuyển khoản thành công, hãy chụp lại biên lai và gửi qua Zalo để được duyệt và kích hoạt tài khoản nhanh nhất.
                 </div>
 
                 {/* Actions */}
