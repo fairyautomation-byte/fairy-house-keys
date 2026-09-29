@@ -11,6 +11,11 @@ export async function GET(req: NextRequest) {
 
     // Get user details
     const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists) {
+      const response = NextResponse.json({ error: 'User not found' }, { status: 401 });
+      response.cookies.delete('FairyHouse_Session');
+      return response;
+    }
     const userData = userDoc.data();
 
     // Get current licenses

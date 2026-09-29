@@ -16,7 +16,11 @@ export default function UserDashboard() {
         return res.json();
       })
       .then(setData)
-      .catch(() => router.push('/login'))
+      .catch(() => {
+        fetch('/api/auth/login', { method: 'DELETE' }).finally(() => {
+          router.push('/login');
+        });
+      })
       .finally(() => setLoading(false));
   }, []);
 
