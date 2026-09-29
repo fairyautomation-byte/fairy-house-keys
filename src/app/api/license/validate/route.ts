@@ -2,12 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { validateKeyFormat } from '@/lib/key-generator';
 
+import { checkRateLimit } from '@/lib/rate-limit';
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return 'unknown';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { licenseKey } = await req.json();
 
     if (!licenseKey) {
       return NextResponse.json({ error: 'Thiếu License Key' }, { status: 400 });
+    }
+
+    // 1. IP Rate limit for validate (60 requests per minute per IP)
+    const ip = getClientIp(req);
+    const rateLimit = await checkRateLimit(`validate_license:${ip}`, 60, 60);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({ 
+        error: `Quá nhiều yêu cầu, vui lòng thử lại sau`,
+        code: 'RATE_LIMIT_EXCEEDED'
+      }, { status: 429 });
     }
 
     if (!validateKeyFormat(licenseKey).valid) {

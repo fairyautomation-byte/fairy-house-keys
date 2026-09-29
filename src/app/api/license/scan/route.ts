@@ -3,12 +3,36 @@ import { db } from '@/lib/firebase';
 import { FieldValue } from 'firebase-admin/firestore';
 import { validateKeyFormat } from '@/lib/key-generator';
 
+import { checkRateLimit } from '@/lib/rate-limit';
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return 'unknown';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { licenseKey, action = 'consume', count = 1 } = await req.json();
 
     if (!licenseKey || !validateKeyFormat(licenseKey).valid) {
       return NextResponse.json({ success: false, code: 'INVALID_LICENSE' }, { status: 400 });
+    }
+
+    // Prevent abuse by scanning too many at once
+    const numCount = Number(count);
+    if (isNaN(numCount) || numCount <= 0 || numCount > 500) {
+      return NextResponse.json({ success: false, code: 'INVALID_COUNT' }, { status: 400 });
+    }
+
+    // IP Rate limit (120 requests per minute per IP)
+    const ip = getClientIp(req);
+    const rateLimit = await checkRateLimit(`scan_license:${ip}`, 120, 60);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({ 
+        success: false, 
+        code: 'RATE_LIMIT_EXCEEDED'
+      }, { status: 429 });
     }
 
     const licensesRef = db.collection('licenses');

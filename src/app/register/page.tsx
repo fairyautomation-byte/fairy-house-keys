@@ -35,8 +35,8 @@ function RegisterContent() {
         throw new Error(data.error || 'Có lỗi xảy ra');
       }
 
-      // Success, go to checkout with the selected plan
-      router.push(`/checkout?plan=${defaultPlan}`);
+      // Success, go to verify OTP
+      router.push(`/verify-otp?email=${encodeURIComponent(data.fullEmail)}&plan=${defaultPlan}`);
     } catch (err: any) {
       setError(err.message);
     } finally {

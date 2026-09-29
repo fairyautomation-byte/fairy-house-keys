@@ -30,6 +30,9 @@ function LoginContent() {
       
       const data = await res.json();
       if (!res.ok) {
+        if (data.code === 'EMAIL_NOT_VERIFIED') {
+          throw new Error(data.error + ` [EMAIL:${data.email}]`);
+        }
         throw new Error(data.error || 'Có lỗi xảy ra');
       }
 
@@ -39,7 +42,14 @@ function LoginContent() {
         router.push(`/dashboard`);
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.message.includes('EMAIL_NOT_VERIFIED')) {
+        // extract email if possible, or just redirect
+        const match = err.message.match(/\[EMAIL:(.*?)\]/);
+        const email = match ? match[1] : form.email;
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}${defaultPlan ? `&plan=${defaultPlan}` : ''}`);
+      } else {
+        setError(err.message.replace(/\[EMAIL:.*?\]/, ''));
+      }
     } finally {
       setLoading(false);
     }

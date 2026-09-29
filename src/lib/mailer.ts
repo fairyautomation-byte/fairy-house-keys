@@ -244,3 +244,34 @@ export async function sendNewUserWelcome(data: {
     `,
   });
 }
+
+// ─── Gửi email OTP xác thực ─────────────────────────────────────
+export async function sendOTPEmail(email: string, otp: string) {
+  await transporter.sendMail({
+    from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
+    to: email,
+    subject: `[Fairy House] Mã xác thực của bạn: ${otp}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
+          <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
+            <h1 style="margin: 0; color: white; font-size: 20px;">Xác Thực Email</h1>
+          </div>
+          <div style="padding: 24px;">
+            <p>Xin chào,</p>
+            <p>Mã xác thực của bạn là:</p>
+            <div style="background: #0f172a; border: 2px solid #7c3aed; border-radius: 10px; padding: 20px; margin: 24px 0; text-align: center;">
+              <p style="margin: 0; font-family: monospace; font-size: 24px; font-weight: bold; color: #a78bfa; letter-spacing: 8px;">${otp}</p>
+            </div>
+            <p>Mã này sẽ hết hạn sau 5 phút.</p>
+            <p>Nếu bạn không yêu cầu mã này, hãy bỏ qua email này.<br/>Không chia sẻ mã này với bất kỳ ai.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
+}

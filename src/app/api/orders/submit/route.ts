@@ -27,6 +27,13 @@ export async function POST(req: NextRequest) {
 
     const userData = userDoc.data()!;
 
+    if (!userData.email_verified) {
+      return NextResponse.json({ 
+        error: 'Vui lòng xác thực email trước khi đăng ký gói',
+        code: 'EMAIL_NOT_VERIFIED' 
+      }, { status: 403 });
+    }
+
     if (keyType === 'trial') {
       if (userData.trial_used) {
         return NextResponse.json({ error: 'TRIAL_ALREADY_USED' }, { status: 403 });

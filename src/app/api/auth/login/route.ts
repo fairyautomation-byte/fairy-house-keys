@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { signUserToken, USER_COOKIE_NAME } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 import * as crypto from 'crypto';
 
 function hashPassword(password: string) {
   return crypto.createHash('sha256').update(password + (process.env.KEY_SECRET_SALT || 'salt')).digest('hex');
+}
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return 'unknown';
 }
 
 export async function POST(req: NextRequest) {
@@ -16,6 +23,16 @@ export async function POST(req: NextRequest) {
     }
 
     const emailLower = email.toLowerCase().trim();
+
+    // 1. Rate Limit IP (5 requests / min)
+    const ip = getClientIp(req);
+    const rateLimit = await checkRateLimit(`login:${ip}`, 5, 60);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({ 
+        error: `Quá nhiều yêu cầu, vui lòng thử lại sau ${rateLimit.retryAfterSeconds}s` 
+      }, { status: 429 });
+    }
+
     const hashedPassword = hashPassword(password);
 
     const usersRef = db.collection('users');
@@ -26,6 +43,17 @@ export async function POST(req: NextRequest) {
     }
 
     const doc = userSnap.docs[0];
+    const userData = doc.data();
+
+    // 2. Check if email is verified
+    if (userData.email_verified === false) {
+      return NextResponse.json({ 
+        error: 'Tài khoản chưa được xác thực email.', 
+        code: 'EMAIL_NOT_VERIFIED',
+        email: emailLower 
+      }, { status: 403 });
+    }
+
     const token = await signUserToken(doc.id, emailLower);
     
     const res = NextResponse.json({ ok: true, uid: doc.id });
