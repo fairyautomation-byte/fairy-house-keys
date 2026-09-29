@@ -3,7 +3,7 @@ import { db } from '@/lib/firebase';
 import { verifyOTP } from '@/lib/otp';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { signUserToken, USER_COOKIE_NAME } from '@/lib/auth';
-
+import { sendNewUserWelcome, sendNewUserAdminNotification } from '@/lib/mailer';
 function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) return forwarded.split(',')[0].trim();
@@ -89,11 +89,33 @@ export async function POST(req: NextRequest) {
     // Update OTP session
     await sessionsRef.doc(sessionId).update({ used: true });
 
+    // Fetch user to send welcome email
+    const userRef = db.collection('users').doc(session.uid);
+    const userDoc = await userRef.get();
+    
     // Update user
-    await db.collection('users').doc(session.uid).update({
+    await userRef.update({
       email_verified: true,
       email_verified_at: now
     });
+
+    if (userDoc.exists) {
+      const userData = userDoc.data()!;
+      // Only send if it's the first time verifying
+      if (userData.email_verified === false) {
+        Promise.allSettled([
+          sendNewUserWelcome({
+            fullName: userData.full_name,
+            email: emailLower,
+          }),
+          sendNewUserAdminNotification({
+            fullName: userData.full_name,
+            email: emailLower,
+            zalo: userData.zalo,
+          })
+        ]).catch(console.error);
+      }
+    }
 
     // 7. Login
     const token = await signUserToken(session.uid, emailLower);

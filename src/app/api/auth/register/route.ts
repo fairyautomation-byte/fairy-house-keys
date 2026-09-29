@@ -89,16 +89,7 @@ export async function POST(req: NextRequest) {
 
     // 7. Send Emails (await so Vercel doesn't kill it before sending)
     const emailResults = await Promise.allSettled([
-      sendOTPEmail(emailLower, otp),
-      sendNewUserWelcome({
-        fullName: newUser.full_name,
-        email: newUser.email,
-      }),
-      sendNewUserAdminNotification({
-        fullName: newUser.full_name,
-        email: newUser.email,
-        zalo: newUser.zalo,
-      })
+      sendOTPEmail(emailLower, otp)
     ]);
 
     emailResults.forEach((res, index) => {
