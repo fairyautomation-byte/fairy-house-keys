@@ -149,6 +149,11 @@ function ForgotPasswordContent() {
             <p className="text-slate-400 text-sm">
               {step === 1 ? 'Nhập email của bạn để lấy mã xác thực' : 'Nhập mã xác thực và mật khẩu mới'}
             </p>
+            {step === 2 && (
+              <p className="text-xs text-amber-500/80 mt-3 bg-amber-500/10 inline-block px-3 py-1.5 rounded-full border border-amber-500/20">
+                💡 Lưu ý: Vui lòng kiểm tra cả hộp thư <strong>Spam (Thư rác)</strong>
+              </p>
+            )}
           </div>
 
           {error && (

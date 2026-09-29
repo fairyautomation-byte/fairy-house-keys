@@ -166,6 +166,9 @@ function VerifyOTPContent() {
               Chúng tôi đã gửi mã đến <br/>
               <strong className="text-white">{email}</strong>
             </p>
+            <p className="text-xs text-amber-500/80 mt-3 bg-amber-500/10 inline-block px-3 py-1.5 rounded-full border border-amber-500/20">
+              💡 Lưu ý: Vui lòng kiểm tra cả hộp thư <strong>Spam (Thư rác)</strong>
+            </p>
           </div>
 
           {error && (
