@@ -133,40 +133,38 @@ export async function sendKeyToCustomer(data: {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
     to: data.email,
-    subject: `🎉 [Fairy House Auto Data] Key kích hoạt của bạn đã sẵn sàng!`,
+    subject: `🎉 [Fairy House Auto Data] Đơn hàng của bạn đã được duyệt thành công!`,
     html: `
       <!DOCTYPE html>
       <html>
       <head><meta charset="UTF-8"></head>
       <body style="font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155;">
-          <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 24px; text-align: center;">
-            <h1 style="margin: 0; color: white; font-size: 20px;">🎉 Key Của Bạn Đã Sẵn Sàng!</h1>
-            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.8);">Fairy House Auto Data — AI Automation Facebook</p>
+          <div style="background: linear-gradient(135deg, #10b981, #06b6d4); padding: 24px; text-align: center;">
+            <h1 style="margin: 0; color: white; font-size: 20px;">🎉 Kích Hoạt Thành Công!</h1>
+            <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9);">Fairy House Auto Data — Hệ thống tự động</p>
           </div>
           <div style="padding: 24px;">
             <p>Chào <strong>${data.fullName}</strong>,</p>
-            <p>Key kích hoạt <strong>Fairy House Auto Data</strong> của bạn:</p>
-            <div style="background: #0f172a; border: 2px solid #7c3aed; border-radius: 10px; padding: 20px; margin: 16px 0; text-align: center;">
-              <p style="margin: 0; font-family: monospace; font-size: 16px; font-weight: bold; color: #a78bfa; letter-spacing: 2px; word-break: break-all;">${data.key}</p>
-            </div>
-            <table style="width: 100%; margin: 16px 0; border-collapse: collapse;">
-              <tr><td style="color: #94a3b8; padding: 6px 0; width: 130px;">📦 Gói:</td><td style="color: #f1f5f9; font-weight: bold;">${pkg.label}</td></tr>
-              <tr><td style="color: #94a3b8; padding: 6px 0;">🔍 Giới hạn quét:</td><td style="color: #10b981; font-weight: bold;">${pkg.scanLimit}</td></tr>
-              <tr><td style="color: #94a3b8; padding: 6px 0;">📅 Hết hạn:</td><td style="color: #10b981; font-weight: bold;">${expiryText}</td></tr>
+            <p>Tin vui! Đơn hàng đăng ký gói <strong>${pkg.label}</strong> của bạn đã được Admin phê duyệt thành công.</p>
+            
+            <table style="width: 100%; margin: 20px 0; border-collapse: collapse; background: #0f172a; border-radius: 8px; overflow: hidden;">
+              <tr><td style="color: #94a3b8; padding: 12px 16px; border-bottom: 1px solid #334155;">📦 Gói dịch vụ:</td><td style="color: #f1f5f9; font-weight: bold; padding: 12px 16px; border-bottom: 1px solid #334155;">${pkg.label}</td></tr>
+              <tr><td style="color: #94a3b8; padding: 12px 16px; border-bottom: 1px solid #334155;">🔍 Giới hạn quét:</td><td style="color: #10b981; font-weight: bold; padding: 12px 16px; border-bottom: 1px solid #334155;">${pkg.scanLimit}</td></tr>
+              <tr><td style="color: #94a3b8; padding: 12px 16px;">📅 Hạn sử dụng:</td><td style="color: #10b981; font-weight: bold; padding: 12px 16px;">${expiryText}</td></tr>
             </table>
-            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin: 16px 0;">
-              <p style="margin: 0 0 8px; font-weight: bold; color: #f1f5f9;">📖 Hướng dẫn kích hoạt:</p>
-              <ol style="margin: 0; padding-left: 20px; color: #94a3b8; font-size: 14px; line-height: 1.8;">
-                <li>Mở Extension <strong style="color: #a78bfa;">Fairy House Auto Data</strong> trên Chrome</li>
-                <li>Vào tab <strong style="color: #a78bfa;">"License Key"</strong></li>
-                <li>Dán key vào ô nhập và bấm <strong style="color: #a78bfa;">"Kích hoạt"</strong></li>
-              </ol>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${APP_URL}/dashboard" style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; letter-spacing: 0.5px;">
+                ĐĂNG NHẬP ĐỂ LẤY KEY NGAY 👉
+              </a>
             </div>
+
             <div style="background: #1e3a2f; border: 1px solid #166534; border-radius: 8px; padding: 12px; margin: 12px 0;">
-              <p style="margin: 0; color: #86efac; font-size: 13px;">🔐 Key được gắn với <strong>1 thiết bị</strong>. Không chia sẻ key cho người khác.</p>
+              <p style="margin: 0; color: #86efac; font-size: 13px;">💡 <strong>Lưu ý:</strong> Vui lòng đăng nhập vào trang quản lý để copy Key kích hoạt và dán vào Extension nhé.</p>
             </div>
-            <p style="color: #94a3b8; font-size: 14px; margin-top: 16px;">📱 Hỗ trợ kỹ thuật: <strong style="color: #06b6d4;">Zalo ${SUPPORT_ZALO}</strong></p>
+            
+            <p style="color: #94a3b8; font-size: 14px; margin-top: 24px; border-top: 1px solid #334155; pt-4">📱 Cần hỗ trợ thêm? Zalo ngay: <strong style="color: #06b6d4;">${SUPPORT_ZALO}</strong></p>
           </div>
         </div>
       </body>

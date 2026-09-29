@@ -78,6 +78,25 @@ export async function POST(req: NextRequest) {
     } else {
       // Create Order for Paid plan
       const now = new Date();
+
+      // Check for existing pending order to prevent F5 spam
+      const existingOrders = await db.collection('orders')
+        .where('user_id', '==', user.uid)
+        .where('plan_id', '==', keyType)
+        .where('status', '==', 'PENDING_PAYMENT_REVIEW')
+        .get();
+
+      if (!existingOrders.empty) {
+        const existingDoc = existingOrders.docs[0];
+        const existingData = existingDoc.data();
+        return NextResponse.json({ 
+          ok: true, 
+          orderId: existingDoc.id, 
+          transactionCode: existingData.transaction_code, 
+          amount: existingData.amount 
+        });
+      }
+
       // Generate transaction code FH20260927XXXX
       const dateStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).replace(/-/g, '');
       const random4 = Math.floor(1000 + Math.random() * 9000);
