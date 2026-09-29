@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       .where('status', 'in', ['ACTIVE', 'SUSPENDED'])
       .get();
       
-    const activeLicenses = licenseSnap.docs.map(doc => doc.data());
+    const activeLicenses = licenseSnap.docs.map((doc: any) => doc.data());
 
     // Get pending orders
     const orderSnap = await db.collection('orders')
