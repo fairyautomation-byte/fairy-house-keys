@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { isAdminAuthenticated } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
     // 1. Chỉ Admin mới được chạy migration
-    const user = await getAuthenticatedUser(req);
-    if (!user) {
+    const isAuth = await isAdminAuthenticated(req);
+    if (!isAuth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const adminRef = db.collection('users').doc(user.uid);
-    const adminDoc = await adminRef.get();
-    if (!adminDoc.exists || adminDoc.data()?.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { confirm } = await req.json();
