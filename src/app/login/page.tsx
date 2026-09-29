@@ -65,8 +65,8 @@ function LoginContent() {
       <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-700/50 overflow-hidden relative z-10">
         <div className="p-8">
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden">
-              <Image src="/logo.png" alt="Fairy House Auto Data" width={80} height={80} className="object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]" />
+            <div className="w-20 h-20 relative flex items-center justify-center overflow-hidden rounded-full shadow-[0_0_20px_rgba(6,182,212,0.3)] border border-slate-700">
+              <Image src="/logo.png" alt="Fairy House Auto Data" fill className="object-cover" />
             </div>
           </div>
           <div className="text-center mb-8">

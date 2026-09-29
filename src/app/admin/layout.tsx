@@ -32,8 +32,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-8">
           <Link href="/admin" className="flex items-center gap-3 hover:scale-105 transition-transform">
-            <div className="w-12 h-12 relative flex items-center justify-center overflow-hidden">
-              <Image src="/logo.png" alt="Fairy House Auto Data" width={48} height={48} className="object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+            <div className="w-12 h-12 relative flex items-center justify-center overflow-hidden rounded-full shadow-[0_0_15px_rgba(6,182,212,0.3)] border border-slate-700">
+              <Image src="/logo.png" alt="Fairy House Auto Data" fill className="object-cover" />
             </div>
             <div>
               <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400 block leading-tight text-lg">Fairy House Auto Data</span>

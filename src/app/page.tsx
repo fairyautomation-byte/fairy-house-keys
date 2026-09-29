@@ -18,8 +18,8 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 relative flex items-center justify-center overflow-hidden">
-              <Image src="/logo.png" alt="Fairy House Auto Data" width={48} height={48} className="object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+            <div className="w-12 h-12 relative flex items-center justify-center overflow-hidden rounded-full shadow-[0_0_15px_rgba(6,182,212,0.3)] border border-slate-700">
+              <Image src="/logo.png" alt="Fairy House Auto Data" fill className="object-cover" />
             </div>
             <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">Fairy House Auto Data</span>
           </div>
@@ -249,7 +249,9 @@ export default function Home() {
       <footer className="bg-slate-950 text-slate-500 py-12 border-t border-slate-900 relative z-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex justify-center items-center gap-3 mb-4">
-            <Image src="/logo.png" alt="Fairy House Auto Data" width={24} height={24} className="object-contain drop-shadow-md grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
+            <div className="w-8 h-8 relative flex items-center justify-center overflow-hidden rounded-full border border-slate-800 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all">
+              <Image src="/logo.png" alt="Fairy House Auto Data" fill className="object-cover" />
+            </div>
             <span className="font-bold text-slate-300">Fairy House Auto Data</span>
           </div>
           <p className="text-sm">© 2026 Bản quyền thuộc về Fairy House Auto Data. All rights reserved.</p>
