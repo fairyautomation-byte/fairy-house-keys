@@ -86,13 +86,13 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="py-24 relative z-10 border-t border-slate-800/50 bg-slate-900/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">Tính năng nổi bật</h2>
-            <p className="text-lg text-slate-400">Công nghệ thông minh giúp bạn làm việc hiệu quả hơn.</p>
+      <section className="py-20 relative z-10 border-t border-slate-800/50 bg-slate-900/20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-white mb-3">Tính năng nổi bật</h2>
+            <p className="text-base text-slate-400">Công nghệ thông minh giúp bạn làm việc hiệu quả hơn.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               { t: 'Quét Data Thông Minh', d: 'Thu thập thông tin khách hàng tiềm năng cực kỳ nhanh chóng và chính xác.', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
               { t: 'Tự Động Kết Bạn', d: 'Gửi lời mời kết bạn hàng loạt theo danh sách UID, mở rộng tệp khách hàng tự động 100%.', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
@@ -101,12 +101,12 @@ export default function Home() {
               { t: 'Dashboard Trực Quan', d: 'Bảng điều khiển hiện đại giúp bạn theo dõi chi tiết lịch sử và gói dịch vụ.', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
               { t: 'Hỗ Trợ Nhanh Chóng', d: 'Đội ngũ Admin sẵn sàng duyệt đơn và giải đáp thắc mắc ngay qua Zalo.', icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z' }
             ].map((f, i) => (
-              <div key={i} className="p-8 rounded-3xl bg-slate-900/60 backdrop-blur-md border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800/80 transition-all duration-300 group">
-                <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-cyan-400 mb-6 border border-slate-700 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors">
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={f.icon} /></svg>
+              <div key={i} className="p-6 rounded-[1.5rem] bg-slate-900/60 backdrop-blur-md border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800/80 transition-all duration-300 group">
+                <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-cyan-400 mb-5 border border-slate-700 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={f.icon} /></svg>
                 </div>
-                <h3 className="text-xl font-bold text-slate-100 mb-3">{f.t}</h3>
-                <p className="text-slate-400 leading-relaxed text-sm">{f.d}</p>
+                <h3 className="text-lg font-bold text-slate-100 mb-2">{f.t}</h3>
+                <p className="text-slate-400 leading-relaxed text-[13px]">{f.d}</p>
               </div>
             ))}
           </div>
