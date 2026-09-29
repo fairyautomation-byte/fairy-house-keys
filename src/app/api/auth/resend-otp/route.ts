@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     if (!allSessionsSnapshot.empty) {
       // Sort in memory to avoid index requirements
       const docs = allSessionsSnapshot.docs.map((doc: any) => ({ id: doc.id, data: doc.data() }));
-      docs.sort((a, b) => b.data.created_at.toMillis() - a.data.created_at.toMillis());
+      docs.sort((a: any, b: any) => b.data.created_at.toMillis() - a.data.created_at.toMillis());
       
       const lastSessionDoc = docs[0];
       const lastSession = lastSessionDoc.data;
