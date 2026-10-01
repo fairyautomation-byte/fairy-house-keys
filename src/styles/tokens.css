@@ -1,0 +1,83 @@
+:root {
+  /* Background & Surface */
+  --fha-bg:           #0a0f1a;
+  --fha-surface:      #111827;
+  --fha-surface-2:    #1a2233;
+  --fha-surface-3:    #222f45;
+  --fha-border:       #1e2d42;
+  --fha-border-muted: #162030;
+
+  /* Text */
+  --fha-text:         #e2e8f0;
+  --fha-text-muted:   #94a3b8;
+  --fha-text-faint:   #4b5a70;
+  --fha-text-inverse: #0a0f1a;
+
+  /* Primary Brand (Cyan) */
+  --fha-cyan:         #00b4d8;
+  --fha-cyan-hover:   #0096b7;
+  --fha-cyan-deep:    #006b8a;
+  --fha-cyan-muted:   rgba(0, 180, 216, 0.12);
+  --fha-cyan-border:  rgba(0, 180, 216, 0.25);
+
+  /* Status Colors */
+  --fha-success:      #10b981;
+  --fha-success-bg:   rgba(16, 185, 129, 0.10);
+  --fha-success-border: rgba(16, 185, 129, 0.25);
+  --fha-success-text: #34d399;
+
+  --fha-warning:      #f59e0b;
+  --fha-warning-bg:   rgba(245, 158, 11, 0.10);
+  --fha-warning-border: rgba(245, 158, 11, 0.25);
+  --fha-warning-text: #fbbf24;
+
+  --fha-error:        #ef4444;
+  --fha-error-bg:     rgba(239, 68, 68, 0.10);
+  --fha-error-border: rgba(239, 68, 68, 0.25);
+  --fha-error-text:   #f87171;
+
+  --fha-info:         #3b82f6;
+  --fha-info-bg:      rgba(59, 130, 246, 0.10);
+  --fha-info-border:  rgba(59, 130, 246, 0.25);
+  --fha-info-text:    #60a5fa;
+
+  /* Financial / Wallet */
+  --fha-gold:         #f59e0b;
+  --fha-gold-text:    #fbbf24;
+
+  /* Typography Scale */
+  --fha-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --fha-font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Spacing System */
+  --fha-space-0:    0;
+  --fha-space-1:    4px;
+  --fha-space-2:    8px;
+  --fha-space-3:    12px;
+  --fha-space-4:    16px;
+  --fha-space-5:    20px;
+  --fha-space-6:    24px;
+  --fha-space-8:    32px;
+  --fha-space-10:   40px;
+  --fha-space-12:   48px;
+  --fha-space-16:   64px;
+  --fha-space-20:   80px;
+  --fha-space-24:   96px;
+
+  /* Border Radius */
+  --fha-radius-sm:   4px;
+  --fha-radius:      6px;
+  --fha-radius-md:   8px;
+  --fha-radius-lg:   12px;
+  --fha-radius-xl:   16px;
+  --fha-radius-full: 9999px;
+
+  /* Shadow System */
+  --fha-shadow-border: 0 0 0 1px var(--fha-border);
+  --fha-shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.3);
+  --fha-shadow-md:     0 0 0 1px var(--fha-border), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --fha-shadow-lg:     0 0 0 1px var(--fha-border), 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --fha-shadow-cyan:   0 0 0 1px var(--fha-cyan-border), 0 4px 16px rgba(0, 180, 216, 0.15);
+  --fha-shadow-glow:   0 0 20px rgba(0, 180, 216, 0.2);
+  --fha-shadow-focus:  0 0 0 3px rgba(0, 180, 216, 0.35);
+}

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@payos/node": "^2.0.5",
     "firebase-admin": "^12.3.0",
     "jose": "^6.2.12",
     "jsonwebtoken": "^9.0.2",

@@ -1,0 +1,171 @@
+import React from 'react';
+import Image from 'next/image';
+import Button from '../ui/Button';
+import Spinner from '../ui/Spinner';
+
+export type PaymentState = 'loading' | 'pending' | 'checking' | 'success' | 'expired' | 'failed';
+
+interface QRPaymentProps {
+  state: PaymentState;
+  qrUrl?: string;
+  amount: number;
+  transactionCode: string;
+  bankInfo?: {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  };
+  timeLeft?: number; // seconds
+  onRetry?: () => void;
+  onCancel?: () => void;
+}
+
+export default function QRPayment({
+  state,
+  qrUrl,
+  amount,
+  transactionCode,
+  bankInfo,
+  timeLeft = 0,
+  onRetry,
+  onCancel
+}: QRPaymentProps) {
+  
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const formatCurrency = (val: number) => val.toLocaleString('vi-VN') + 'đ';
+
+  return (
+    <div className="w-full max-w-md mx-auto bg-fha-surface rounded-fha-radius-lg border border-fha-border shadow-fha-lg overflow-hidden">
+      
+      {/* Header */}
+      <div className="bg-fha-surface-2 p-5 border-b border-fha-border text-center relative">
+        <h3 className="text-lg font-bold text-fha-text">Thanh Toán Chuyển Khoản</h3>
+        <p className="text-sm text-fha-text-muted mt-1">Mã đơn: <span className="font-mono text-fha-cyan">{transactionCode}</span></p>
+        
+        {state === 'pending' && timeLeft > 0 && (
+          <div className="absolute top-5 right-5 text-fha-warning bg-fha-warning-bg px-2 py-1 rounded text-xs font-bold font-mono">
+            {formatTime(timeLeft)}
+          </div>
+        )}
+      </div>
+
+      <div className="p-6 flex flex-col items-center">
+        
+        {/* State Content */}
+        <div className="w-full max-w-[240px] aspect-square rounded-xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 shadow-md border-4 border-fha-surface-3">
+          
+          {state === 'loading' && (
+            <div className="w-full h-full bg-slate-200 animate-shimmer" />
+          )}
+
+          {state === 'pending' && qrUrl && (
+            <Image src={qrUrl} alt="QR Code" fill className="object-contain p-2" unoptimized />
+          )}
+
+          {state === 'checking' && (
+            <div className="absolute inset-0 bg-white/90 backdrop-blur flex flex-col items-center justify-center text-slate-800">
+              <Spinner size="lg" color="cyan" />
+              <p className="mt-4 font-semibold text-sm">Đang xác nhận...</p>
+            </div>
+          )}
+
+          {state === 'success' && (
+            <div className="absolute inset-0 bg-emerald-50 flex flex-col items-center justify-center text-emerald-600">
+              <svg className="w-16 h-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="font-bold">Thành công!</p>
+            </div>
+          )}
+
+          {state === 'expired' && (
+            <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center text-slate-500">
+              <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="font-bold text-sm">QR Đã Hết Hạn</p>
+            </div>
+          )}
+
+          {state === 'failed' && (
+            <div className="absolute inset-0 bg-rose-50 flex flex-col items-center justify-center text-rose-500">
+              <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="font-bold text-sm text-center px-4">Lỗi giao dịch</p>
+            </div>
+          )}
+        </div>
+
+        {/* Amount */}
+        <div className="text-center mb-6">
+          <p className="text-sm text-fha-text-muted mb-1">Số tiền thanh toán</p>
+          <div className="text-3xl font-black font-mono text-fha-cyan">
+            {formatCurrency(amount)}
+          </div>
+        </div>
+
+        {/* Bank Info */}
+        {(state === 'pending' || state === 'loading' || state === 'checking') && bankInfo && (
+          <div className="w-full bg-fha-surface-2 rounded-lg p-4 space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-fha-text-muted">Ngân hàng</span>
+              <span className="font-semibold text-fha-text">{bankInfo.bankName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-fha-text-muted">Số tài khoản</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-fha-text">{bankInfo.accountNumber}</span>
+                <button 
+                  onClick={() => navigator.clipboard.writeText(bankInfo.accountNumber)}
+                  className="text-fha-cyan hover:text-fha-cyan-hover"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-fha-text-muted">Nội dung (Bắt buộc)</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-fha-warning">{transactionCode}</span>
+                <button 
+                  onClick={() => navigator.clipboard.writeText(transactionCode)}
+                  className="text-fha-cyan hover:text-fha-cyan-hover"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="w-full mt-6 space-y-3">
+          {(state === 'expired' || state === 'failed') && onRetry && (
+            <Button variant="primary" fullWidth onClick={onRetry}>
+              Thử lại / Tạo QR Mới
+            </Button>
+          )}
+          
+          {(state === 'pending' || state === 'expired' || state === 'failed') && onCancel && (
+            <Button variant="ghost" fullWidth onClick={onCancel}>
+              Hủy thanh toán
+            </Button>
+          )}
+
+          {state === 'success' && (
+            <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
+              Vào Dashboard
+            </Button>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}

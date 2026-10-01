@@ -1,9 +1,22 @@
 'use client';
 import { useState, useEffect } from 'react';
+import PageHeader from '@/components/layout/PageHeader';
+import StatCard from '@/components/features/StatCard';
+import Card from '@/components/ui/Card';
+import Table, { Column } from '@/components/ui/Table';
+import StatusBadge from '@/components/features/StatusBadge';
+import Button from '@/components/ui/Button';
+import { useToast } from '@/components/ui/ToastProvider';
+import { ConfirmModal } from '@/components/ui/Modal';
 
 export default function AdminDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  const [confirmAction, setConfirmAction] = useState<{type: 'approve' | 'reject', id: string} | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  
+  const { toast } = useToast();
 
   const fetchDashboard = () => {
     setLoading(true);
@@ -17,119 +30,147 @@ export default function AdminDashboard() {
     fetchDashboard();
   }, []);
 
-  if (loading && !data) return (
-    <div className="py-20 flex justify-center">
-      <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
-    </div>
-  );
+  const executeAction = async () => {
+    if (!confirmAction) return;
+    
+    setActionLoading(true);
+    const { type, id } = confirmAction;
+    
+    try {
+      const res = await fetch(`/api/admin/orders/${id}/${type}`, { method: 'POST' });
+      if (res.ok) {
+        toast.success(type === 'approve' ? 'Đã duyệt thành công!' : 'Đã từ chối đơn hàng');
+        fetchDashboard();
+      } else {
+        const err = await res.json();
+        throw new Error(err.error);
+      }
+    } catch (err: any) {
+      toast.error('Lỗi: ' + err.message);
+    } finally {
+      setActionLoading(false);
+      setConfirmAction(null);
+    }
+  };
+
+  if (loading && !data) {
+    return (
+      <div className="animate-pulse space-y-6">
+        <div className="h-16 bg-fha-surface-2 rounded-lg"></div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-fha-surface-2 rounded-lg"></div>)}
+        </div>
+      </div>
+    );
+  }
+
   if (!data) return null;
 
   const { stats, recentOrders } = data;
 
-  const handleApprove = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn duyệt đơn này và cấp License?')) return;
-    const res = await fetch(`/api/admin/orders/${id}/approve`, { method: 'POST' });
-    if (res.ok) {
-      alert('Đã duyệt thành công!');
-      fetchDashboard();
-    } else {
-      const err = await res.json();
-      alert('Lỗi: ' + err.error);
+  const columns: Column<any>[] = [
+    {
+      key: 'transaction_code',
+      title: 'Mã GD',
+      render: (item) => <span className="font-mono text-fha-cyan">{item.transaction_code}</span>
+    },
+    {
+      key: 'plan_id',
+      title: 'Gói',
+      render: (item) => <span className="font-bold uppercase text-fha-text">{item.plan_id}</span>
+    },
+    {
+      key: 'amount',
+      title: 'Số Tiền',
+      render: (item) => <span className="font-medium text-fha-text">{item.amount?.toLocaleString('vi-VN')}đ</span>
+    },
+    {
+      key: 'status',
+      title: 'Trạng Thái',
+      render: (item) => <StatusBadge status={item.status} size="sm" />
+    },
+    {
+      key: 'actions',
+      title: 'Hành động',
+      align: 'right',
+      render: (item) => {
+        if (item.status === 'PENDING_PAYMENT_REVIEW') {
+          return (
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="ghost" onClick={() => setConfirmAction({type: 'reject', id: item.id})}>Từ chối</Button>
+              <Button size="sm" variant="primary" onClick={() => setConfirmAction({type: 'approve', id: item.id})}>Duyệt</Button>
+            </div>
+          );
+        }
+        return null;
+      }
     }
-  };
-
-  const handleReject = async (id: string) => {
-    if (!confirm('Từ chối đơn hàng này?')) return;
-    const res = await fetch(`/api/admin/orders/${id}/reject`, { method: 'POST' });
-    if (res.ok) {
-      alert('Đã từ chối!');
-      fetchDashboard();
-    }
-  };
+  ];
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-extrabold text-white">Tổng quan hệ thống</h1>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Tổng Quan Hệ Thống" 
+        actions={
+          <Button variant="secondary" onClick={fetchDashboard} size="sm">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Làm Mới
+          </Button>
+        }
+      />
       
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-cyan-500/30 transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-cyan-500/10 transition-colors"></div>
-          <div className="text-sm text-slate-400 font-bold mb-2 uppercase tracking-widest">Tổng Users</div>
-          <div className="text-4xl font-black text-white">{stats.totalUsers}</div>
-        </div>
-        <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-violet-500/30 transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-violet-500/10 transition-colors"></div>
-          <div className="text-sm text-slate-400 font-bold mb-2 uppercase tracking-widest">Active Licenses</div>
-          <div className="text-4xl font-black text-cyan-400">{stats.activeLicenses}</div>
-        </div>
-        <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-emerald-500/10 transition-colors"></div>
-          <div className="text-sm text-slate-400 font-bold mb-2 uppercase tracking-widest">Lượt Scan (All)</div>
-          <div className="text-4xl font-black text-emerald-400">{stats.totalScans.toLocaleString()}</div>
-        </div>
-        <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-rose-500/30 transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-rose-500/10 transition-colors"></div>
-          <div className="text-sm text-slate-400 font-bold mb-2 uppercase tracking-widest">Chờ Duyệt</div>
-          <div className="text-4xl font-black text-rose-400">{stats.pendingOrders}</div>
-        </div>
+        <StatCard 
+          label="Tổng Users" 
+          value={stats.totalUsers} 
+          icon={<svg className="w-5 h-5 text-fha-text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+        />
+        <StatCard 
+          label="Active Licenses" 
+          value={stats.activeLicenses}
+          className="border-fha-cyan-border shadow-fha-sm" 
+          icon={<svg className="w-5 h-5 text-fha-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>}
+        />
+        <StatCard 
+          label="Tổng Lượt Scan" 
+          value={stats.totalScans?.toLocaleString() || 0} 
+          icon={<svg className="w-5 h-5 text-fha-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        />
+        <StatCard 
+          label="Chờ Duyệt" 
+          value={stats.pendingOrders} 
+          className={stats.pendingOrders > 0 ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)]" : ""}
+          icon={<svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        />
       </div>
 
       {/* Recent Orders */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-extrabold text-white">Giao dịch gần đây</h2>
-          <button onClick={fetchDashboard} className="text-sm font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-2 bg-cyan-500/10 px-4 py-2 rounded-xl border border-cyan-500/20 transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            Làm mới
-          </button>
+      <Card variant="default" padding="none">
+        <div className="px-6 py-4 border-b border-fha-border">
+          <h3 className="text-base font-semibold text-fha-text">Giao Dịch Gần Đây</h3>
         </div>
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-3xl border border-slate-700/50 shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-950/80 border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-widest">Mã GD</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-widest">Gói</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-widest">Số Tiền</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-widest">Trạng Thái</th>
-                  <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/80">
-                {recentOrders.length === 0 ? (
-                  <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">Chưa có giao dịch nào</td></tr>
-                ) : (
-                  recentOrders.map((order: any) => (
-                    <tr key={order.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-5 font-mono text-sm font-medium text-cyan-400">{order.transaction_code}</td>
-                      <td className="px-6 py-5 font-bold uppercase text-sm text-slate-300">{order.plan_id}</td>
-                      <td className="px-6 py-5 font-medium text-slate-300">{order.amount.toLocaleString('vi-VN')}đ</td>
-                      <td className="px-6 py-5">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
-                          order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                          order.status === 'PENDING_PAYMENT_REVIEW' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
-                          'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                        }`}>
-                          {order.status === 'PAID' ? 'THÀNH CÔNG' : order.status === 'PENDING_PAYMENT_REVIEW' ? 'ĐANG CHỜ DUYỆT' : 'THẤT BẠI'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-right">
-                        {order.status === 'PENDING_PAYMENT_REVIEW' && (
-                          <div className="flex justify-end gap-3">
-                            <button onClick={() => handleApprove(order.id)} className="px-4 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 text-xs font-bold rounded-lg transition-colors">Duyệt</button>
-                            <button onClick={() => handleReject(order.id)} className="px-4 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 text-xs font-bold rounded-lg transition-colors">Từ chối</button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        <Table
+          columns={columns}
+          data={recentOrders}
+          rowKey={(item) => item.id}
+          loading={loading}
+          emptyState={
+            <div className="py-12 text-center text-fha-text-muted">Chưa có giao dịch nào</div>
+          }
+        />
+      </Card>
+
+      <ConfirmModal
+        open={!!confirmAction}
+        onClose={() => !actionLoading && setConfirmAction(null)}
+        title={confirmAction?.type === 'approve' ? 'Xác nhận duyệt đơn' : 'Từ chối đơn hàng'}
+        message={confirmAction?.type === 'approve' ? 'Bạn có chắc chắn muốn duyệt đơn này và cấp License cho người dùng?' : 'Bạn có chắc chắn muốn từ chối đơn hàng này?'}
+        confirmText={confirmAction?.type === 'approve' ? 'Duyệt Đơn' : 'Từ Chối'}
+        onConfirm={executeAction}
+        loading={actionLoading}
+        danger={confirmAction?.type === 'reject'}
+      />
     </div>
   );
 }

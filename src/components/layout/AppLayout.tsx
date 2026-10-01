@@ -1,20 +1,22 @@
 'use client';
-import { usePathname } from 'next/navigation';
-import AdminSidebar from '@/components/layout/AdminSidebar';
+import React from 'react';
+import Sidebar from './Sidebar';
+import BottomNav from './BottomNav';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
 
-  if (pathname === '/admin/login') return <>{children}</>;
-
+export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex h-screen bg-fha-bg overflow-hidden font-sans">
-      <AdminSidebar />
+      <Sidebar />
       <div className="flex-1 overflow-y-auto flex flex-col relative pb-[60px] md:pb-0">
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }
