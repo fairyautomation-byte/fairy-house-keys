@@ -10,10 +10,14 @@ export async function GET(req: NextRequest) {
     }
 
     const snapshot = await db.collection('users').orderBy('created_at', 'desc').get();
-    const users = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const users = snapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      if (data.password) delete data.password;
+      return {
+        id: doc.id,
+        ...data
+      };
+    });
 
     return NextResponse.json(users);
   } catch (error) {

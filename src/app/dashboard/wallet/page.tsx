@@ -47,7 +47,6 @@ export default function WalletPage() {
         },
         body: JSON.stringify({
           amount: amount,
-          description: 'Nap Tien FHA',
         }),
       });
 
@@ -71,11 +70,10 @@ export default function WalletPage() {
       
       const niceBankName = bankNames[data.bin] || data.bin;
 
-      // Convert QR code data from PayOS
       setTransactionInfo({
         amount: data.amount,
-        transactionCode: data.orderCode.toString(),
-        qrUrl: `https://img.vietqr.io/image/${data.bin}-${data.accountNumber}-compact2.jpg?amount=${data.amount}&addInfo=${data.description}&accountName=${encodeURIComponent(data.accountName)}`,
+        transactionCode: data.description || data.orderCode.toString(),
+        qrUrl: `https://img.vietqr.io/image/${data.bin}-${data.accountNumber}-compact2.jpg?amount=${data.amount}&addInfo=${data.description || data.orderCode}&accountName=${encodeURIComponent(data.accountName)}`,
         bankInfo: {
           bankName: niceBankName,
           accountNumber: data.accountNumber,

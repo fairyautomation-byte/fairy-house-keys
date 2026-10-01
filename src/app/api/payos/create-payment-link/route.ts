@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const paymentData = {
       orderCode,
       amount: amountInt,
-      description: description || `NAP ${transactionCode}`,
+      description: description || String(orderCode),
       returnUrl: returnUrl || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/dashboard/wallet?success=true`,
       cancelUrl: cancelUrl || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/dashboard/wallet?success=false`
     };

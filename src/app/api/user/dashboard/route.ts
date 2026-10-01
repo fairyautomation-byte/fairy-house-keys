@@ -17,6 +17,9 @@ export async function GET(req: NextRequest) {
       return response;
     }
     const userData = userDoc.data();
+    if (userData && userData.password) {
+      delete userData.password;
+    }
 
     // Get current licenses
     const licenseSnap = await db.collection('licenses')
