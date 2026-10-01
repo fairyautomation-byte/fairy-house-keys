@@ -22,7 +22,7 @@ export default function LandingFAQ() {
         return (
           <div 
             key={index} 
-            className={`border rounded-fha-radius-md overflow-hidden transition-colors ${isOpen ? 'border-fha-cyan-border bg-fha-surface-2' : 'border-fha-border bg-fha-surface/50 hover:border-fha-border-muted'}`}
+            className={`border rounded-2xl overflow-hidden transition-colors ${isOpen ? 'border-fha-cyan-border bg-fha-surface-2' : 'border-fha-border bg-fha-surface/50 hover:border-fha-border-muted'}`}
           >
             <button
               onClick={() => toggle(index)}

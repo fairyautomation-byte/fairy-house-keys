@@ -95,10 +95,10 @@ export default function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-fha-radius transition-colors text-[13px] font-medium group
+                flex items-center gap-3 px-3 py-2.5 rounded-full transition-colors text-[13px] font-medium group
                 ${isActive 
-                  ? 'bg-amber-500/10 text-amber-500 border-l-2 border-amber-500 rounded-l-none pl-2.5' 
-                  : 'text-fha-text-muted hover:bg-fha-surface-3 hover:text-fha-text'
+                  ? 'bg-amber-500/10 text-amber-500' 
+                  : 'text-fha-text-muted hover:bg-white/5 hover:text-fha-text'
                 }
               `}
             >

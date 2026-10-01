@@ -45,6 +45,14 @@ module.exports = {
         'fha-inset': 'var(--fha-shadow-inset)',
         'fha-outset': 'var(--fha-shadow-outset)',
       },
+      borderRadius: {
+        'fha-radius-sm': 'var(--fha-radius-sm)',
+        'fha-radius': 'var(--fha-radius)',
+        'fha-radius-md': 'var(--fha-radius-md)',
+        'fha-radius-lg': 'var(--fha-radius-lg)',
+        'fha-radius-xl': 'var(--fha-radius-xl)',
+        'fha-radius-full': 'var(--fha-radius-full)',
+      },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.4s ease-out',

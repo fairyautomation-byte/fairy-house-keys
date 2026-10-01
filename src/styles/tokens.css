@@ -69,11 +69,11 @@
   --fha-space-24:   96px;
 
   /* Border Radius */
-  --fha-radius-sm:   4px;
-  --fha-radius:      6px;
-  --fha-radius-md:   8px;
-  --fha-radius-lg:   12px;
-  --fha-radius-xl:   16px;
+  --fha-radius-sm:   12px;
+  --fha-radius:      16px;
+  --fha-radius-md:   24px;
+  --fha-radius-lg:   32px;
+  --fha-radius-xl:   40px;
   --fha-radius-full: 9999px;
 
   /* Shadow System */
