@@ -9,8 +9,16 @@ interface ToastMessage {
   title?: string;
 }
 
+interface CallableToast {
+  (message: string, type?: ToastType, title?: string): void;
+  success: (message: string, title?: string) => void;
+  error: (message: string, title?: string) => void;
+  warning: (message: string, title?: string) => void;
+  info: (message: string, title?: string) => void;
+}
+
 interface ToastContextType {
-  toast: (message: string, type?: ToastType, title?: string) => void;
+  toast: CallableToast;
   success: (message: string, title?: string) => void;
   error: (message: string, title?: string) => void;
   warning: (message: string, title?: string) => void;
@@ -36,12 +44,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, 4000);
   }, [removeToast]);
 
+  const toastMethod = addToast as CallableToast;
+  toastMethod.success = (msg: string, title?: string) => addToast(msg, 'success', title);
+  toastMethod.error = (msg: string, title?: string) => addToast(msg, 'error', title);
+  toastMethod.warning = (msg: string, title?: string) => addToast(msg, 'warning', title);
+  toastMethod.info = (msg: string, title?: string) => addToast(msg, 'info', title);
+
   const value = {
-    toast: addToast,
-    success: (msg: string, title?: string) => addToast(msg, 'success', title),
-    error: (msg: string, title?: string) => addToast(msg, 'error', title),
-    warning: (msg: string, title?: string) => addToast(msg, 'warning', title),
-    info: (msg: string, title?: string) => addToast(msg, 'info', title),
+    toast: toastMethod,
+    success: toastMethod.success,
+    error: toastMethod.error,
+    warning: toastMethod.warning,
+    info: toastMethod.info,
   };
 
   return (

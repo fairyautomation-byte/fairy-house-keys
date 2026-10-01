@@ -27,7 +27,7 @@ export default function WalletPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleDeposit = (e: React.FormEvent) => {
+  const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseInt(depositAmount.replace(/[^0-9]/g, ''));
     if (isNaN(amount) || amount < 10000) {

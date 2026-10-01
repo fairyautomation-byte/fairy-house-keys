@@ -85,7 +85,7 @@ export default function OTPInput({ length = 6, value, onChange, disabled = false
         return (
           <input
             key={index}
-            ref={(el) => (inputsRef.current[index] = el)}
+            ref={(el) => { inputsRef.current[index] = el; }}
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"

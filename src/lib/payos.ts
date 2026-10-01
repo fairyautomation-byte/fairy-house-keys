@@ -1,4 +1,4 @@
-import PayOS from "@payos/node";
+const PayOS = require("@payos/node");
 
 const clientId = process.env.PAYOS_CLIENT_ID || "fcaaf2a3-ae41-4913-b9f2-ecb9b85c3793";
 const apiKey = process.env.PAYOS_API_KEY || "eb825018-e705-4020-b5f5-7368ded67af9";
