@@ -1,11 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { cookies } from 'next/headers';
-import * as admin from 'firebase-admin';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const orderCodeStr = searchParams.get('orderCode');
@@ -19,21 +18,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'orderCode không hợp lệ' }, { status: 400 });
     }
 
-    // Verify session
-    const cookieStore = cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Không có quyền truy cập' }, { status: 401 });
+    // Verify session using NextRequest
+    const user = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Không có quyền truy cập hoặc phiên đăng nhập hết hạn' }, { status: 401 });
     }
 
-    let decodedClaims;
-    try {
-      decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
-    } catch (error) {
-      return NextResponse.json({ error: 'Phiên đăng nhập không hợp lệ' }, { status: 401 });
-    }
-
-    const userId = decodedClaims.uid;
+    const userId = user.uid;
 
     // Fetch order from Firestore
     const orderQuery = await db.collection('payos_orders').where('orderCode', '==', orderCode).get();

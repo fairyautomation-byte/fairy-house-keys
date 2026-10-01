@@ -4,8 +4,9 @@ import { cookies } from 'next/headers';
 export async function POST(req: Request) {
   try {
     const cookieStore = cookies();
-    // Delete the session cookie by setting maxAge to 0
-    cookieStore.set('session', '', { maxAge: 0, path: '/' });
+    // Delete both user and admin tokens
+    cookieStore.set('fh_user_token', '', { maxAge: 0, path: '/' });
+    cookieStore.set('fh_admin_token', '', { maxAge: 0, path: '/' });
     
     return NextResponse.json({ success: true, message: 'Đăng xuất thành công' });
   } catch (error: any) {
