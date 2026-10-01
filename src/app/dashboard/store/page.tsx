@@ -50,13 +50,27 @@ export default function StorePage() {
 
     setPurchasing(true);
     
-    // Simulate API call for purchase via wallet
-    setTimeout(() => {
-      setPurchasing(false);
+    try {
+      const res = await fetch('/api/orders/pay-with-wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selectedPlan.id })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Lỗi thanh toán');
+      }
+
       setShowConfirmModal(false);
-      toast.success(`Đã mua thành công gói ${selectedPlan.name}!`);
-      setWalletBalance(prev => prev - selectedPlan.price);
-    }, 1500);
+      toast.success(`Đã mua thành công! Key đã được gửi vào email.`);
+      setWalletBalance(data.newBalance); // Sync balance exactly as backend calculated
+    } catch (err: any) {
+      toast.error(err.message || 'Lỗi kết nối tới máy chủ.');
+    } finally {
+      setPurchasing(false);
+    }
   };
 
   if (loading) {
