@@ -31,6 +31,18 @@ export default function QRPayment({
   onCancel
 }: QRPaymentProps) {
   const [currentTimeLeft, setCurrentTimeLeft] = React.useState(timeLeft);
+  const [redirectCountdown, setRedirectCountdown] = React.useState(10);
+
+  React.useEffect(() => {
+    if (state === 'success' && redirectCountdown > 0) {
+      const timer = setInterval(() => {
+        setRedirectCountdown(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    } else if (state === 'success' && redirectCountdown === 0) {
+      window.location.href = '/dashboard';
+    }
+  }, [state, redirectCountdown]);
 
   React.useEffect(() => {
     setCurrentTimeLeft(timeLeft);
@@ -175,8 +187,8 @@ export default function QRPayment({
 
           {displayState === 'success' && (
             <div className="w-full space-y-3">
-              <p className="text-[13px] text-fha-text-muted text-center animate-pulse">
-                Giao dịch hoàn tất. Tự động quay về Trang Quản Lý sau 10 giây...
+              <p className="text-[13px] text-fha-text-muted text-center">
+                Giao dịch hoàn tất. Tự động quay về Trang Quản Lý sau <span className="font-bold text-fha-text">{redirectCountdown}s</span>...
               </p>
               <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
                 Vào Trang Quản Lý

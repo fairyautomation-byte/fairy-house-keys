@@ -44,11 +44,6 @@ export default function WalletPage() {
               setPaymentState('success');
               setBalance(prev => prev + (transactionInfo.amount || 0));
               clearInterval(intervalId);
-              
-              // Automatically redirect after showing success state for 10 seconds
-              setTimeout(() => {
-                window.location.href = '/dashboard';
-              }, 10000);
             } else if (data.status === 'CANCELLED') {
               setPaymentState('expired');
               clearInterval(intervalId);
