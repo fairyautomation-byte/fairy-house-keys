@@ -61,8 +61,7 @@ export default function WalletPage() {
       setTransactionInfo({
         amount: data.amount,
         transactionCode: data.orderCode.toString(),
-        // PayOS usually uses VietQR standard or provides qrCode string, we can use the VietQR string they provide
-        qrUrl: data.qrCode || `https://img.vietqr.io/image/${data.bin}-${data.accountNumber}-compact2.jpg?amount=${data.amount}&addInfo=${data.description}&accountName=${encodeURIComponent(data.accountName)}`,
+        qrUrl: `https://img.vietqr.io/image/${data.bin}-${data.accountNumber}-compact2.jpg?amount=${data.amount}&addInfo=${data.description}&accountName=${encodeURIComponent(data.accountName)}`,
         bankInfo: {
           bankName: data.bin,
           accountNumber: data.accountNumber,
