@@ -115,10 +115,10 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-fha-radius transition-colors text-[13px] font-medium group
+                flex items-center gap-3 px-3 py-2.5 rounded-full transition-colors text-[13px] font-medium group
                 ${isActive 
-                  ? 'bg-fha-cyan-muted text-fha-cyan border-l-2 border-fha-cyan rounded-l-none pl-2.5' 
-                  : 'text-fha-text-muted hover:bg-fha-surface-3 hover:text-fha-text'
+                  ? 'bg-fha-cyan/10 text-fha-cyan' 
+                  : 'text-fha-text-muted hover:bg-white/5 hover:text-fha-text'
                 }
               `}
             >
@@ -135,7 +135,7 @@ export default function Sidebar() {
       <div className="p-4 border-t border-fha-border space-y-2">
         <Link 
           href="/"
-          className="w-full inline-flex items-center justify-start font-medium rounded-fha-radius transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fha-cyan px-6 py-2.5 text-sm bg-transparent text-fha-text-muted hover:bg-fha-surface-3 hover:text-fha-cyan"
+          className="w-full inline-flex items-center justify-start font-medium rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fha-cyan px-6 py-2.5 text-sm bg-transparent text-fha-text-muted hover:bg-white/5 hover:text-fha-cyan"
         >
           <span className="mr-3">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
