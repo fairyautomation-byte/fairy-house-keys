@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -129,19 +130,22 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-fha-bg flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-fha-bg flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      
+      {/* Background Aurora Effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fha-cyan rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
       {/* Logo */}
-      <Link href="/" className="mb-8 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fha-cyan to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-fha-cyan">
-          FH
-        </div>
+      <Link href="/" className="mb-8 flex items-center gap-3 relative z-10 hover:scale-105 transition-transform">
+        <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-full shadow-fha-cyan" />
         <span className="font-bold text-xl tracking-tight text-fha-text">
           Fairy House <span className="text-fha-cyan">AutoData</span>
         </span>
       </Link>
 
       {/* Main Card */}
-      <div className="w-full max-w-[440px] bg-fha-surface-2 shadow-fha-lg rounded-fha-radius-lg border border-fha-border overflow-hidden animate-slide-up">
+      <div className="w-full max-w-[440px] bg-fha-surface/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.3)] shadow-fha-cyan/5 rounded-fha-radius-lg border border-fha-border overflow-hidden animate-slide-up relative z-10">
         <div className="p-8 sm:p-10">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-fha-text mb-2">Quên Mật Khẩu</h1>
