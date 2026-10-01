@@ -34,13 +34,21 @@ export default function WalletPage() {
     if (paymentState === 'pending' && transactionInfo?.transactionCode) {
       intervalId = setInterval(async () => {
         try {
-          const res = await fetch(`/api/payos/check-order?orderCode=${transactionInfo.transactionCode}`);
+          const res = await fetch(`/api/payos/check-order?orderCode=${transactionInfo.transactionCode}`, {
+            cache: 'no-store', // Prevent browser caching
+            headers: { 'Cache-Control': 'no-cache' }
+          });
           if (res.ok) {
             const data = await res.json();
             if (data.status === 'PAID') {
               setPaymentState('success');
               setBalance(prev => prev + (transactionInfo.amount || 0));
               clearInterval(intervalId);
+              
+              // Automatically redirect after showing success state for 2 seconds
+              setTimeout(() => {
+                window.location.href = '/dashboard';
+              }, 2000);
             } else if (data.status === 'CANCELLED') {
               setPaymentState('expired');
               clearInterval(intervalId);

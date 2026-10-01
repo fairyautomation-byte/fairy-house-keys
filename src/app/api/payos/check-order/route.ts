@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     const userId = user.uid;
 
     // Fetch order from Firestore
-    const orderQuery = await db.collection('payos_orders').where('orderCode', '==', orderCode).get();
+    const orderQuery = await db.collection('payos_orders').where('payosOrderCode', '==', orderCode).get();
     
     if (orderQuery.empty) {
       return NextResponse.json({ error: 'Không tìm thấy đơn hàng' }, { status: 404 });
