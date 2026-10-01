@@ -27,6 +27,36 @@ export default function WalletPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  // Poll for payment status
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (paymentState === 'pending' && transactionInfo?.transactionCode) {
+      intervalId = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/payos/check-order?orderCode=${transactionInfo.transactionCode}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'PAID') {
+              setPaymentState('success');
+              setBalance(prev => prev + (transactionInfo.amount || 0));
+              clearInterval(intervalId);
+            } else if (data.status === 'CANCELLED') {
+              setPaymentState('expired');
+              clearInterval(intervalId);
+            }
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+        }
+      }, 3000); // Check every 3 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [paymentState, transactionInfo]);
+
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseInt(depositAmount.replace(/[^0-9]/g, ''));
