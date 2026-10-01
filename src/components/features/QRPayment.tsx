@@ -30,6 +30,23 @@ export default function QRPayment({
   onRetry,
   onCancel
 }: QRPaymentProps) {
+  const [currentTimeLeft, setCurrentTimeLeft] = React.useState(timeLeft);
+
+  React.useEffect(() => {
+    setCurrentTimeLeft(timeLeft);
+  }, [timeLeft]);
+
+  React.useEffect(() => {
+    if (state !== 'pending' || currentTimeLeft <= 0) return;
+    
+    const timer = setInterval(() => {
+      setCurrentTimeLeft(prev => prev - 1);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [state, currentTimeLeft]);
+
+  const displayState = (state === 'pending' && currentTimeLeft <= 0) ? 'expired' : state;
   
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -47,9 +64,9 @@ export default function QRPayment({
         <h3 className="text-lg font-bold text-fha-text">Thanh Toán Chuyển Khoản</h3>
         <p className="text-sm text-fha-text-muted mt-1">Mã đơn: <span className="font-mono text-fha-cyan">{transactionCode}</span></p>
         
-        {state === 'pending' && timeLeft > 0 && (
+        {displayState === 'pending' && currentTimeLeft > 0 && (
           <div className="absolute top-5 right-5 text-fha-warning bg-fha-warning-bg px-2 py-1 rounded text-xs font-bold font-mono">
-            {formatTime(timeLeft)}
+            {formatTime(currentTimeLeft)}
           </div>
         )}
       </div>
@@ -59,22 +76,22 @@ export default function QRPayment({
         {/* State Content */}
         <div className="w-full max-w-[240px] aspect-square rounded-xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 shadow-md border-4 border-fha-surface-3">
           
-          {state === 'loading' && (
+          {displayState === 'loading' && (
             <div className="w-full h-full bg-slate-200 animate-shimmer" />
           )}
 
-          {state === 'pending' && qrUrl && (
+          {displayState === 'pending' && qrUrl && (
             <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain p-2" />
           )}
 
-          {state === 'checking' && (
+          {displayState === 'checking' && (
             <div className="absolute inset-0 bg-white/90 backdrop-blur flex flex-col items-center justify-center text-slate-800">
               <Spinner size="lg" color="cyan" />
               <p className="mt-4 font-semibold text-sm">Đang xác nhận...</p>
             </div>
           )}
 
-          {state === 'success' && (
+          {displayState === 'success' && (
             <div className="absolute inset-0 bg-emerald-50 flex flex-col items-center justify-center text-emerald-600">
               <svg className="w-16 h-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -83,7 +100,7 @@ export default function QRPayment({
             </div>
           )}
 
-          {state === 'expired' && (
+          {displayState === 'expired' && (
             <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center text-slate-500">
               <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -92,7 +109,7 @@ export default function QRPayment({
             </div>
           )}
 
-          {state === 'failed' && (
+          {displayState === 'failed' && (
             <div className="absolute inset-0 bg-rose-50 flex flex-col items-center justify-center text-rose-500">
               <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -110,8 +127,7 @@ export default function QRPayment({
           </div>
         </div>
 
-        {/* Bank Info */}
-        {(state === 'pending' || state === 'loading' || state === 'checking') && bankInfo && (
+        {(displayState === 'pending' || displayState === 'loading' || displayState === 'checking') && bankInfo && (
           <div className="w-full bg-fha-surface-2 rounded-lg p-4 space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-fha-text-muted">Ngân hàng</span>
@@ -144,21 +160,20 @@ export default function QRPayment({
           </div>
         )}
 
-        {/* Actions */}
         <div className="w-full mt-6 space-y-3">
-          {(state === 'expired' || state === 'failed') && onRetry && (
+          {(displayState === 'expired' || displayState === 'failed') && onRetry && (
             <Button variant="primary" fullWidth onClick={onRetry}>
               Thử lại / Tạo QR Mới
             </Button>
           )}
           
-          {(state === 'pending' || state === 'expired' || state === 'failed') && onCancel && (
+          {(displayState === 'pending' || displayState === 'expired' || displayState === 'failed') && onCancel && (
             <Button variant="ghost" fullWidth onClick={onCancel}>
               Hủy thanh toán
             </Button>
           )}
 
-          {state === 'success' && (
+          {displayState === 'success' && (
             <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
               Vào Dashboard
             </Button>
