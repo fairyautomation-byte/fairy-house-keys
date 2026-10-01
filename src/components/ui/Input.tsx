@@ -37,13 +37,13 @@ export default function Input({
         
         <input
           id={inputId}
-          className={`w-full bg-fha-surface-2 border text-fha-text text-sm rounded-fha-radius placeholder-fha-text-faint
-            transition-all focus:outline-none focus:ring-2 focus:ring-fha-cyan focus:border-transparent
+          className={`w-full bg-fha-bg border-none shadow-fha-inset text-fha-text text-sm rounded-xl placeholder-fha-text-faint
+            transition-all focus:outline-none focus:ring-1 focus:ring-fha-cyan
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${leftIcon ? 'pl-10' : 'pl-3'} 
-            ${rightIcon ? 'pr-10' : 'pr-3'} 
-            ${error ? 'border-fha-error focus:ring-fha-error' : 'border-fha-border'}
-            py-2.5`}
+            ${leftIcon ? 'pl-11' : 'pl-4'} 
+            ${rightIcon ? 'pr-11' : 'pr-4'} 
+            ${error ? 'ring-1 ring-fha-error focus:ring-fha-error' : ''}
+            py-3`}
           {...props}
         />
         

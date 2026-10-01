@@ -69,10 +69,10 @@ export default function QRPayment({
   const formatCurrency = (val: number) => val.toLocaleString('vi-VN') + 'đ';
 
   return (
-    <div className="w-full max-w-md mx-auto bg-fha-surface rounded-fha-radius-lg border border-fha-border shadow-fha-lg overflow-hidden">
+    <div className="w-full max-w-md mx-auto bg-fha-glass backdrop-blur-2xl rounded-3xl border border-fha-glass-border shadow-fha-outset overflow-hidden">
       
       {/* Header */}
-      <div className="bg-fha-surface-2 p-5 border-b border-fha-border text-center relative">
+      <div className="bg-fha-surface/40 p-5 border-b border-fha-glass-border text-center relative">
         <h3 className="text-lg font-bold text-fha-text">Thanh Toán Chuyển Khoản</h3>
         <p className="text-sm text-fha-text-muted mt-1">Mã đơn: <span className="font-mono text-fha-cyan">{transactionCode}</span></p>
         
@@ -86,7 +86,7 @@ export default function QRPayment({
       <div className="p-6 flex flex-col items-center">
         
         {/* State Content */}
-        <div className="w-full max-w-[240px] aspect-square rounded-xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 shadow-md border-4 border-fha-surface-3">
+        <div className="w-full max-w-[240px] aspect-square rounded-2xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 shadow-fha-outset border-4 border-fha-surface/50">
           
           {displayState === 'loading' && (
             <div className="w-full h-full bg-slate-200 animate-shimmer" />
@@ -140,7 +140,7 @@ export default function QRPayment({
         </div>
 
         {(displayState === 'pending' || displayState === 'loading' || displayState === 'checking') && bankInfo && (
-          <div className="w-full bg-fha-surface-2 rounded-lg p-4 space-y-3 text-sm">
+          <div className="w-full bg-fha-bg shadow-fha-inset rounded-xl p-4 space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-fha-text-muted">Ngân hàng</span>
               <span className="font-semibold text-fha-text">{bankInfo.bankName}</span>

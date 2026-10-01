@@ -15,12 +15,12 @@ export default function Card({
   className = '',
   onClick
 }: CardProps) {
-  const baseStyles = 'rounded-fha-radius-md bg-fha-surface border transition-all duration-200';
+  const baseStyles = 'rounded-3xl bg-fha-glass backdrop-blur-xl border transition-all duration-200';
   
   const variantStyles = {
-    default: 'border-fha-border shadow-fha-md',
-    interactive: 'border-fha-border shadow-fha-sm hover:shadow-fha-lg hover:border-fha-cyan-border hover:bg-fha-surface-3 cursor-pointer',
-    highlight: 'border-fha-cyan-border shadow-fha-cyan'
+    default: 'border-fha-glass-border shadow-fha-outset',
+    interactive: 'border-fha-glass-border shadow-fha-outset hover:shadow-fha-lg hover:border-fha-cyan-border hover:bg-fha-surface/60 cursor-pointer active:shadow-fha-inset active:translate-y-[2px]',
+    highlight: 'border-fha-cyan shadow-fha-cyan bg-fha-cyan/10'
   };
 
   const paddingStyles = {

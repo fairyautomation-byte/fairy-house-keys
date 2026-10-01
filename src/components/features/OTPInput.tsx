@@ -95,12 +95,12 @@ export default function OTPInput({ length = 6, value, onChange, disabled = false
             onKeyDown={(e) => handleKeyDown(e, index)}
             onPaste={handlePaste}
             disabled={disabled}
-            className={`
-              w-10 h-12 sm:w-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-fha-radius bg-fha-surface-2 transition-all outline-none border
-              ${disabled ? 'opacity-50 cursor-not-allowed text-fha-text-muted border-fha-border' : 'text-fha-text'}
-              ${error ? 'border-fha-error focus:ring-2 focus:ring-fha-error focus:border-fha-error shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'border-fha-border focus:border-fha-cyan focus:ring-2 focus:ring-fha-cyan focus:shadow-fha-focus'}
-              ${digit && !error ? 'border-fha-cyan/50 text-fha-cyan' : ''}
-            `}
+              className={`
+                w-10 h-12 sm:w-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-xl bg-fha-bg shadow-fha-inset transition-all outline-none border-none
+                ${disabled ? 'opacity-50 cursor-not-allowed text-fha-text-muted' : 'text-fha-text'}
+                ${error ? 'ring-1 ring-fha-error focus:ring-1 focus:ring-fha-error shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'focus:ring-1 focus:ring-fha-cyan'}
+                ${digit && !error ? 'text-fha-cyan ring-1 ring-fha-cyan/30' : ''}
+              `}
             aria-label={`OTP digit ${index + 1}`}
           />
         );

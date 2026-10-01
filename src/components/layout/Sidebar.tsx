@@ -84,7 +84,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen bg-fha-surface border-r border-fha-border sticky top-0">
+    <aside className="hidden md:flex flex-col w-60 h-screen bg-fha-glass backdrop-blur-2xl border-r border-fha-glass-border sticky top-0 z-20 shadow-xl">
       
       {/* Brand */}
       <div className="h-[60px] flex items-center px-6 border-b border-fha-border shrink-0">

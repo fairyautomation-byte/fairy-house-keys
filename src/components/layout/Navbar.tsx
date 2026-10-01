@@ -13,7 +13,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full h-[60px] bg-[#0a0f1a]/85 backdrop-blur-xl border-b border-fha-border">
+      <header className="sticky top-0 z-50 w-full h-[60px] bg-fha-glass backdrop-blur-2xl border-b border-fha-glass-border shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
           
           {/* Logo & Brand */}
@@ -80,7 +80,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="relative w-64 max-w-full bg-fha-surface h-full shadow-2xl flex flex-col p-6 animate-slide-up">
+          <div className="relative w-64 max-w-full bg-fha-glass backdrop-blur-3xl border-l border-fha-glass-border h-full shadow-[0_0_40px_rgba(0,0,0,0.8)] flex flex-col p-6 animate-slide-up">
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="absolute top-4 right-4 p-2 text-fha-text-muted hover:text-fha-text"

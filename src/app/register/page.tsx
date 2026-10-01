@@ -70,8 +70,7 @@ function RegisterContent() {
         </span>
       </Link>
 
-      {/* Main Card */}
-      <div className="w-full max-w-[440px] bg-fha-surface/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.3)] shadow-fha-cyan/5 rounded-fha-radius-lg border border-fha-border overflow-hidden animate-slide-up relative z-10">
+      <div className="w-full max-w-[440px] bg-fha-glass backdrop-blur-2xl shadow-fha-outset rounded-3xl border border-fha-glass-border overflow-hidden animate-slide-up relative z-10">
         <div className="p-8 sm:p-10">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-fha-text mb-2">Tạo tài khoản</h1>
@@ -96,6 +95,11 @@ function RegisterContent() {
               placeholder="Nguyễn Văn A"
               value={form.fullName}
               onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              }
             />
 
             <Input
@@ -105,6 +109,11 @@ function RegisterContent() {
               placeholder="email@example.com"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              }
             />
 
             <Input
@@ -113,11 +122,21 @@ function RegisterContent() {
               placeholder="0912345678"
               value={form.zalo}
               onChange={(e) => setForm({ ...form, zalo: e.target.value })}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              }
             />
 
             <div className="space-y-1.5">
               <label className="text-[13px] font-medium text-fha-text-muted">Mật khẩu *</label>
               <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-fha-text-muted z-10">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -125,12 +144,12 @@ function RegisterContent() {
                   placeholder="••••••••"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full bg-fha-surface-2 border text-fha-text text-sm rounded-fha-radius placeholder-fha-text-faint transition-all focus:outline-none focus:ring-2 focus:ring-fha-cyan focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed pl-3 pr-10 border-fha-border py-2.5"
+                  className="w-full bg-fha-bg border-none shadow-fha-inset text-fha-text text-sm rounded-xl placeholder-fha-text-faint transition-all focus:outline-none focus:ring-1 focus:ring-fha-cyan disabled:opacity-50 disabled:cursor-not-allowed pl-11 pr-11 py-3"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-fha-text-muted hover:text-fha-text focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-fha-text-muted hover:text-fha-text focus:outline-none"
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -143,15 +162,22 @@ function RegisterContent() {
 
             <div className="space-y-1.5 pb-2">
               <label className="text-[13px] font-medium text-fha-text-muted">Xác nhận mật khẩu *</label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                minLength={6}
-                placeholder="••••••••"
-                value={form.confirmPassword}
-                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                className="w-full bg-fha-surface-2 border text-fha-text text-sm rounded-fha-radius placeholder-fha-text-faint transition-all focus:outline-none focus:ring-2 focus:ring-fha-cyan focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed pl-3 pr-3 border-fha-border py-2.5"
-              />
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-fha-text-muted z-10">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                  className="w-full bg-fha-bg border-none shadow-fha-inset text-fha-text text-sm rounded-xl placeholder-fha-text-faint transition-all focus:outline-none focus:ring-1 focus:ring-fha-cyan disabled:opacity-50 disabled:cursor-not-allowed pl-11 pr-4 py-3"
+                />
+              </div>
             </div>
 
             <Button type="submit" variant="primary" fullWidth size="lg" loading={loading}>

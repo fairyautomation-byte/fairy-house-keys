@@ -17,8 +17,7 @@ export default function ActivatePage() {
         </span>
       </Link>
 
-      {/* Main Card */}
-      <div className="w-full max-w-[440px] bg-fha-surface/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.3)] shadow-fha-cyan/5 rounded-fha-radius-lg border border-fha-border overflow-hidden animate-slide-up relative z-10">
+      <div className="w-full max-w-[440px] bg-fha-glass backdrop-blur-2xl shadow-fha-outset rounded-3xl border border-fha-glass-border overflow-hidden animate-slide-up relative z-10">
         <div className="p-8 sm:p-10 text-center">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-4xl mx-auto mb-6 shadow-lg" style={{ boxShadow: '0 0 30px rgba(16,185,129,0.4)' }}>
             ✅

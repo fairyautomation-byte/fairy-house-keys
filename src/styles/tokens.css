@@ -6,6 +6,10 @@
   --fha-surface-3:    #222f45;
   --fha-border:       #1e2d42;
   --fha-border-muted: #162030;
+  
+  /* Glass & Neumorphism */
+  --fha-glass-bg:     rgba(17, 24, 39, 0.45);
+  --fha-glass-border: rgba(255, 255, 255, 0.08);
 
   /* Text */
   --fha-text:         #e2e8f0;
@@ -80,4 +84,8 @@
   --fha-shadow-cyan:   0 0 0 1px var(--fha-cyan-border), 0 4px 16px rgba(0, 180, 216, 0.15);
   --fha-shadow-glow:   0 0 20px rgba(0, 180, 216, 0.2);
   --fha-shadow-focus:  0 0 0 3px rgba(0, 180, 216, 0.35);
+
+  /* Neumorphism Shadows */
+  --fha-shadow-inset:  inset 3px 3px 6px rgba(0, 0, 0, 0.6), inset -1px -1px 4px rgba(255, 255, 255, 0.04);
+  --fha-shadow-outset: 5px 5px 10px rgba(0, 0, 0, 0.5), -1px -1px 3px rgba(255, 255, 255, 0.05);
 }

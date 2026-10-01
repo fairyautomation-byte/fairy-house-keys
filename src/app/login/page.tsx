@@ -75,8 +75,7 @@ function LoginContent() {
         </span>
       </Link>
 
-      {/* Main Card */}
-      <div className="w-full max-w-[440px] bg-fha-surface/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.3)] shadow-fha-cyan/5 rounded-fha-radius-lg border border-fha-border overflow-hidden animate-slide-up relative z-10">
+      <div className="w-full max-w-[440px] bg-fha-glass backdrop-blur-2xl shadow-fha-outset rounded-3xl border border-fha-glass-border overflow-hidden animate-slide-up relative z-10">
         <div className="p-8 sm:p-10">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-fha-text mb-2">Đăng nhập</h1>
@@ -127,7 +126,7 @@ function LoginContent() {
                   placeholder="••••••••"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full bg-fha-surface-2 border text-fha-text text-sm rounded-fha-radius placeholder-fha-text-faint transition-all focus:outline-none focus:ring-2 focus:ring-fha-cyan focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed pl-10 pr-10 border-fha-border py-2.5"
+                  className="w-full bg-fha-bg border-none shadow-fha-inset text-fha-text text-sm rounded-xl placeholder-fha-text-faint transition-all focus:outline-none focus:ring-1 focus:ring-fha-cyan disabled:opacity-50 disabled:cursor-not-allowed pl-11 pr-11 py-3"
                 />
                 <button
                   type="button"

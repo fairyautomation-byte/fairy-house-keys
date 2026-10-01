@@ -53,39 +53,39 @@ export default function Home() {
 
           {/* CSS Mockup Visual */}
           <div className="mt-20 relative mx-auto max-w-4xl">
-            <div className="rounded-xl border border-fha-border bg-fha-surface shadow-2xl overflow-hidden flex flex-col items-center">
-              <div className="w-full h-10 bg-fha-surface-2 border-b border-fha-border flex items-center px-4 gap-2">
+            <div className="rounded-2xl border border-fha-glass-border bg-fha-glass backdrop-blur-xl shadow-fha-outset overflow-hidden flex flex-col items-center">
+              <div className="w-full h-10 bg-fha-bg/80 border-b border-fha-glass-border flex items-center px-4 gap-2">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                  <div className="w-3 h-3 rounded-full shadow-fha-outset bg-red-500/80"></div>
+                  <div className="w-3 h-3 rounded-full shadow-fha-outset bg-amber-500/80"></div>
+                  <div className="w-3 h-3 rounded-full shadow-fha-outset bg-emerald-500/80"></div>
                 </div>
-                <div className="flex-1 ml-4 bg-fha-surface h-6 rounded border border-fha-border flex items-center px-3 justify-center text-[11px] text-fha-text-faint font-mono">
+                <div className="flex-1 ml-4 bg-fha-bg shadow-fha-inset h-6 rounded-xl border-none flex items-center px-3 justify-center text-[11px] text-fha-text-faint font-mono">
                   facebook.com/groups/target
                 </div>
-                <div className="w-8 h-6 bg-fha-cyan/10 border border-fha-cyan/30 rounded flex items-center justify-center text-fha-cyan text-[10px] font-bold">FH</div>
+                <div className="w-8 h-6 bg-fha-cyan shadow-fha-outset rounded flex items-center justify-center text-[#0a0f1a] text-[10px] font-bold">FH</div>
               </div>
-              <div className="w-full aspect-[16/9] bg-fha-bg relative flex flex-col p-8">
+              <div className="w-full aspect-[16/9] relative flex flex-col p-8">
                 {/* Fake UI */}
-                <div className="flex justify-between items-center mb-8 border-b border-fha-border pb-4">
-                  <div className="w-48 h-6 bg-fha-surface-2 rounded"></div>
-                  <div className="w-24 h-8 bg-fha-cyan rounded"></div>
+                <div className="flex justify-between items-center mb-8 border-b border-fha-glass-border pb-4">
+                  <div className="w-48 h-6 bg-fha-surface/40 rounded-xl"></div>
+                  <div className="w-24 h-8 bg-fha-cyan shadow-fha-outset rounded-full"></div>
                 </div>
                 <div className="flex gap-6 flex-1">
-                  <div className="w-64 bg-fha-surface-2 rounded border border-fha-border p-4 flex flex-col gap-4">
-                    <div className="w-full h-8 bg-fha-surface rounded"></div>
-                    <div className="w-3/4 h-4 bg-fha-surface rounded"></div>
-                    <div className="w-1/2 h-4 bg-fha-surface rounded"></div>
+                  <div className="w-64 bg-fha-surface/30 rounded-2xl border border-fha-glass-border shadow-fha-outset p-4 flex flex-col gap-4">
+                    <div className="w-full h-8 bg-fha-bg shadow-fha-inset rounded-xl"></div>
+                    <div className="w-3/4 h-4 bg-fha-surface/40 rounded"></div>
+                    <div className="w-1/2 h-4 bg-fha-surface/40 rounded"></div>
                   </div>
                   <div className="flex-1 flex flex-col gap-4">
                     {[1,2,3,4].map(i => (
-                      <div key={i} className="w-full h-16 bg-fha-surface rounded border border-fha-border flex items-center px-4 gap-4">
-                        <div className="w-10 h-10 rounded-full bg-fha-surface-2"></div>
+                      <div key={i} className="w-full h-16 bg-fha-surface/30 rounded-2xl border border-fha-glass-border shadow-fha-outset flex items-center px-4 gap-4">
+                        <div className="w-10 h-10 rounded-full bg-fha-surface/50 shadow-fha-inset"></div>
                         <div className="flex-1 flex flex-col gap-2">
-                          <div className="w-32 h-3 bg-fha-surface-2 rounded"></div>
-                          <div className="w-24 h-2 bg-fha-surface-2 rounded"></div>
+                          <div className="w-32 h-3 bg-fha-surface/40 rounded"></div>
+                          <div className="w-24 h-2 bg-fha-surface/40 rounded"></div>
                         </div>
-                        <div className="w-20 h-6 bg-fha-success-bg border border-fha-success-border rounded"></div>
+                        <div className="w-20 h-6 bg-fha-success-bg border border-fha-success-border rounded-full shadow-fha-outset"></div>
                       </div>
                     ))}
                   </div>

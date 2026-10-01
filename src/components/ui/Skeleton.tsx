@@ -6,6 +6,6 @@ interface SkeletonProps {
 
 export default function Skeleton({ className = '' }: SkeletonProps) {
   return (
-    <div className={`bg-fha-surface-2 animate-shimmer rounded-fha-radius ${className}`} />
+    <div className={`bg-fha-surface/40 animate-shimmer rounded-xl ${className}`} />
   );
 }

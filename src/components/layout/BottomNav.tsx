@@ -56,7 +56,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 h-[60px] bg-fha-surface border-t border-fha-border z-50 px-2 pb-safe flex justify-around items-center">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 h-[60px] bg-fha-glass backdrop-blur-2xl border-t border-fha-glass-border z-50 px-2 pb-safe flex justify-around items-center">
       {navItems.map((item) => {
         const isActive = item.href === '/dashboard' 
           ? pathname === item.href 

@@ -123,8 +123,7 @@ function VerifyOTPContent() {
         </span>
       </Link>
 
-      {/* Main Card */}
-      <div className="w-full max-w-[440px] bg-fha-surface/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.3)] shadow-fha-cyan/5 rounded-fha-radius-lg border border-fha-border overflow-hidden animate-slide-up relative z-10">
+      <div className="w-full max-w-[440px] bg-fha-glass backdrop-blur-2xl shadow-fha-outset rounded-3xl border border-fha-glass-border overflow-hidden animate-slide-up relative z-10">
         <div className="p-8 sm:p-10">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-fha-text mb-2">Xác thực Email</h1>

@@ -29,10 +29,10 @@ export default function Button({
   };
 
   const variantStyles = {
-    primary: 'bg-fha-cyan text-white shadow-fha-cyan hover:bg-fha-cyan-hover hover:shadow-fha-glow active:bg-fha-cyan-deep',
-    secondary: 'bg-fha-surface-3 text-fha-text border border-fha-border hover:bg-fha-surface-2',
-    ghost: 'bg-transparent text-fha-text hover:bg-fha-surface-3',
-    danger: 'bg-fha-error text-white hover:bg-red-600',
+    primary: 'bg-fha-cyan text-[#0a0f1a] shadow-fha-outset hover:bg-fha-cyan-hover hover:brightness-110 active:shadow-fha-inset active:translate-y-[2px]',
+    secondary: 'bg-fha-surface-2 text-fha-text shadow-fha-outset hover:bg-fha-surface-3 active:shadow-fha-inset active:translate-y-[2px]',
+    ghost: 'bg-transparent text-fha-text hover:bg-fha-glass active:bg-fha-surface-3',
+    danger: 'bg-fha-error text-white shadow-fha-outset hover:bg-red-600 active:shadow-fha-inset active:translate-y-[2px]',
     link: 'bg-transparent text-fha-cyan hover:underline p-0'
   };
 
