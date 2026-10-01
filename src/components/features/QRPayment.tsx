@@ -174,9 +174,14 @@ export default function QRPayment({
           )}
 
           {displayState === 'success' && (
-            <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
-              Vào Trang Quản Lý
-            </Button>
+            <div className="w-full space-y-3">
+              <p className="text-[13px] text-fha-text-muted text-center animate-pulse">
+                Giao dịch hoàn tất. Tự động quay về Trang Quản Lý sau 10 giây...
+              </p>
+              <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
+                Vào Trang Quản Lý
+              </Button>
+            </div>
           )}
         </div>
 
