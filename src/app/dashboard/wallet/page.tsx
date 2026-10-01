@@ -57,13 +57,27 @@ export default function WalletPage() {
         throw new Error(data.error || 'Lỗi tạo mã QR');
       }
 
+      // Map popular BINs to Bank Names
+      const bankNames: Record<string, string> = {
+        '970422': 'MB Bank',
+        '970436': 'Vietcombank',
+        '970415': 'VietinBank',
+        '970418': 'BIDV',
+        '970407': 'Techcombank',
+        '970423': 'TPBank',
+        '970432': 'VPBank',
+        '970403': 'Sacombank',
+      };
+      
+      const niceBankName = bankNames[data.bin] || data.bin;
+
       // Convert QR code data from PayOS
       setTransactionInfo({
         amount: data.amount,
         transactionCode: data.orderCode.toString(),
         qrUrl: `https://img.vietqr.io/image/${data.bin}-${data.accountNumber}-compact2.jpg?amount=${data.amount}&addInfo=${data.description}&accountName=${encodeURIComponent(data.accountName)}`,
         bankInfo: {
-          bankName: data.bin,
+          bankName: niceBankName,
           accountNumber: data.accountNumber,
           accountName: data.accountName
         },
