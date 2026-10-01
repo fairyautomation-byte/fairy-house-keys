@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { generateKey, KEY_DURATIONS, KEY_SCAN_LIMITS, KeyType } from '@/lib/key-generator';
+import { generateKey, KeyType } from '@/lib/key-generator';
 import { isAdminAuthenticated } from '@/lib/auth';
 import { sendKeyToCustomer } from '@/lib/mailer';
 
@@ -25,11 +25,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     const keyType = order.plan_id as KeyType;
+    
+    // Lấy thông tin gói từ Firebase
+    const planDoc = await db.collection('plans').doc(keyType).get();
+    if (!planDoc.exists) {
+      return NextResponse.json({ error: 'Gói cước không tồn tại hoặc đã bị xóa' }, { status: 400 });
+    }
+    const planData = planDoc.data()!;
+    const durationDays = planData.duration;
+    const scanLimit = planData.scanLimit;
+
     const licenseKey = generateKey();
     
     const expiresAt = new Date();
-    if (KEY_DURATIONS[keyType]) {
-      expiresAt.setDate(expiresAt.getDate() + KEY_DURATIONS[keyType]!);
+    if (durationDays !== null) {
+      expiresAt.setDate(expiresAt.getDate() + durationDays);
     }
 
     const newLicense = {
@@ -39,8 +49,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       status: 'ACTIVE',
       created_at: new Date(),
       activated_at: new Date(),
-      expires_at: KEY_DURATIONS[keyType] ? expiresAt : null,
-      daily_limit: KEY_SCAN_LIMITS[keyType],
+      expires_at: durationDays !== null ? expiresAt : null,
+      daily_limit: scanLimit,
       daily_used: 0,
       total_scans: 0,
       last_reset_date: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' })
@@ -64,7 +74,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           email: userData.email || '',
           key: licenseKey,
           packageType: keyType,
-          expiresAt: KEY_DURATIONS[keyType] ? expiresAt : null
+          expiresAt: durationDays !== null ? expiresAt : null
         });
       } catch (err) {
         console.error('Email send failed:', err);

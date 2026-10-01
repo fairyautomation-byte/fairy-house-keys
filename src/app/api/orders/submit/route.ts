@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { generateKey, KEY_DURATIONS, KEY_SCAN_LIMITS, KEY_PRICES, KeyType } from '@/lib/key-generator';
+import { generateKey, KeyType } from '@/lib/key-generator';
 import { sendAdminNotification, sendCustomerConfirmation, sendKeyToCustomer } from '@/lib/mailer';
 
 export async function POST(req: NextRequest) {
@@ -25,6 +25,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Lấy thông tin gói từ Firebase
+    const planDoc = await db.collection('plans').doc(keyType).get();
+    if (!planDoc.exists) {
+      return NextResponse.json({ error: 'Gói không tồn tại' }, { status: 400 });
+    }
+    const planData = planDoc.data()!;
+    if (planData.active === false) {
+      return NextResponse.json({ error: 'Gói cước đã ngừng bán' }, { status: 400 });
+    }
+    const price = planData.price;
+    const durationDays = planData.duration;
+    const scanLimit = planData.scanLimit;
+
     const userData = userDoc.data()!;
 
     if (!userData.email_verified) {
@@ -42,7 +55,9 @@ export async function POST(req: NextRequest) {
       // Auto create trial license
       const licenseKey = generateKey();
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + (KEY_DURATIONS.trial || 3));
+      if (durationDays !== null) {
+        expiresAt.setDate(expiresAt.getDate() + durationDays);
+      }
 
       const newLicense = {
         license_key: licenseKey,
@@ -51,8 +66,8 @@ export async function POST(req: NextRequest) {
         status: 'ACTIVE',
         created_at: new Date(),
         activated_at: new Date(),
-        expires_at: expiresAt,
-        daily_limit: KEY_SCAN_LIMITS.trial,
+        expires_at: durationDays !== null ? expiresAt : null,
+        daily_limit: scanLimit,
         daily_used: 0,
         total_scans: 0,
         last_reset_date: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }) // YYYY-MM-DD
@@ -106,7 +121,7 @@ export async function POST(req: NextRequest) {
         transaction_code: transactionCode,
         user_id: user.uid,
         plan_id: keyType,
-        amount: KEY_PRICES[keyType],
+        amount: price,
         status: 'PENDING_PAYMENT_REVIEW',
         created_at: now,
       };
@@ -140,7 +155,7 @@ export async function POST(req: NextRequest) {
         ok: true, 
         orderId: orderRef.id, 
         transactionCode, 
-        amount: KEY_PRICES[keyType] 
+        amount: price 
       });
     }
   } catch (err) {

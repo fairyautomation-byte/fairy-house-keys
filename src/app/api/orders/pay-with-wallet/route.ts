@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { generateKey, KEY_DURATIONS, KEY_SCAN_LIMITS, KEY_PRICES, KeyType } from '@/lib/key-generator';
+import { generateKey, KeyType } from '@/lib/key-generator';
 import { sendKeyToCustomer } from '@/lib/mailer';
 
 export async function POST(req: NextRequest) {
@@ -26,7 +26,21 @@ export async function POST(req: NextRequest) {
     }
 
     const keyType = planId as KeyType;
-    const price = KEY_PRICES[keyType];
+    
+    // Đọc thông tin gói cước từ Firebase thay vì gắn cứng (Hacker mindset)
+    const planDoc = await db.collection('plans').doc(keyType).get();
+    if (!planDoc.exists) {
+      return NextResponse.json({ error: 'Gói cước không tồn tại' }, { status: 400 });
+    }
+    const planData = planDoc.data()!;
+    if (planData.active === false) {
+      return NextResponse.json({ error: 'Gói cước đã ngừng bán' }, { status: 400 });
+    }
+    
+    const price = planData.price;
+    const durationDays = planData.duration; // nullable
+    const scanLimit = planData.scanLimit;
+
     const userRef = db.collection('users').doc(user.uid);
 
     let licenseKey = '';
@@ -53,8 +67,8 @@ export async function POST(req: NextRequest) {
       // 3.3. Tạo License Key
       licenseKey = generateKey();
       const expiresAt = new Date();
-      if (KEY_DURATIONS[keyType]) {
-        expiresAt.setDate(expiresAt.getDate() + KEY_DURATIONS[keyType]!);
+      if (durationDays !== null) {
+        expiresAt.setDate(expiresAt.getDate() + durationDays);
       }
 
       const newLicense = {
@@ -64,8 +78,8 @@ export async function POST(req: NextRequest) {
         status: 'ACTIVE',
         created_at: new Date(),
         activated_at: new Date(),
-        expires_at: KEY_DURATIONS[keyType] ? expiresAt : null,
-        daily_limit: KEY_SCAN_LIMITS[keyType],
+        expires_at: durationDays !== null ? expiresAt : null,
+        daily_limit: scanLimit,
         daily_used: 0,
         total_scans: 0,
         last_reset_date: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' })
@@ -94,9 +108,9 @@ export async function POST(req: NextRequest) {
     // 4. Lấy lại thông tin user để gửi Email (Không cho vào transaction để tránh kẹt nếu gửi mail lâu)
     const finalUserDoc = await userRef.get();
     const finalUserData = finalUserDoc.data()!;
-    const expiresAt = new Date();
-    if (KEY_DURATIONS[keyType]) {
-      expiresAt.setDate(expiresAt.getDate() + KEY_DURATIONS[keyType]!);
+    const expiresAtFinal = new Date();
+    if (durationDays !== null) {
+      expiresAtFinal.setDate(expiresAtFinal.getDate() + durationDays);
     }
 
     try {
@@ -105,7 +119,7 @@ export async function POST(req: NextRequest) {
         email: user.email || finalUserData.email || '',
         key: licenseKey,
         packageType: keyType,
-        expiresAt: KEY_DURATIONS[keyType] ? expiresAt : null
+        expiresAt: durationDays !== null ? expiresAtFinal : null
       });
     } catch (err) {
       console.error('Email send failed:', err);
