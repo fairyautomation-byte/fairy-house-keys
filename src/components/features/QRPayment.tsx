@@ -175,7 +175,7 @@ export default function QRPayment({
 
           {displayState === 'success' && (
             <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
-              Vào Dashboard
+              Vào Trang Quản Lý
             </Button>
           )}
         </div>

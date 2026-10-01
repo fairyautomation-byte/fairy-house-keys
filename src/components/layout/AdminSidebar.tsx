@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Button from '../ui/Button';
 import { useToast } from '../ui/ToastProvider';
@@ -69,9 +70,7 @@ export default function AdminSidebar() {
       {/* Brand */}
       <div className="h-[60px] flex items-center px-6 border-b border-fha-border shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] shrink-0">
-            A
-          </div>
+          <Image src="/logo.png" alt="Admin Logo" width={32} height={32} className="rounded-full shadow-[0_0_15px_rgba(245,158,11,0.3)] shrink-0" />
           <span className="font-bold text-sm tracking-tight text-fha-text truncate">
             Admin Portal
           </span>

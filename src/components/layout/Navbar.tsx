@@ -19,9 +19,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fha-cyan to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-fha-cyan">
-                FH
-              </div>
+              <Image src="/logo.png" alt="Fairy House Logo" width={32} height={32} className="rounded-full shadow-fha-cyan" />
               <span className="font-bold text-base tracking-tight text-fha-text hidden sm:block">
                 Fairy House <span className="text-fha-cyan">AutoData</span>
               </span>
@@ -45,7 +43,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
           <div className="hidden md:flex items-center gap-3">
             {isLoggedIn ? (
               <Link href="/dashboard" passHref>
-                <Button variant="primary" size="sm">Vào Dashboard</Button>
+                <Button variant="primary" size="sm">Vào Trang Quản Lý</Button>
               </Link>
             ) : (
               <>
@@ -105,7 +103,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
               <div className="flex flex-col gap-3">
                 {isLoggedIn ? (
                   <Link href="/dashboard" passHref>
-                    <Button variant="primary" fullWidth onClick={() => setMobileMenuOpen(false)}>Vào Dashboard</Button>
+                    <Button variant="primary" fullWidth onClick={() => setMobileMenuOpen(false)}>Vào Trang Quản Lý</Button>
                   </Link>
                 ) : (
                   <>

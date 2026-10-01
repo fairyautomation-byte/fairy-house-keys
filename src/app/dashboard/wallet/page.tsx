@@ -141,7 +141,7 @@ export default function WalletPage() {
                     key={amt}
                     type="button"
                     onClick={() => setDepositAmount(amt.toLocaleString('vi-VN'))}
-                    className="flex-1 py-1.5 rounded-md border border-fha-border bg-fha-surface hover:bg-fha-surface-3 hover:border-fha-cyan-border text-[11px] font-medium text-fha-text transition-colors"
+                    className="flex-1 py-1.5 rounded-full border border-fha-border bg-fha-surface hover:bg-fha-surface-3 hover:border-fha-cyan-border text-[11px] font-medium text-fha-text transition-colors"
                   >
                     {amt.toLocaleString('vi-VN')}
                   </button>

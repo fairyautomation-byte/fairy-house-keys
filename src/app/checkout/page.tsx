@@ -241,8 +241,8 @@ function CheckoutContent() {
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21.144 10.457c0-4.63-4.225-8.457-9.457-8.457-5.232 0-9.457 3.827-9.457 8.457 0 4.629 4.225 8.457 9.457 8.457 1.157 0 2.257-.184 3.284-.523l3.655 2.115c.348.201.769-.074.721-.476l-.422-3.159c1.65-1.579 2.676-3.834 2.676-6.414z"/></svg>
                     Gửi biên lai Zalo
                   </a>
-                  <button onClick={() => router.push('/dashboard')} className="flex items-center justify-center px-4 py-3.5 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 hover:text-white transition-all border border-slate-600">
-                    Trở về Dashboard
+                  <button onClick={() => router.push('/dashboard')} className="flex items-center justify-center px-4 py-3.5 rounded-full bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 hover:text-white transition-all border border-slate-600">
+                    Trở về Trang Quản Lý
                   </button>
                 </div>
 
