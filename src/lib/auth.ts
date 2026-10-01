@@ -25,8 +25,8 @@ export async function isAdminAuthenticated(req: NextRequest): Promise<boolean> {
 }
 
 export function validateAdminCredentials(username: string, password: string): boolean {
-  const validUsername = process.env.ADMIN_USERNAME || 'admin';
-  const validPassword = process.env.ADMIN_PASSWORD || 'fairy_house_admin_2026!';
+  const validUsername = process.env.ADMIN_USERNAME || '';
+  const validPassword = process.env.ADMIN_PASSWORD || '';
   return username === validUsername && password === validPassword;
 }
 

@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback-secret-change-this-to-64-chars-in-prod'
+  process.env.JWT_SECRET || ''
 );
 
 export async function signToken(payload: any, expiresIn: string = '7d'): Promise<string> {

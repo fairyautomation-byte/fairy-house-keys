@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import * as crypto from 'crypto';
 
 function hashPassword(password: string) {
-  return crypto.createHash('sha256').update(password + (process.env.KEY_SECRET_SALT || 'salt')).digest('hex');
+  return crypto.createHash('sha256').update(password + (process.env.KEY_SECRET_SALT || '')).digest('hex');
 }
 
 function getClientIp(req: NextRequest): string {

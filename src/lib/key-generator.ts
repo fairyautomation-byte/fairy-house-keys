@@ -86,7 +86,7 @@ function generateRandomPart(length: number): string {
 }
 
 function generateChecksum(type: string, random: string): string {
-  const salt = process.env.KEY_SECRET_SALT || 'zt-default-salt-2024';
+  const salt = process.env.KEY_SECRET_SALT || '';
   const hash = crypto.createHash('sha256').update(`${type}${random}${salt}`).digest('hex');
   return hash.substring(0, 4).toUpperCase();
 }
