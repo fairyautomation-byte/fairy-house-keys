@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
     // Bước 1: Xác thực chữ ký từ PayOS (chống giả mạo webhook)
     const webhookData = payos.verifyPaymentWebhookData(body);
 
-    const { orderCode, amount } = webhookData.data;
-    const isSuccess = webhookData.code === '00' && webhookData.success === true;
+    const { orderCode, amount } = webhookData;
+    const isSuccess = webhookData.code === '00';
 
     if (!isSuccess) {
       // Giao dịch thất bại - không cần xử lý
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       tx.update(orderDoc.ref, {
         status: 'PAID',
         paid_at: new Date(),
-        reference: webhookData.data.reference || '',
+        reference: webhookData.reference || '',
       });
 
       // Ghi lịch sử giao dịch vào collection 'orders' hiện có
