@@ -127,3 +127,12 @@ input, textarea, select, button {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* Fix browser autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: var(--fha-text) !important;
+    caret-color: var(--fha-text) !important;
+}

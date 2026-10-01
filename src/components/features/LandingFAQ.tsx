@@ -5,7 +5,7 @@ const faqs = [
   { q: 'Trial có hoàn toàn miễn phí không?', a: 'Chắc chắn rồi. Gói Trial hoàn toàn miễn phí trong 3 ngày với hạn mức 100 lượt scan/ngày để bạn trải nghiệm sức mạnh của Extension.' },
   { q: 'Sau khi thanh toán tôi phải làm gì?', a: 'Sau khi thanh toán qua QR code, hệ thống sẽ tự động duyệt đơn của bạn trong vòng vài giây đến vài phút và kích hoạt key ngay lập tức.' },
   { q: 'Khi hết lượt scan trong ngày thì sao?', a: 'Hệ thống sẽ tạm dừng quét và tự động cấp lại đầy đủ số lượt scan mới vào lúc 00:00 (giờ Việt Nam) ngày hôm sau.' },
-  { q: 'Tôi có thể mua nhiều gói để cộng dồn không?', a: 'Hiện tại mỗi tài khoản chỉ áp dụng 1 gói License duy nhất tại 1 thời điểm. Bạn có thể gia hạn khi gói cũ gần hết.' }
+  { q: 'Tôi có thể mua nhiều Key cùng lúc không?', a: 'Hệ thống hiện tại cấp phát Key độc lập cho mỗi lần mua. Bạn có thể mua nhiều Key để sử dụng cho nhiều thiết bị hoặc nhân viên khác nhau. Khi Key cũ hết hạn, bạn chỉ cần mua Key mới và nhập vào Extension.' }
 ];
 
 export default function LandingFAQ() {

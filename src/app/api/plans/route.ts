@@ -23,7 +23,7 @@ export async function GET() {
           scanLimit: KEY_SCAN_LIMITS[type],
           features: [
             'Truy cập đầy đủ tính năng Extension',
-            'Cập nhật dữ liệu BĐS theo thời gian thực',
+            'Cập nhật dữ liệu theo thời gian thực',
             'Hỗ trợ kỹ thuật 24/7',
             'Bảo mật dữ liệu tuyệt đối'
           ],
@@ -64,7 +64,7 @@ export async function GET() {
         price: p.price,
         duration: durationText,
         scanLimit: scanLimitText,
-        features: p.features || [],
+        features: (p.features || []).map((f: string) => f.replace('BĐS ', '')),
         popular: p.badge === 'PHỔ BIẾN'
       };
     });
