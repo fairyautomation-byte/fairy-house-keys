@@ -5,9 +5,7 @@ export default function ActivatePage() {
   return (
     <div className="min-h-screen bg-fha-bg flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Background Aurora Effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fha-cyan rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
 
       {/* Logo */}
       <Link href="/" className="mb-8 flex items-center gap-3 relative z-10 hover:scale-105 transition-transform">
