@@ -36,7 +36,7 @@ export async function GET() {
         };
         
         batch.set(plansRef.doc(type), planData);
-        if (planData.active && type !== 'trial') { // Giấu gói trial trên cửa hàng
+        if (planData.active) {
           plans.push(planData);
         }
       }
@@ -45,7 +45,7 @@ export async function GET() {
       // Đọc từ Firebase
       snapshot.forEach((doc: any) => {
         const data = doc.data();
-        if (data.active !== false && data.id !== 'trial') { // Hide inactive and trial
+        if (data.active !== false) { // Hide inactive
           plans.push(data);
         }
       });

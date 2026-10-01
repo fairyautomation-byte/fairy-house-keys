@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { planId } = await req.json();
-    if (!['monthly', 'quarterly', 'yearly'].includes(planId)) {
+    if (!['trial', 'monthly', 'quarterly', 'yearly'].includes(planId)) {
       return NextResponse.json({ error: 'Gói dịch vụ không hợp lệ' }, { status: 400 });
     }
 
@@ -56,13 +56,23 @@ export async function POST(req: NextRequest) {
       const userData = userDoc.data()!;
       const currentBalance = userData.wallet_balance || 0;
 
-      // 3.1. Kiểm tra số dư nghiêm ngặt tại Backend
-      if (currentBalance < price) {
+      // 3.1. Kiểm tra điều kiện mua (số dư, trial_used)
+      if (keyType === 'trial') {
+        if (userData.trial_used) {
+          throw new Error('TRIAL_ALREADY_USED');
+        }
+      } else if (currentBalance < price) {
         throw new Error('INSUFFICIENT_FUNDS');
       }
 
-      // 3.2. Trừ tiền
-      tx.update(userRef, { wallet_balance: currentBalance - price });
+      // 3.2. Trừ tiền (và đánh dấu trial_used nếu là gói trial)
+      const updates: any = {};
+      if (keyType === 'trial') {
+        updates.trial_used = true;
+      } else {
+        updates.wallet_balance = currentBalance - price;
+      }
+      tx.update(userRef, updates);
 
       // 3.3. Tạo License Key
       licenseKey = generateKey();
@@ -131,6 +141,9 @@ export async function POST(req: NextRequest) {
     console.error('Pay with wallet error:', err);
     if (err.message === 'INSUFFICIENT_FUNDS') {
       return NextResponse.json({ error: 'Số dư không đủ, vui lòng nạp thêm.' }, { status: 400 });
+    }
+    if (err.message === 'TRIAL_ALREADY_USED') {
+      return NextResponse.json({ error: 'Mỗi tài khoản chỉ được đăng ký gói Dùng thử 1 lần duy nhất.' }, { status: 403 });
     }
     return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
   }
