@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     let transactionCodeStr = '';
 
     // 3. Thực hiện giao dịch Nguyên tử (Atomic Transaction) để chống gian lận đa luồng
-    await db.runTransaction(async (tx) => {
+    await db.runTransaction(async (tx: any) => {
       const userDoc = await tx.get(userRef);
       if (!userDoc.exists) {
         throw new Error('User not found');
