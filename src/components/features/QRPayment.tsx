@@ -64,7 +64,7 @@ export default function QRPayment({
           )}
 
           {state === 'pending' && qrUrl && (
-            <Image src={qrUrl} alt="QR Code" fill className="object-contain p-2" unoptimized />
+            <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain p-2" />
           )}
 
           {state === 'checking' && (
