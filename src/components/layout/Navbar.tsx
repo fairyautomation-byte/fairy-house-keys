@@ -14,9 +14,9 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   return (
     <>
       {/* Top Announcement Ribbon */}
-      <aside aria-label="Thông báo cập nhật" className="w-full bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] py-1.5 px-4 text-center">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-center gap-2 text-xs font-medium text-[var(--fha-text-muted)]">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] font-bold text-[10px] uppercase tracking-wider">
+      <aside aria-label="Thông báo cập nhật" className="w-full bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] py-1.5 px-3 sm:px-4 text-center">
+        <div className="max-w-[1200px] mx-auto flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium text-[var(--fha-text-muted)] text-center leading-relaxed">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] font-bold text-[10px] uppercase tracking-wider shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--fha-brand)] animate-pulse" />
             V2.0 Live
           </span>

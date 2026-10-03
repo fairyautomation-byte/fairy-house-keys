@@ -99,10 +99,10 @@ export default function Home() {
             </div>
 
             {/* Right Column (40%): Live Extension Interactive Simulator */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative">
-                {/* Decorative background glow */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-[var(--fha-brand-soft)] to-transparent rounded-2xl opacity-60 blur-xl pointer-events-none" />
+            <div className="lg:col-span-5 relative w-full overflow-hidden sm:overflow-visible">
+              <div className="relative w-full max-w-[500px] mx-auto">
+                {/* Decorative background glow - hidden on mobile to prevent horizontal overflow */}
+                <div className="hidden sm:block absolute -inset-4 bg-gradient-to-r from-[var(--fha-brand-soft)] to-transparent rounded-2xl opacity-60 blur-xl pointer-events-none" />
                 <LiveExtensionPreview />
               </div>
             </div>
