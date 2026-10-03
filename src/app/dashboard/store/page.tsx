@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
-import PlanCard, { Plan } from '@/components/features/PlanCard';
+import { Plan } from '@/components/features/PlanCard';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Skeleton from '@/components/ui/Skeleton';
@@ -25,7 +26,7 @@ export default function StorePage() {
       fetch('/api/user/dashboard').then(res => res.json())
     ])
     .then(([plansData, userData]) => {
-      setPlans(Array.isArray(plansData) ? plansData : []); // Ensure array
+      setPlans(Array.isArray(plansData) ? plansData : []);
       setWalletBalance(userData.user?.wallet_balance || 0);
       setLoading(false);
     })
@@ -34,12 +35,9 @@ export default function StorePage() {
     });
   }, []);
 
-  const handleSelect = (id: string) => {
-    const plan = plans.find(p => p.id === id);
-    if (plan) {
-      setSelectedPlan(plan);
-      setShowConfirmModal(true);
-    }
+  const handleSelect = (plan: Plan) => {
+    setSelectedPlan(plan);
+    setShowConfirmModal(true);
   };
 
   const handlePurchase = async () => {
@@ -66,8 +64,8 @@ export default function StorePage() {
       }
 
       setShowConfirmModal(false);
-      success(`Đã mua thành công! Key đã được gửi vào email.`);
-      setWalletBalance(data.newBalance); // Sync balance exactly as backend calculated
+      success(`Đã mua thành công! Key đã được tạo và lưu vào mục License Của Tôi.`);
+      setWalletBalance(data.newBalance);
     } catch (err: any) {
       error(err.message || 'Lỗi kết nối tới máy chủ.');
     } finally {
@@ -78,9 +76,9 @@ export default function StorePage() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="h-16 bg-white border border-[var(--fha-border)] rounded-fha-lg animate-pulse" />
+        <Skeleton className="h-16 w-full rounded-fha-lg" />
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-[400px] w-full rounded-fha-lg" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-[420px] w-full rounded-fha-lg" />)}
         </div>
       </div>
     );
@@ -89,72 +87,157 @@ export default function StorePage() {
   return (
     <div className="space-y-8">
       <PageHeader 
-        title="Cửa Hàng Key" 
-        description="Mua license key để sử dụng dịch vụ trên thiết bị của bạn"
+        title="Cửa Hàng License Bản Quyền" 
+        description="Lựa chọn gói cước phù hợp với quy mô quét data và tiếp cận khách hàng của bạn"
         actions={
-          <div className="text-[14px] px-4 py-2.5 bg-white border border-[var(--fha-border)] rounded-fha flex items-center gap-2 shadow-sm">
-            <span className="text-[var(--fha-text-muted)] font-medium">Số dư ví:</span>
-            <span className="font-bold font-mono text-[var(--fha-brand)] tracking-tight">{formatCurrency(walletBalance)}</span>
+          <div className="flex items-center gap-3">
+            <div className="text-xs px-3.5 py-2 bg-white border border-[var(--fha-border)] rounded-fha flex items-center gap-2 shadow-sm">
+              <span className="text-[var(--fha-text-muted)] font-medium">Số dư khả dụng:</span>
+              <span className="font-bold font-mono text-[var(--fha-brand)] text-sm">{formatCurrency(walletBalance)}</span>
+            </div>
+            <Link href="/dashboard/wallet" passHref>
+              <Button variant="secondary" size="sm">
+                + Nạp Ví PayOS
+              </Button>
+            </Link>
           </div>
         }
       />
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {plans.map((plan) => (
-          <PlanCard 
-            key={plan.id}
-            plan={plan}
-            onSelect={handleSelect}
-          />
-        ))}
-        {plans.length === 0 && (
-          <div className="col-span-full py-12 text-center text-[var(--fha-text-muted)] font-medium text-sm border border-dashed border-[var(--fha-border-strong)] bg-[var(--fha-surface-2)] rounded-fha-lg">
-            Hiện chưa có gói cước nào được cấu hình
-          </div>
-        )}
+      {/* Plan Matrix */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        {plans.map((plan) => {
+          const isPopular = plan.popular || plan.id === 'quarterly';
+          const canAfford = walletBalance >= plan.price;
+
+          return (
+            <div
+              key={plan.id}
+              className={`rounded-fha-lg border-2 p-6 flex flex-col justify-between transition-all bg-white relative ${
+                isPopular 
+                  ? 'border-[var(--fha-brand)] shadow-fha-md scale-[1.02] z-10' 
+                  : 'border-[var(--fha-border)] hover:border-[var(--fha-border-strong)] shadow-fha-sm'
+              }`}
+            >
+              {isPopular && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[var(--fha-brand)] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full shadow-sm">
+                  Khuyên Dùng
+                </div>
+              )}
+
+              <div>
+                <div className="mb-4">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--fha-text-muted)]">
+                    {plan.id === 'trial' ? 'Khám Phá' : plan.id === 'monthly' ? 'Chuẩn' : plan.id === 'quarterly' ? 'Tiết Kiệm 40%' : 'Doanh Nghiệp'}
+                  </span>
+                  <h3 className="text-xl font-bold text-[var(--fha-text)] mt-1">
+                    {plan.name}
+                  </h3>
+                </div>
+
+                <div className="mb-6 pb-5 border-b border-[var(--fha-border)]">
+                  <div className="text-3xl font-black font-mono text-[var(--fha-text)] tracking-tight">
+                    {plan.price === 0 ? '0đ' : formatCurrency(plan.price)}
+                  </div>
+                  <div className="text-xs font-semibold text-[var(--fha-brand)] mt-1">
+                    {plan.duration} • {plan.scanLimit}
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 mb-8">
+                  <div className="text-[10px] font-bold uppercase text-[var(--fha-text-faint)] tracking-wider">
+                    Quyền lợi gói:
+                  </div>
+                  {plan.features?.map((feat, fIdx) => (
+                    <div key={fIdx} className="flex items-start gap-2 text-xs text-[var(--fha-text)]">
+                      <svg className="w-3.5 h-3.5 text-[var(--fha-brand)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-4 border-t border-[var(--fha-border)]">
+                {canAfford ? (
+                  <Button 
+                    variant={isPopular ? 'primary' : 'outline'} 
+                    fullWidth 
+                    size="md"
+                    onClick={() => handleSelect(plan)}
+                    className="font-bold text-xs"
+                  >
+                    Mua Ngay Bằng Ví
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <Button 
+                      variant="primary" 
+                      fullWidth 
+                      size="md"
+                      onClick={() => window.location.href = `/checkout?plan=${plan.id}`}
+                      className="font-bold text-xs"
+                    >
+                      Quét QR PayOS Mua Ngay
+                    </Button>
+                    <div className="text-[10px] text-center text-[var(--fha-text-muted)]">
+                      Thiếu {formatCurrency(plan.price - walletBalance)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
+      {/* Confirmation Modal */}
       <Modal
         open={showConfirmModal}
         onClose={() => !purchasing && setShowConfirmModal(false)}
-        title="Xác nhận thanh toán"
+        title="Xác Nhận Kích Hoạt Key Bản Quyền"
       >
         {selectedPlan && (
-          <div className="space-y-6">
-            <div className="bg-[var(--fha-surface-2)] border border-[var(--fha-border)] p-5 rounded-fha space-y-4">
-              <div className="flex justify-between items-center pb-4 border-b border-[var(--fha-border-strong)]">
-                <span className="text-[14px] font-medium text-[var(--fha-text-muted)]">Gói dịch vụ</span>
-                <span className="font-bold text-[var(--fha-text)]">{selectedPlan.name}</span>
+          <div className="space-y-5">
+            <div className="bg-[var(--fha-surface-2)] border border-[var(--fha-border)] p-4 rounded-fha space-y-3 text-xs">
+              <div className="flex justify-between items-center pb-2.5 border-b border-[var(--fha-border)]">
+                <span className="text-[var(--fha-text-muted)] font-medium">Gói cước đã chọn</span>
+                <span className="font-bold text-sm text-[var(--fha-text)]">{selectedPlan.name}</span>
               </div>
-              <div className="flex justify-between items-center pb-4 border-b border-[var(--fha-border-strong)]">
-                <span className="text-[14px] font-medium text-[var(--fha-text-muted)]">Giá tiền</span>
-                <span className="font-bold font-mono text-[var(--fha-text)] text-lg">{formatCurrency(selectedPlan.price)}</span>
+              <div className="flex justify-between items-center pb-2.5 border-b border-[var(--fha-border)]">
+                <span className="text-[var(--fha-text-muted)] font-medium">Đơn giá thanh toán</span>
+                <span className="font-bold font-mono text-[var(--fha-brand)] text-base">{formatCurrency(selectedPlan.price)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[14px] font-medium text-[var(--fha-text-muted)]">Số dư hiện tại</span>
-                <span className={`font-bold font-mono text-lg ${walletBalance < selectedPlan.price ? 'text-[var(--fha-error)]' : 'text-[var(--fha-success)]'}`}>
+                <span className="text-[var(--fha-text-muted)] font-medium">Số dư ví hiện tại</span>
+                <span className={`font-bold font-mono text-sm ${walletBalance < selectedPlan.price ? 'text-[var(--fha-error)]' : 'text-[var(--fha-success)]'}`}>
                   {formatCurrency(walletBalance)}
                 </span>
               </div>
             </div>
 
-            {walletBalance < selectedPlan.price && (
+            {walletBalance < selectedPlan.price ? (
               <Alert variant="danger">
-                Số dư không đủ. Vui lòng nạp thêm <strong className="font-mono text-lg ml-1">{formatCurrency(selectedPlan.price - walletBalance)}</strong>
+                Số dư ví không đủ. Vui lòng nạp thêm <strong className="font-mono ml-1">{formatCurrency(selectedPlan.price - walletBalance)}</strong>
               </Alert>
+            ) : (
+              <div className="text-xs text-[var(--fha-text-muted)] leading-relaxed">
+                Số tiền <strong>{formatCurrency(selectedPlan.price)}</strong> sẽ được trừ trực tiếp vào số dư ví của bạn. Key bản quyền sẽ được tạo tức thì.
+              </div>
             )}
 
-            <div className="flex gap-3 justify-end pt-2">
-              <Button variant="ghost" onClick={() => setShowConfirmModal(false)} disabled={purchasing}>
-                Hủy
+            <div className="flex gap-2.5 justify-end pt-3 border-t border-[var(--fha-border)]">
+              <Button variant="ghost" onClick={() => setShowConfirmModal(false)} disabled={purchasing} size="sm">
+                Đóng
               </Button>
               {walletBalance >= selectedPlan.price ? (
-                <Button variant="primary" onClick={handlePurchase} loading={purchasing}>
-                  Thanh Toán
+                <Button variant="primary" onClick={handlePurchase} loading={purchasing} size="sm" className="font-bold">
+                  Xác Nhận Mua
                 </Button>
               ) : (
-                <Button variant="secondary" onClick={() => window.location.href='/dashboard/wallet'}>
-                  Nạp Tiền Vào Ví
+                <Button variant="primary" onClick={() => window.location.href = `/checkout?plan=${selectedPlan.id}`} size="sm">
+                  Thanh Toán Qua PayOS &rarr;
                 </Button>
               )}
             </div>

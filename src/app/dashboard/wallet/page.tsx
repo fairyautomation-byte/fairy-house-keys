@@ -10,10 +10,10 @@ import { formatCurrency } from '@/lib/format';
 import { useToast } from '@/components/ui/ToastProvider';
 
 export default function WalletPage() {
-  const { error: toastError } = useToast();
+  const { error: toastError, success: toastSuccess } = useToast();
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [depositAmount, setDepositAmount] = useState('');
+  const [depositAmount, setDepositAmount] = useState('100.000');
   
   // Payment Flow State
   const [paymentState, setPaymentState] = useState<PaymentState>('loading');
@@ -39,7 +39,7 @@ export default function WalletPage() {
       intervalId = setInterval(async () => {
         try {
           const res = await fetch(`/api/payos/check-order?orderCode=${transactionInfo.transactionCode}`, {
-            cache: 'no-store', // Prevent browser caching
+            cache: 'no-store',
             headers: { 'Cache-Control': 'no-cache' }
           });
           if (res.ok) {
@@ -47,6 +47,7 @@ export default function WalletPage() {
             if (data.status === 'PAID') {
               setPaymentState('success');
               setBalance(prev => prev + (transactionInfo.amount || 0));
+              toastSuccess('Nạp tiền vào ví thành công!');
               clearInterval(intervalId);
             } else if (data.status === 'CANCELLED') {
               setPaymentState('expired');
@@ -56,13 +57,13 @@ export default function WalletPage() {
         } catch (error) {
           console.error("Polling error:", error);
         }
-      }, 3000); // Check every 3 seconds
+      }, 3000);
     }
 
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [paymentState, transactionInfo]);
+  }, [paymentState, transactionInfo, toastSuccess]);
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +73,6 @@ export default function WalletPage() {
       return;
     }
 
-    // Initialize PayOS flow
     setShowQR(true);
     setPaymentState('loading');
     
@@ -93,7 +93,6 @@ export default function WalletPage() {
         throw new Error(data.error || 'Lỗi tạo mã QR');
       }
 
-      // Map popular BINs to Bank Names
       const bankNames: Record<string, string> = {
         '970422': 'MB Bank',
         '970436': 'Vietcombank',
@@ -116,7 +115,7 @@ export default function WalletPage() {
           accountNumber: data.accountNumber,
           accountName: data.accountName
         },
-        timeLeft: 300 // 5 minutes
+        timeLeft: 300
       });
       setPaymentState('pending');
     } catch (err: any) {
@@ -127,16 +126,15 @@ export default function WalletPage() {
 
   const handleCancelPayment = () => {
     setShowQR(false);
-    setDepositAmount('');
   };
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-16 bg-white border border-[var(--fha-border)] rounded-fha-lg animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Skeleton className="h-[240px] w-full rounded-fha-lg" />
-          <Skeleton className="h-[240px] w-full rounded-fha-lg" />
+        <Skeleton className="h-16 w-full rounded-fha-lg" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <Skeleton className="lg:col-span-5 h-[340px] w-full rounded-fha-lg" />
+          <Skeleton className="lg:col-span-7 h-[340px] w-full rounded-fha-lg" />
         </div>
       </div>
     );
@@ -145,68 +143,190 @@ export default function WalletPage() {
   return (
     <div className="space-y-8">
       <PageHeader 
-        title="Ví & Nạp Tiền" 
-        description="Quản lý số dư và nạp tiền vào ví qua QR PayOS"
+        title="Bàn Thu Ngân & Nạp Ví" 
+        description="Nạp số dư tài khoản tự động 24/7 thông qua cổng chuyển khoản VietQR PayOS"
       />
 
-      {!showQR ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          <Card variant="highlight" className="flex flex-col items-center justify-center py-12 bg-white border-[var(--fha-brand)] ring-1 ring-[var(--fha-brand)]">
-            <span className="text-[var(--fha-text-muted)] mb-2 font-semibold tracking-wide text-sm uppercase">Số Dư Hiện Tại</span>
-            <div className="text-[40px] md:text-[48px] font-black font-mono text-[var(--fha-brand)] tracking-tight">
+      {/* 2-Column Split Cashier Desk */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Column (5 cols): Balance Card & Deposit Form */}
+        <div className="lg:col-span-5 space-y-6">
+          
+          {/* Balance Footprint Card */}
+          <div className="bg-white rounded-fha-lg border-2 border-[var(--fha-border-strong)] p-6 shadow-fha-sm relative overflow-hidden">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--fha-text-muted)]">
+                Số Dư Ví Của Bạn
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--fha-success-bg)] text-[var(--fha-success)] border border-[var(--fha-success-border)]">
+                Sẵn Sàng Thanh Toán
+              </span>
+            </div>
+
+            <div className="text-3xl sm:text-4xl font-black font-mono text-[var(--fha-brand)] tracking-tight">
               {formatCurrency(balance)}
             </div>
-          </Card>
 
-          <Card variant="default">
-            <h3 className="text-[17px] font-bold text-[var(--fha-text)] mb-6">Nạp tiền vào ví</h3>
-            <form onSubmit={handleDeposit} className="space-y-5">
-              <Input
-                label="Nhập số tiền cần nạp"
-                type="text"
-                placeholder="VD: 100,000"
-                value={depositAmount}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/[^0-9]/g, '');
-                  setDepositAmount(val ? parseInt(val).toLocaleString('vi-VN') : '');
-                }}
-                rightIcon={<span className="text-[var(--fha-text-muted)] font-medium text-[13px]">VNĐ</span>}
-              />
-              
-              <div className="flex flex-wrap gap-2">
-                {[50000, 100000, 200000, 500000].map(amt => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setDepositAmount(amt.toLocaleString('vi-VN'))}
-                    className="flex-1 min-w-[70px] py-2 rounded-fha border border-[var(--fha-border)] bg-[var(--fha-surface-2)] hover:bg-[var(--fha-brand-soft)] hover:border-[var(--fha-brand)] hover:text-[var(--fha-brand)] text-[12px] font-semibold text-[var(--fha-text)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)]"
-                  >
-                    {amt.toLocaleString('vi-VN')}
-                  </button>
-                ))}
+            <div className="mt-3 text-xs text-[var(--fha-text-muted)] leading-relaxed">
+              Dùng để mua hoặc gia hạn các gói bản quyền Extension bất kỳ lúc nào với 1 click.
+            </div>
+          </div>
+
+          {/* Deposit Form */}
+          <div className="bg-white rounded-fha-lg border border-[var(--fha-border)] p-6 shadow-fha-sm space-y-5">
+            <div>
+              <h3 className="text-base font-bold text-[var(--fha-text)]">Cấu Hình Nạp Tiền</h3>
+              <p className="text-xs text-[var(--fha-text-muted)] mt-0.5">Tạo mã VietQR tự động khớp nội dung</p>
+            </div>
+
+            <form onSubmit={handleDeposit} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-[var(--fha-text)] block mb-1.5">
+                  Số tiền muốn nạp (tối thiểu 10.000đ):
+                </label>
+                <Input
+                  type="text"
+                  placeholder="VD: 100.000"
+                  value={depositAmount}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setDepositAmount(val ? parseInt(val).toLocaleString('vi-VN') : '');
+                  }}
+                  rightIcon={<span className="text-[var(--fha-text-muted)] font-bold text-xs">VNĐ</span>}
+                />
               </div>
 
-              <div className="pt-5 border-t border-[var(--fha-border)]">
-                <Button type="submit" variant="primary" fullWidth size="lg">
-                  Tạo QR Nạp Tiền
+              {/* Fast Presets */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-semibold text-[var(--fha-text-muted)]">Mệnh giá phổ biến:</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {[50000, 100000, 200000, 500000, 1000000].map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setDepositAmount(amt.toLocaleString('vi-VN'))}
+                      className={`py-2 px-1 text-center rounded-fha text-xs font-bold border transition-colors ${
+                        depositAmount === amt.toLocaleString('vi-VN')
+                          ? 'border-[var(--fha-brand)] bg-[var(--fha-brand-soft)] text-[var(--fha-brand)]'
+                          : 'border-[var(--fha-border)] bg-[var(--fha-surface-2)] text-[var(--fha-text)] hover:border-[var(--fha-border-strong)]'
+                      }`}
+                    >
+                      {amt >= 1000000 ? `${amt / 1000000} Triệu` : `${amt / 1000}k`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[var(--fha-border)]">
+                <Button 
+                  type="submit" 
+                  variant="primary" 
+                  fullWidth 
+                  size="lg" 
+                  className="font-bold text-sm shadow-fha-sm"
+                >
+                  <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Tạo Mã VietQR Nạp Tiền
                 </Button>
               </div>
             </form>
-          </Card>
+          </div>
+
         </div>
-      ) : (
-        <div className="flex justify-center animate-fade-in">
-          <QRPayment 
-            state={paymentState}
-            amount={transactionInfo?.amount || 0}
-            transactionCode={transactionInfo?.transactionCode || ''}
-            qrUrl={transactionInfo?.qrUrl}
-            bankInfo={transactionInfo?.bankInfo}
-            timeLeft={transactionInfo?.timeLeft}
-            onCancel={handleCancelPayment}
-          />
+
+        {/* Right Column (7 cols): Cashier Screen (Live QR or PayOS Instructions) */}
+        <div className="lg:col-span-7">
+          {showQR ? (
+            <div className="animate-fade-in">
+              <QRPayment 
+                state={paymentState}
+                amount={transactionInfo?.amount || 0}
+                transactionCode={transactionInfo?.transactionCode || ''}
+                qrUrl={transactionInfo?.qrUrl}
+                bankInfo={transactionInfo?.bankInfo}
+                timeLeft={transactionInfo?.timeLeft}
+                onCancel={handleCancelPayment}
+              />
+            </div>
+          ) : (
+            <div className="bg-white rounded-fha-lg border border-[var(--fha-border)] p-7 space-y-6 shadow-fha-sm">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-2.5 py-0.5 rounded">
+                  Cổng Thanh Toán Tự Động
+                </span>
+                <h3 className="text-xl font-bold text-[var(--fha-text)] mt-2">
+                  Quy Trình Nạp Ví Tức Thì Qua VietQR
+                </h3>
+                <p className="text-xs text-[var(--fha-text-muted)] leading-relaxed">
+                  Hệ thống kết nối trực tiếp với cổng trung gian thanh toán PayOS được Ngân hàng Nhà nước cấp phép.
+                </p>
+              </div>
+
+              {/* 3 Step Guidelines */}
+              <div className="space-y-4 pt-2">
+                <div className="flex items-start gap-3.5 p-3.5 bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)]">
+                  <div className="w-7 h-7 rounded bg-white border border-[var(--fha-border-strong)] text-[var(--fha-text)] font-black text-xs flex items-center justify-center shrink-0 font-mono">
+                    1
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs text-[var(--fha-text)]">Nhập số tiền & bấm Tạo Mã QR</div>
+                    <div className="text-[11px] text-[var(--fha-text-muted)] mt-0.5">
+                      Hệ thống tự động sinh mã VietQR động chứa chính xác số tiền và mã nhận diện.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5 p-3.5 bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)]">
+                  <div className="w-7 h-7 rounded bg-white border border-[var(--fha-border-strong)] text-[var(--fha-text)] font-black text-xs flex items-center justify-center shrink-0 font-mono">
+                    2
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs text-[var(--fha-text)]">Quét mã bằng App Ngân Hàng</div>
+                    <div className="text-[11px] text-[var(--fha-text-muted)] mt-0.5">
+                      Mở bất kỳ app ngân hàng nào (MBBank, Vietcombank, Techcombank, BIDV, Momo...) để quét QR.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5 p-3.5 bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)]">
+                  <div className="w-7 h-7 rounded bg-white border border-[var(--fha-border-strong)] text-[var(--fha-text)] font-black text-xs flex items-center justify-center shrink-0 font-mono">
+                    3
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs text-[var(--fha-text)]">Số dư cộng tự động trong 5 giây</div>
+                    <div className="text-[11px] text-[var(--fha-text-muted)] mt-0.5">
+                      Ngay sau khi ngân hàng báo trừ tiền, số dư ví sẽ lập tức được cập nhật trên màn hình.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Guarantees */}
+              <div className="pt-4 border-t border-[var(--fha-border)] flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--fha-text-muted)]">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Khớp lệnh tự động 100% không cần chụp bill</span>
+                </div>
+
+                <a 
+                  href="https://zalo.me/0378791667" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="font-bold text-[var(--fha-brand)] hover:underline"
+                >
+                  Hotline Kế toán Zalo &rarr;
+                </a>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+      </div>
     </div>
   );
 }
