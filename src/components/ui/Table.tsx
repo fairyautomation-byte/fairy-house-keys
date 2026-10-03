@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Skeleton from './Skeleton';
 
 export interface Column<T> {
@@ -17,6 +17,12 @@ interface TableProps<T> {
   onRowClick?: (item: T) => void;
   rowKey: (item: T) => string;
   className?: string;
+  density?: 'compact' | 'normal';
+  /**
+   * If provided, on screens < 640px, the table will render as a list of cards
+   * using this function for each item.
+   */
+  mobileRender?: (item: T, index: number) => React.ReactNode;
 }
 
 export default function Table<T>({ 
@@ -26,21 +32,29 @@ export default function Table<T>({
   emptyState, 
   onRowClick, 
   rowKey,
-  className = ''
+  className = '',
+  density = 'normal',
+  mobileRender
 }: TableProps<T>) {
+  
+  const pyClass = density === 'compact' ? 'py-2.5' : 'py-3.5';
   
   if (loading && data.length === 0) {
     return (
       <div className={`w-full ${className}`}>
-        <div className="w-full border-b border-fha-border py-3 flex gap-4 px-4">
+        <div className="w-full border-b border-[var(--fha-border)] py-3 flex gap-4 px-4 bg-[var(--fha-surface-2)]">
           {columns.map((col, i) => (
-            <Skeleton key={i} className={`h-4 ${col.width || 'flex-1'}`} />
+            <div key={i} style={{ width: col.width || '100%', flex: col.width ? 'none' : 1 }}>
+              <Skeleton className="h-4 w-3/4" />
+            </div>
           ))}
         </div>
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="w-full border-b border-fha-border-muted py-4 flex gap-4 px-4">
+          <div key={i} className={`w-full border-b border-[var(--fha-border)] ${pyClass} flex items-center gap-4 px-4`}>
             {columns.map((col, j) => (
-              <Skeleton key={j} className={`h-5 ${col.width || 'flex-1'}`} />
+              <div key={j} style={{ width: col.width || '100%', flex: col.width ? 'none' : 1 }}>
+                <Skeleton className="h-4 w-full" />
+              </div>
             ))}
           </div>
         ))}
@@ -53,45 +67,65 @@ export default function Table<T>({
   }
 
   return (
-    <div className={`w-full overflow-x-auto ${className}`}>
-      <table className="w-full text-left text-sm whitespace-nowrap">
-        <thead className="bg-fha-surface-2 border-b border-fha-border">
-          <tr>
-            {columns.map((col) => (
-              <th 
-                key={String(col.key)}
-                className={`px-4 py-3 font-medium text-[11px] uppercase tracking-[0.06em] text-fha-text-muted ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.width ? `w-[${col.width}]` : ''}`}
-              >
-                {col.title}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item, index) => {
-            const isClickable = !!onRowClick;
-            return (
-              <tr 
-                key={rowKey(item)}
-                onClick={() => onRowClick?.(item)}
-                className={`bg-fha-surface border-b border-fha-border-muted transition-colors
-                  ${isClickable ? 'cursor-pointer hover:bg-fha-surface-3' : 'hover:bg-fha-surface/80'}`}
-              >
-                {columns.map((col) => (
-                  <td 
-                    key={String(col.key)}
-                    className={`px-4 py-3.5 text-[14px] text-fha-text ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
-                  >
-                    {col.render 
-                      ? col.render(item, index) 
-                      : (item[col.key as keyof T] as React.ReactNode)}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className={`w-full ${className}`}>
+      {/* Mobile Card View */}
+      {mobileRender && (
+        <div className="block sm:hidden flex flex-col gap-3">
+          {data.map((item, index) => (
+            <div 
+              key={rowKey(item)}
+              onClick={() => onRowClick?.(item)}
+              className={`bg-white border border-[var(--fha-border)] p-4 rounded-fha-lg ${onRowClick ? 'cursor-pointer active:bg-[var(--fha-surface-2)]' : ''}`}
+            >
+              {mobileRender(item, index)}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop Table View */}
+      <div className={`w-full overflow-x-auto ${mobileRender ? 'hidden sm:block' : ''}`}>
+        <table className="w-full text-left text-sm whitespace-nowrap">
+          <thead className="bg-[var(--fha-surface-2)] border-y border-[var(--fha-border)]">
+            <tr>
+              {columns.map((col) => (
+                <th 
+                  key={String(col.key)}
+                  style={{ width: col.width }}
+                  className={`px-4 py-2.5 font-medium text-[13px] text-[var(--fha-text-muted)] ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                >
+                  {col.title}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item, index) => {
+              const isClickable = !!onRowClick;
+              return (
+                <tr 
+                  key={rowKey(item)}
+                  onClick={() => onRowClick?.(item)}
+                  className={`bg-white border-b border-[var(--fha-border)] transition-colors
+                    ${isClickable ? 'cursor-pointer hover:bg-[var(--fha-surface-2)]' : 'hover:bg-[var(--fha-surface-2)]'}`}
+                >
+                  {columns.map((col) => (
+                    <td 
+                      key={String(col.key)}
+                      style={{ width: col.width }}
+                      className={`px-4 ${pyClass} text-[14px] text-[var(--fha-text)] ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                    >
+                      {col.render 
+                        ? col.render(item, index) 
+                        : (item[col.key as keyof T] as React.ReactNode)}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

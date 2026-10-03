@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
-import StatCard from '@/components/features/StatCard';
+import StatStrip from '@/components/features/StatStrip';
 import StatusBadge from '@/components/features/StatusBadge';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Skeleton from '@/components/ui/Skeleton';
+import { formatCurrency, formatDate } from '@/lib/format';
 
 export default function DashboardOverview() {
   const router = useRouter();
@@ -28,16 +30,14 @@ export default function DashboardOverview() {
       .finally(() => setLoading(false));
   }, []);
 
-  const formatCurrency = (val: number) => val.toLocaleString('vi-VN') + 'đ';
-
   if (loading) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-20 bg-fha-surface-2 rounded-fha-radius-lg border border-fha-border"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="h-32 bg-fha-surface-2 rounded-fha-radius-md border border-fha-border"></div>
-          <div className="h-32 bg-fha-surface-2 rounded-fha-radius-md border border-fha-border"></div>
-          <div className="h-32 bg-fha-surface-2 rounded-fha-radius-md border border-fha-border"></div>
+      <div className="space-y-6">
+        <div className="h-24 bg-white border border-[var(--fha-border)] rounded-fha-lg animate-pulse" />
+        <Skeleton className="h-32 w-full rounded-fha-lg" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-[280px] w-full rounded-fha-lg" />
+          <Skeleton className="h-[280px] w-full rounded-fha-lg" />
         </div>
       </div>
     );
@@ -55,61 +55,56 @@ export default function DashboardOverview() {
   
   const recentOrders = orders.slice(0, 3);
 
+  const stats = [
+    {
+      label: 'Số dư ví',
+      value: formatCurrency(walletBalance),
+      highlight: walletBalance > 0 ? 'success' as const : 'none' as const
+    },
+    {
+      label: 'License Đang Hoạt Động',
+      value: activeLicensesCount,
+      highlight: activeLicensesCount === 0 ? 'warning' as const : 'none' as const
+    },
+    {
+      label: 'Tổng Đơn Hàng',
+      value: orders.length
+    }
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title={`Xin chào, ${user.full_name}`} 
-        description="Chào mừng bạn quay lại Fairy House AutoData"
+        description="Chào mừng bạn quay lại Fairy House"
       />
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard 
-          label="Số dư ví"
-          value={formatCurrency(walletBalance)}
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-          }
-        />
-        <StatCard 
-          label="License Đang Hoạt Động"
-          value={activeLicensesCount}
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-          }
-        />
-        <StatCard 
-          label="Tổng Đơn Hàng"
-          value={orders.length}
-          icon={
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-          }
-        />
-      </div>
+      {/* Stats Strip */}
+      <StatStrip items={stats} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
         <Card variant="default">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-semibold text-fha-text">Thao tác nhanh</h3>
+            <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Thao tác nhanh</h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Link href="/dashboard/wallet" passHref className="w-full">
-              <Button variant="secondary" fullWidth className="h-auto py-4 flex-col gap-2">
-                <svg className="w-6 h-6 text-fha-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                <span>Nạp Tiền Vào Ví</span>
+            <Link href="/dashboard/wallet" passHref className="w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
+              <Button variant="secondary" fullWidth className="h-auto py-5 flex-col gap-2">
+                <svg className="w-[22px] h-[22px] text-[var(--fha-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                <span className="font-semibold text-sm">Nạp Tiền Vào Ví</span>
               </Button>
             </Link>
-            <Link href="/dashboard/store" passHref className="w-full">
-              <Button variant="secondary" fullWidth className="h-auto py-4 flex-col gap-2">
-                <svg className="w-6 h-6 text-fha-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                <span>Mua License Mới</span>
+            <Link href="/dashboard/store" passHref className="w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
+              <Button variant="secondary" fullWidth className="h-auto py-5 flex-col gap-2">
+                <svg className="w-[22px] h-[22px] text-[var(--fha-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                <span className="font-semibold text-sm">Mua License</span>
               </Button>
             </Link>
-            <Link href="/dashboard/licenses" passHref className="w-full col-span-2">
-              <Button variant="secondary" fullWidth className="justify-start border border-fha-border-muted hover:border-fha-cyan-border">
-                <svg className="w-5 h-5 text-fha-text-muted mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-                Quản lý License hiện tại
+            <Link href="/dashboard/licenses" passHref className="w-full col-span-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
+              <Button variant="outline" fullWidth className="justify-start py-4">
+                <svg className="w-[18px] h-[18px] text-[var(--fha-text-muted)] mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                <span className="font-semibold">Quản lý License hiện tại</span>
               </Button>
             </Link>
           </div>
@@ -118,27 +113,29 @@ export default function DashboardOverview() {
         {/* Recent Orders */}
         <Card variant="default">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-semibold text-fha-text">Giao dịch gần đây</h3>
-            <Link href="/dashboard/transactions" className="text-sm font-medium text-fha-cyan hover:text-fha-cyan-hover">
+            <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Giao dịch gần đây</h3>
+            <Link href="/dashboard/transactions" className="text-[13px] font-semibold text-[var(--fha-brand)] hover:text-[var(--fha-brand-hover)] focus-visible:outline-none focus-visible:underline">
               Xem tất cả
             </Link>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {recentOrders.length > 0 ? (
               recentOrders.map((order: any) => (
-                <div key={order.id} className="flex items-center justify-between p-3 rounded-fha-radius-sm hover:bg-fha-surface-3 transition-colors border border-transparent hover:border-fha-border-muted">
-                  <div className="flex flex-col">
-                    <span className="font-mono text-sm text-fha-text font-semibold">{order.transaction_code}</span>
-                    <span className="text-xs text-fha-text-muted mt-0.5">{new Date(order.created_at?._seconds ? order.created_at._seconds * 1000 : order.created_at).toLocaleDateString('vi-VN')}</span>
+                <div key={order.id} className="flex items-center justify-between p-4 rounded-fha bg-[var(--fha-surface-2)] border border-[var(--fha-border)] hover:border-[var(--fha-border-strong)] transition-colors">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-mono text-sm text-[var(--fha-brand)] font-bold">{order.transaction_code}</span>
+                    <span className="text-xs font-medium text-[var(--fha-text-muted)]">
+                      {formatDate(order.created_at?._seconds ? order.created_at._seconds * 1000 : order.created_at)}
+                    </span>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-sm font-bold text-fha-text mb-1">{formatCurrency(order.amount)}</span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-[15px] font-bold text-[var(--fha-text)] tracking-tight">{formatCurrency(order.amount)}</span>
                     <StatusBadge status={order.status} size="sm" />
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-6 text-fha-text-muted text-sm border border-dashed border-fha-border rounded-fha-radius">
+              <div className="text-center py-8 text-[var(--fha-text-muted)] text-[13px] font-medium border border-dashed border-[var(--fha-border-strong)] rounded-fha bg-[var(--fha-surface-2)]">
                 Chưa có giao dịch nào
               </div>
             )}

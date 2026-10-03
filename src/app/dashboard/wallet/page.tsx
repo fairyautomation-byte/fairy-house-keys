@@ -4,9 +4,13 @@ import PageHeader from '@/components/layout/PageHeader';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import Skeleton from '@/components/ui/Skeleton';
 import QRPayment, { PaymentState } from '@/components/features/QRPayment';
+import { formatCurrency } from '@/lib/format';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function WalletPage() {
+  const { error: toastError } = useToast();
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [depositAmount, setDepositAmount] = useState('');
@@ -64,11 +68,11 @@ export default function WalletPage() {
     e.preventDefault();
     const amount = parseInt(depositAmount.replace(/[^0-9]/g, ''));
     if (isNaN(amount) || amount < 10000) {
-      alert('Số tiền nạp tối thiểu là 10.000đ');
+      toastError('Số tiền nạp tối thiểu là 10.000đ');
       return;
     }
 
-    // Initialize PayOS flow (placeholder for now)
+    // Initialize PayOS flow
     setShowQR(true);
     setPaymentState('loading');
     
@@ -116,12 +120,10 @@ export default function WalletPage() {
       });
       setPaymentState('pending');
     } catch (err: any) {
-      alert(err.message);
+      toastError(err.message || 'Lỗi tạo mã QR');
       setShowQR(false);
     }
   };
-
-  const formatCurrency = (val: number) => val.toLocaleString('vi-VN') + 'đ';
 
   const handleCancelPayment = () => {
     setShowQR(false);
@@ -130,32 +132,35 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-16 bg-fha-surface-2 rounded-lg"></div>
-        <div className="h-48 bg-fha-surface-2 rounded-lg"></div>
+      <div className="space-y-6">
+        <div className="h-16 bg-white border border-[var(--fha-border)] rounded-fha-lg animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-[240px] w-full rounded-fha-lg" />
+          <Skeleton className="h-[240px] w-full rounded-fha-lg" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title="Ví & Nạp Tiền" 
-        description="Quản lý số dư và nạp tiền vào ví qua PayOS QR Code"
+        description="Quản lý số dư và nạp tiền vào ví qua QR PayOS"
       />
 
       {!showQR ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card variant="highlight" className="flex flex-col items-center justify-center py-10 bg-gradient-to-br from-fha-surface to-fha-cyan/5">
-            <span className="text-fha-text-muted mb-2 font-medium">Số Dư Hiện Tại</span>
-            <div className="text-4xl md:text-5xl font-black font-mono text-fha-cyan drop-shadow-fha-cyan">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <Card variant="highlight" className="flex flex-col items-center justify-center py-12 bg-white border-[var(--fha-brand)] ring-1 ring-[var(--fha-brand)]">
+            <span className="text-[var(--fha-text-muted)] mb-2 font-semibold tracking-wide text-sm uppercase">Số Dư Hiện Tại</span>
+            <div className="text-[40px] md:text-[48px] font-black font-mono text-[var(--fha-brand)] tracking-tight">
               {formatCurrency(balance)}
             </div>
           </Card>
 
           <Card variant="default">
-            <h3 className="text-lg font-bold text-fha-text mb-4">Nạp tiền vào ví</h3>
-            <form onSubmit={handleDeposit} className="space-y-4">
+            <h3 className="text-[17px] font-bold text-[var(--fha-text)] mb-6">Nạp tiền vào ví</h3>
+            <form onSubmit={handleDeposit} className="space-y-5">
               <Input
                 label="Nhập số tiền cần nạp"
                 type="text"
@@ -165,32 +170,32 @@ export default function WalletPage() {
                   const val = e.target.value.replace(/[^0-9]/g, '');
                   setDepositAmount(val ? parseInt(val).toLocaleString('vi-VN') : '');
                 }}
-                rightIcon={<span className="text-fha-text-muted font-medium">VNĐ</span>}
+                rightIcon={<span className="text-[var(--fha-text-muted)] font-medium text-[13px]">VNĐ</span>}
               />
               
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[50000, 100000, 200000, 500000].map(amt => (
                   <button
                     key={amt}
                     type="button"
                     onClick={() => setDepositAmount(amt.toLocaleString('vi-VN'))}
-                    className="flex-1 py-1.5 rounded-full border border-fha-border bg-fha-surface hover:bg-fha-surface-3 hover:border-fha-cyan-border text-[11px] font-medium text-fha-text transition-colors"
+                    className="flex-1 min-w-[70px] py-2 rounded-fha border border-[var(--fha-border)] bg-[var(--fha-surface-2)] hover:bg-[var(--fha-brand-soft)] hover:border-[var(--fha-brand)] hover:text-[var(--fha-brand)] text-[12px] font-semibold text-[var(--fha-text)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)]"
                   >
                     {amt.toLocaleString('vi-VN')}
                   </button>
                 ))}
               </div>
 
-              <div className="pt-4 border-t border-fha-border">
+              <div className="pt-5 border-t border-[var(--fha-border)]">
                 <Button type="submit" variant="primary" fullWidth size="lg">
-                  Tạo QR Nạp Tiền (PayOS)
+                  Tạo QR Nạp Tiền
                 </Button>
               </div>
             </form>
           </Card>
         </div>
       ) : (
-        <div className="flex justify-center">
+        <div className="flex justify-center animate-fade-in">
           <QRPayment 
             state={paymentState}
             amount={transactionInfo?.amount || 0}

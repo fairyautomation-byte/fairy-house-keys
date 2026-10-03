@@ -2,28 +2,29 @@ import React from 'react';
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
-  color?: 'cyan' | 'white' | 'muted';
+  color?: 'brand' | 'white' | 'muted' | 'cyan';
   className?: string;
 }
 
-export default function Spinner({ size = 'md', color = 'cyan', className = '' }: SpinnerProps) {
+export default function Spinner({ size = 'md', color = 'brand', className = '' }: SpinnerProps) {
   const sizeStyles = {
     sm: 'w-4 h-4 border-2',
-    md: 'w-6 h-6 border-[3px]',
-    lg: 'w-8 h-8 border-4'
+    md: 'w-5 h-5 border-2',
+    lg: 'w-6 h-6 border-[3px]',
   };
 
   const colorStyles = {
-    cyan: 'border-fha-cyan/20 border-t-fha-cyan',
-    white: 'border-white/20 border-t-white',
-    muted: 'border-fha-text-faint/20 border-t-fha-text-faint'
+    brand: 'border-[var(--fha-brand)]/20 border-t-[var(--fha-brand)]',
+    cyan: 'border-[var(--fha-brand)]/20 border-t-[var(--fha-brand)]', // legacy alias
+    white: 'border-white/30 border-t-white',
+    muted: 'border-[var(--fha-text-faint)]/20 border-t-[var(--fha-text-faint)]',
   };
 
   return (
     <div 
       className={`rounded-full animate-spin ${sizeStyles[size]} ${colorStyles[color]} ${className}`}
       role="status"
-      aria-label="Loading"
+      aria-label="Đang tải"
     />
   );
 }

@@ -1,59 +1,69 @@
+/* ================================================================
+   FAIRY HOUSE AUTODATA — Design Tokens (Direction A: Hairline Light)
+   Redesigned 2026-10-03 — flat, clean, professional
+   ================================================================ */
+
 :root {
-  /* Background & Surface */
-  --fha-bg:           #0a0f1a;
-  --fha-surface:      #111827;
-  --fha-surface-2:    #1a2233;
-  --fha-surface-3:    #222f45;
-  --fha-border:       #1e2d42;
-  --fha-border-muted: #162030;
-  
-  /* Glass & Neumorphism */
-  --fha-glass-bg:     rgba(17, 24, 39, 0.45);
-  --fha-glass-border: rgba(255, 255, 255, 0.08);
+  /* ── Background & Surface ── */
+  --fha-bg:            #F6F7F9;
+  --fha-surface:       #FFFFFF;
+  --fha-surface-2:     #F1F3F5;
+  --fha-surface-3:     #E9ECEF;
+  --fha-border:        #E3E6EA;
+  --fha-border-muted:  #EDF0F2;
+  --fha-border-strong: #CDD2D8;
 
-  /* Text */
-  --fha-text:         #e2e8f0;
-  --fha-text-muted:   #94a3b8;
-  --fha-text-faint:   #4b5a70;
-  --fha-text-inverse: #0a0f1a;
+  /* ── Text ── */
+  --fha-text:          #111827;
+  --fha-text-muted:    #4B5563;
+  --fha-text-faint:    #6B7280;
+  --fha-text-inverse:  #FFFFFF;
 
-  /* Primary Brand (Cyan) */
-  --fha-cyan:         #00b4d8;
-  --fha-cyan-hover:   #0096b7;
-  --fha-cyan-deep:    #006b8a;
-  --fha-cyan-muted:   rgba(0, 180, 216, 0.12);
-  --fha-cyan-border:  rgba(0, 180, 216, 0.25);
+  /* ── Brand (Teal — inherited from cyan logo) ── */
+  --fha-brand:         #0E7490;
+  --fha-brand-hover:   #155E75;
+  --fha-brand-active:  #164E63;
+  --fha-brand-soft:    #ECFEFF;
+  --fha-brand-soft-border: #A5F3FC;
+  --fha-brand-accent:  #00B4D8;  /* logo detail only, not for text on white */
 
-  /* Status Colors */
-  --fha-success:      #10b981;
-  --fha-success-bg:   rgba(16, 185, 129, 0.10);
-  --fha-success-border: rgba(16, 185, 129, 0.25);
-  --fha-success-text: #34d399;
+  /* Legacy aliases (so existing `fha-cyan-*` classes still resolve) */
+  --fha-cyan:          var(--fha-brand);
+  --fha-cyan-hover:    var(--fha-brand-hover);
+  --fha-cyan-deep:     var(--fha-brand-active);
+  --fha-cyan-muted:    var(--fha-brand-soft);
+  --fha-cyan-border:   var(--fha-brand-soft-border);
 
-  --fha-warning:      #f59e0b;
-  --fha-warning-bg:   rgba(245, 158, 11, 0.10);
-  --fha-warning-border: rgba(245, 158, 11, 0.25);
-  --fha-warning-text: #fbbf24;
+  /* ── Status Colors ── */
+  --fha-success:       #067647;
+  --fha-success-bg:    #ECFDF3;
+  --fha-success-border:#A6F4C5;
+  --fha-success-text:  #067647;
 
-  --fha-error:        #ef4444;
-  --fha-error-bg:     rgba(239, 68, 68, 0.10);
-  --fha-error-border: rgba(239, 68, 68, 0.25);
-  --fha-error-text:   #f87171;
+  --fha-warning:       #B54708;
+  --fha-warning-bg:    #FFFAEB;
+  --fha-warning-border:#FDE68A;
+  --fha-warning-text:  #B54708;
 
-  --fha-info:         #3b82f6;
-  --fha-info-bg:      rgba(59, 130, 246, 0.10);
-  --fha-info-border:  rgba(59, 130, 246, 0.25);
-  --fha-info-text:    #60a5fa;
+  --fha-error:         #B42318;
+  --fha-error-bg:      #FEF3F2;
+  --fha-error-border:  #FECACA;
+  --fha-error-text:    #B42318;
 
-  /* Financial / Wallet */
-  --fha-gold:         #f59e0b;
-  --fha-gold-text:    #fbbf24;
+  --fha-info:          #175CD3;
+  --fha-info-bg:       #EFF8FF;
+  --fha-info-border:   #B2DDFF;
+  --fha-info-text:     #175CD3;
 
-  /* Typography Scale */
-  --fha-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --fha-font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  /* ── Financial / Wallet ── */
+  --fha-gold:          #B54708;
+  --fha-gold-text:     #B54708;
 
-  /* Spacing System */
+  /* ── Typography ── */
+  --fha-font-sans:     'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --fha-font-mono:     'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* ── Spacing (4px grid) ── */
   --fha-space-0:    0;
   --fha-space-1:    4px;
   --fha-space-2:    8px;
@@ -68,24 +78,39 @@
   --fha-space-20:   80px;
   --fha-space-24:   96px;
 
-  /* Border Radius */
-  --fha-radius-sm:   12px;
-  --fha-radius:      16px;
-  --fha-radius-md:   24px;
-  --fha-radius-lg:   32px;
-  --fha-radius-xl:   40px;
-  --fha-radius-full: 9999px;
+  /* ── Border Radius ── */
+  --fha-radius-sm:   6px;   /* badge, chip, checkbox */
+  --fha-radius:      8px;   /* button, input */
+  --fha-radius-md:   8px;   /* alias */
+  --fha-radius-lg:   12px;  /* card, modal, table */
+  --fha-radius-xl:   12px;  /* alias */
+  --fha-radius-full: 9999px; /* avatar, status dot */
 
-  /* Shadow System */
+  /* ── Shadow ── */
   --fha-shadow-border: 0 0 0 1px var(--fha-border);
-  --fha-shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.3);
-  --fha-shadow-md:     0 0 0 1px var(--fha-border), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --fha-shadow-lg:     0 0 0 1px var(--fha-border), 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
-  --fha-shadow-cyan:   0 0 0 1px var(--fha-cyan-border), 0 4px 16px rgba(0, 180, 216, 0.15);
-  --fha-shadow-glow:   0 0 20px rgba(0, 180, 216, 0.2);
-  --fha-shadow-focus:  0 0 0 3px rgba(0, 180, 216, 0.35);
+  --fha-shadow-sm:     0 1px 2px rgba(17, 24, 39, 0.04);
+  --fha-shadow-md:     0 2px 4px rgba(17, 24, 39, 0.06), 0 1px 2px rgba(17, 24, 39, 0.04);
+  --fha-shadow-lg:     0 0 0 1px var(--fha-border), 0 4px 12px rgba(17, 24, 39, 0.06);
+  --fha-shadow-overlay: 0 8px 24px rgba(17, 24, 39, 0.08), 0 2px 6px rgba(17, 24, 39, 0.06);
+  --fha-shadow-focus:  0 0 0 3px rgba(14, 116, 144, 0.25);
 
-  /* Neumorphism Shadows */
-  --fha-shadow-inset:  inset 3px 3px 6px rgba(0, 0, 0, 0.6), inset -1px -1px 4px rgba(255, 255, 255, 0.04);
-  --fha-shadow-outset: 5px 5px 10px rgba(0, 0, 0, 0.5), -1px -1px 3px rgba(255, 255, 255, 0.05);
+  /* Legacy aliases (resolve but produce subtle/no effect in light theme) */
+  --fha-shadow-cyan:   var(--fha-shadow-focus);
+  --fha-shadow-glow:   none;
+  --fha-shadow-inset:  none;
+  --fha-shadow-outset: none;
+
+  /* Removed: glass, neumorphism, glow — not used in Direction A */
+
+  /* ── Transitions ── */
+  --fha-transition-fast: 150ms ease;
+  --fha-transition-base: 200ms ease;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fha-transition-fast: 0ms;
+    --fha-transition-base: 0ms;
+  }
 }

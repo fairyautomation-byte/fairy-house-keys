@@ -1,13 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
-import StatCard from '@/components/features/StatCard';
+import StatStrip from '@/components/features/StatStrip';
 import Card from '@/components/ui/Card';
 import Table, { Column } from '@/components/ui/Table';
 import StatusBadge from '@/components/features/StatusBadge';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ConfirmModal } from '@/components/ui/Modal';
+import { formatCurrency } from '@/lib/format';
 
 export default function AdminDashboard() {
   const [data, setData] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
   const [confirmAction, setConfirmAction] = useState<{type: 'approve' | 'reject', id: string} | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   
-  const { toast } = useToast();
+  const { success, error } = useToast();
 
   const fetchDashboard = () => {
     setLoading(true);
@@ -39,14 +40,14 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`/api/admin/orders/${id}/${type}`, { method: 'POST' });
       if (res.ok) {
-        toast.success(type === 'approve' ? 'Đã duyệt thành công!' : 'Đã từ chối đơn hàng');
+        success(type === 'approve' ? 'Đã duyệt thành công!' : 'Đã từ chối đơn hàng');
         fetchDashboard();
       } else {
         const err = await res.json();
         throw new Error(err.error);
       }
     } catch (err: any) {
-      toast.error('Lỗi: ' + err.message);
+      error('Lỗi: ' + err.message);
     } finally {
       setActionLoading(false);
       setConfirmAction(null);
@@ -56,10 +57,9 @@ export default function AdminDashboard() {
   if (loading && !data) {
     return (
       <div className="animate-pulse space-y-6">
-        <div className="h-16 bg-fha-surface-2 rounded-lg"></div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-fha-surface-2 rounded-lg"></div>)}
-        </div>
+        <div className="h-16 bg-white border border-[var(--fha-border)] rounded-fha-lg"></div>
+        <div className="h-24 bg-white border border-[var(--fha-border)] rounded-fha-lg"></div>
+        <div className="h-64 bg-white border border-[var(--fha-border)] rounded-fha-lg"></div>
       </div>
     );
   }
@@ -72,17 +72,17 @@ export default function AdminDashboard() {
     {
       key: 'transaction_code',
       title: 'Mã GD',
-      render: (item) => <span className="font-mono text-fha-cyan">{item.transaction_code}</span>
+      render: (item) => <span className="font-mono text-[var(--fha-brand)] font-semibold">{item.transaction_code}</span>
     },
     {
       key: 'plan_id',
       title: 'Gói',
-      render: (item) => <span className="font-bold uppercase text-fha-text">{item.plan_id}</span>
+      render: (item) => <span className="font-bold uppercase text-[var(--fha-text)]">{item.plan_id}</span>
     },
     {
       key: 'amount',
       title: 'Số Tiền',
-      render: (item) => <span className="font-medium text-fha-text">{item.amount?.toLocaleString('vi-VN')}đ</span>
+      render: (item) => <span className="font-medium font-mono text-[var(--fha-text)]">{formatCurrency(item.amount)}</span>
     },
     {
       key: 'status',
@@ -107,48 +107,32 @@ export default function AdminDashboard() {
     }
   ];
 
+  const stripItems = [
+    { label: 'Tổng Users', value: stats.totalUsers },
+    { label: 'Active Licenses', value: stats.activeLicenses, highlight: 'success' as const },
+    { label: 'Tổng Lượt Scan', value: stats.totalScans?.toLocaleString() || 0 },
+    { label: 'Chờ Duyệt', value: stats.pendingOrders, highlight: stats.pendingOrders > 0 ? 'warning' as const : 'none' as const },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title="Tổng Quan Hệ Thống" 
         actions={
-          <Button variant="secondary" onClick={fetchDashboard} size="sm">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          <Button variant="secondary" onClick={fetchDashboard} size="sm" className="bg-white">
+            <svg className="w-[18px] h-[18px] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             Làm Mới
           </Button>
         }
       />
       
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <StatCard 
-          label="Tổng Users" 
-          value={stats.totalUsers} 
-          icon={<svg className="w-5 h-5 text-fha-text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
-        />
-        <StatCard 
-          label="Active Licenses" 
-          value={stats.activeLicenses}
-          className="border-fha-cyan-border shadow-fha-sm" 
-          icon={<svg className="w-5 h-5 text-fha-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>}
-        />
-        <StatCard 
-          label="Tổng Lượt Scan" 
-          value={stats.totalScans?.toLocaleString() || 0} 
-          icon={<svg className="w-5 h-5 text-fha-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-        />
-        <StatCard 
-          label="Chờ Duyệt" 
-          value={stats.pendingOrders} 
-          className={stats.pendingOrders > 0 ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)]" : ""}
-          icon={<svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-        />
-      </div>
+      <StatStrip items={stripItems} />
 
       {/* Recent Orders */}
-      <Card variant="default" padding="none">
-        <div className="px-6 py-4 border-b border-fha-border">
-          <h3 className="text-base font-semibold text-fha-text">Giao Dịch Gần Đây</h3>
+      <Card variant="default" padding="none" className="overflow-hidden">
+        <div className="px-6 py-5 border-b border-[var(--fha-border-strong)] bg-[var(--fha-surface-2)]">
+          <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Giao Dịch Gần Đây</h3>
         </div>
         <Table
           columns={columns}
@@ -156,7 +140,7 @@ export default function AdminDashboard() {
           rowKey={(item) => item.id}
           loading={loading}
           emptyState={
-            <div className="py-12 text-center text-fha-text-muted">Chưa có giao dịch nào</div>
+            <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Chưa có giao dịch nào</div>
           }
         />
       </Card>

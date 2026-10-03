@@ -5,6 +5,7 @@ import Table, { Column } from '@/components/ui/Table';
 import StatusBadge from '@/components/features/StatusBadge';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import { formatCurrency } from '@/lib/format';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -37,22 +38,22 @@ export default function AdminOrdersPage() {
     {
       key: 'transaction_code',
       title: 'Mã GD',
-      render: (item) => <span className="font-mono text-fha-cyan">{item.transaction_code}</span>
+      render: (item) => <span className="font-mono text-[var(--fha-brand)] font-semibold">{item.transaction_code}</span>
     },
     {
       key: 'email',
       title: 'Khách hàng',
-      render: (item) => <span className="text-fha-text">{item.email || 'N/A'}</span>
+      render: (item) => <span className="text-[var(--fha-text)]">{item.email || 'N/A'}</span>
     },
     {
       key: 'plan_id',
       title: 'Gói',
-      render: (item) => <span className="font-bold uppercase text-fha-text">{item.plan_id}</span>
+      render: (item) => <span className="font-bold uppercase text-[var(--fha-text)]">{item.plan_id}</span>
     },
     {
       key: 'amount',
       title: 'Số Tiền',
-      render: (item) => <span className="font-medium text-fha-text">{item.amount?.toLocaleString('vi-VN')}đ</span>
+      render: (item) => <span className="font-medium font-mono text-[var(--fha-text)]">{formatCurrency(item.amount)}</span>
     },
     {
       key: 'status',
@@ -62,37 +63,37 @@ export default function AdminOrdersPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title="Quản Lý Đơn Hàng" 
         description="Tất cả giao dịch nạp tiền và mua gói trên hệ thống"
       />
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="w-full sm:w-96">
+        <div className="w-full sm:w-[400px]">
           <Input 
             placeholder="Tìm kiếm mã GD, email, gói..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             leftIcon={
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             }
           />
         </div>
-        <Button variant="secondary" onClick={fetchOrders} size="sm">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        <Button variant="secondary" onClick={fetchOrders} size="sm" className="bg-white">
+          <svg className="w-[16px] h-[16px] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           Làm Mới
         </Button>
       </div>
 
-      <div className="bg-fha-surface rounded-fha-radius-lg border border-fha-border shadow-fha-md overflow-hidden">
+      <div className="bg-white rounded-fha-lg border border-[var(--fha-border)] overflow-hidden shadow-sm">
         <Table
           columns={columns}
           data={filteredOrders}
           rowKey={(item) => item.id}
           loading={loading}
           emptyState={
-            <div className="py-12 text-center text-fha-text-muted">Không tìm thấy đơn hàng nào</div>
+            <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Không tìm thấy đơn hàng nào</div>
           }
         />
       </div>

@@ -4,6 +4,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import Table, { Column } from '@/components/ui/Table';
 import StatusBadge from '@/components/features/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
+import { formatCurrency, formatDate } from '@/lib/format';
 
 export default function TransactionsPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -19,18 +20,28 @@ export default function TransactionsPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  const getPlanName = (planId: string) => {
+    switch (planId) {
+      case 'trial': return 'Trial (3 Ngày)';
+      case 'monthly': return '1 Tháng';
+      case 'quarterly': return '3 Tháng';
+      case 'yearly': return '1 Năm';
+      default: return planId?.toUpperCase() || 'Mua Key';
+    }
+  };
+
   const columns: Column<any>[] = [
     {
       key: 'transaction_code',
       title: 'Mã Giao Dịch',
-      render: (item) => <span className="font-mono text-fha-cyan">{item.transaction_code}</span>
+      render: (item) => <span className="font-mono text-[var(--fha-brand)] font-semibold">{item.transaction_code}</span>
     },
     {
       key: 'created_at',
       title: 'Thời Gian',
       render: (item) => (
-        <span className="text-fha-text-muted">
-          {new Date(item.created_at?._seconds ? item.created_at._seconds * 1000 : item.created_at).toLocaleString('vi-VN')}
+        <span className="text-[var(--fha-text-muted)] font-medium">
+          {formatDate(item.created_at?._seconds ? item.created_at._seconds * 1000 : item.created_at, true)}
         </span>
       )
     },
@@ -38,8 +49,8 @@ export default function TransactionsPage() {
       key: 'type',
       title: 'Loại / Gói',
       render: (item) => (
-        <span className="font-bold text-fha-text">
-          {item.type === 'DEPOSIT' ? 'Nạp Tiền' : (item.plan_id || 'Mua Key')}
+        <span className="font-bold text-[var(--fha-text)]">
+          {item.type === 'DEPOSIT' ? 'Nạp Tiền' : getPlanName(item.plan_id)}
         </span>
       )
     },
@@ -48,8 +59,8 @@ export default function TransactionsPage() {
       title: 'Số Tiền',
       align: 'right',
       render: (item) => (
-        <span className={`font-bold font-mono ${item.type === 'DEPOSIT' ? 'text-fha-success-text' : 'text-fha-text'}`}>
-          {item.type === 'DEPOSIT' ? '+' : ''}{item.amount?.toLocaleString('vi-VN')}đ
+        <span className={`font-bold font-mono tracking-tight ${item.type === 'DEPOSIT' ? 'text-[var(--fha-success)]' : 'text-[var(--fha-text)]'}`}>
+          {item.type === 'DEPOSIT' ? '+' : ''}{formatCurrency(item.amount)}
         </span>
       )
     },
@@ -62,13 +73,13 @@ export default function TransactionsPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title="Lịch Sử Giao Dịch" 
-        description="Chi tiết các giao dịch nạp tiền và mua gói của bạn"
+        description="Chi tiết các giao dịch mua gói của bạn"
       />
 
-      <div className="bg-fha-surface rounded-fha-radius-lg border border-fha-border shadow-fha-md overflow-hidden">
+      <div className="bg-white rounded-fha-lg border border-[var(--fha-border)] overflow-hidden shadow-sm">
         <Table
           columns={columns}
           data={orders}
@@ -78,7 +89,7 @@ export default function TransactionsPage() {
             <EmptyState 
               title="Chưa có giao dịch nào" 
               description="Lịch sử giao dịch của bạn sẽ hiển thị tại đây."
-              className="border-0 bg-transparent rounded-none my-8"
+              className="border-0 shadow-none my-8"
             />
           }
         />

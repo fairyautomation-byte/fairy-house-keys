@@ -4,7 +4,6 @@ import Link from 'next/link';
 import PlanCard, { Plan } from './PlanCard';
 import Skeleton from '../ui/Skeleton';
 
-// Fallback static plans in case API is not ready
 const STATIC_PLANS: Plan[] = [
   {
     id: 'trial',
@@ -12,7 +11,7 @@ const STATIC_PLANS: Plan[] = [
     price: 0,
     duration: '3 ngày',
     scanLimit: '100 lượt scan / ngày',
-    features: ['Dùng 1 lần duy nhất', 'Hỗ trợ cơ bản'],
+    features: ['Sử dụng 1 thiết bị', 'Hỗ trợ cơ bản'],
   },
   {
     id: 'monthly',
@@ -20,7 +19,7 @@ const STATIC_PLANS: Plan[] = [
     price: 69000,
     duration: '30 ngày',
     scanLimit: '1.000 lượt scan / ngày',
-    features: ['Nâng cấp linh hoạt', 'Hỗ trợ tiêu chuẩn'],
+    features: ['Sử dụng 1 thiết bị', 'Hỗ trợ tiêu chuẩn', 'Kích hoạt tự động'],
   },
   {
     id: 'quarterly',
@@ -28,7 +27,7 @@ const STATIC_PLANS: Plan[] = [
     price: 179000,
     duration: '90 ngày',
     scanLimit: '3.000 lượt scan / ngày',
-    features: ['Tiết kiệm chi phí', 'Hỗ trợ tiêu chuẩn'],
+    features: ['Sử dụng 1 thiết bị', 'Hỗ trợ tiêu chuẩn', 'Kích hoạt tự động'],
     popular: true,
   },
   {
@@ -37,7 +36,7 @@ const STATIC_PLANS: Plan[] = [
     price: 479000,
     duration: '365 ngày',
     scanLimit: 'Không giới hạn scan',
-    features: ['Hỗ trợ ưu tiên 24/7', 'Nhiều ưu đãi đặc biệt'],
+    features: ['Sử dụng 1 thiết bị', 'Hỗ trợ ưu tiên 24/7', 'Kích hoạt tự động'],
   }
 ];
 

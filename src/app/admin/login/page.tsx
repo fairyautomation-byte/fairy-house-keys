@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
+import Button from '@/components/ui/Button';
+import Alert from '@/components/ui/Alert';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -21,7 +26,7 @@ export default function AdminLoginPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        router.push('/admin/orders');
+        router.push('/admin');
         router.refresh();
       } else {
         setError(data.error || 'Sai thông tin đăng nhập');
@@ -34,54 +39,61 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0f1e] via-[#0d1429] to-[#0a0f1e] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm animate-fade-in">
+    <div className="min-h-screen bg-[var(--fha-surface-2)] flex items-center justify-center p-4 font-sans selection:bg-[var(--fha-brand-soft)]">
+      <div className="w-full max-w-[400px] animate-fade-in relative z-10">
+        
+        {/* Logo & Title */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-3xl mx-auto mb-4 glow-purple">
-            🔐
+          <div className="inline-flex items-center justify-center p-1 bg-white rounded-fha border border-[var(--fha-border-strong)] shadow-sm mb-5">
+            <Image src="/logo.png" alt="Admin Logo" width={48} height={48} className="rounded" />
           </div>
-          <h1 className="text-2xl font-black gradient-text">Admin Panel</h1>
-          <p className="text-slate-400 text-sm mt-1">Fairy House AutoData</p>
+          <h1 className="text-[24px] font-black tracking-tight text-[var(--fha-text)] mb-1">
+            Admin Panel
+          </h1>
+          <p className="text-[14px] font-medium text-[var(--fha-text-muted)]">
+            Fairy House AutoData
+          </p>
         </div>
 
-        <div className="glass rounded-2xl p-6 shadow-2xl">
+        {/* Login Form */}
+        <div className="bg-white rounded-fha-lg p-6 sm:p-8 shadow-sm border border-[var(--fha-border)]">
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-950/50 border border-red-500/40 text-red-200 text-sm">
-              ⚠️ {error}
+            <div className="mb-6">
+              <Alert type="danger" message={error} />
             </div>
           )}
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Tên đăng nhập</label>
-              <input
-                type="text"
-                value={form.username}
-                onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
-                className="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 transition-all"
-                placeholder="admin"
-                required
-              />
+          
+          <form onSubmit={handleLogin} className="space-y-5">
+            <Input
+              label="Tên đăng nhập"
+              placeholder="admin"
+              value={form.username}
+              onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
+              required
+              autoComplete="username"
+            />
+            
+            <PasswordInput
+              label="Mật khẩu"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+              required
+              autoComplete="current-password"
+            />
+            
+            <div className="pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={loading}
+                className="h-[48px]"
+              >
+                Đăng Nhập Quản Trị
+              </Button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Mật khẩu</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                className="w-full bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 transition-all"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-bold hover:brightness-110 transition-all shadow-lg disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Đang đăng nhập...</>
-              ) : '🔓 Đăng Nhập'}
-            </button>
           </form>
         </div>
       </div>

@@ -7,10 +7,17 @@ interface OTPInputProps {
   onChange: (val: string) => void;
   disabled?: boolean;
   error?: boolean;
+  onComplete?: (val: string) => void;
 }
 
-export default function OTPInput({ length = 6, value, onChange, disabled = false, error = false }: OTPInputProps) {
+export default function OTPInput({ length = 6, value, onChange, disabled = false, error = false, onComplete }: OTPInputProps) {
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  const checkComplete = (newVal: string) => {
+    if (newVal.length === length && onComplete) {
+      onComplete(newVal);
+    }
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (disabled) return;
@@ -22,12 +29,14 @@ export default function OTPInput({ length = 6, value, onChange, disabled = false
         
         const newValue = value.split('');
         newValue[index - 1] = '';
-        onChange(newValue.join(''));
+        const finalVal = newValue.join('');
+        onChange(finalVal);
       } else {
         // Clear current
         const newValue = value.split('');
         newValue[index] = '';
-        onChange(newValue.join(''));
+        const finalVal = newValue.join('');
+        onChange(finalVal);
       }
     } else if (e.key === 'ArrowLeft' && index > 0) {
       inputsRef.current[index - 1]?.focus();
@@ -52,6 +61,7 @@ export default function OTPInput({ length = 6, value, onChange, disabled = false
     
     const updatedValue = newValue.join('').replace(/\s/g, '');
     onChange(updatedValue);
+    checkComplete(updatedValue);
     
     // Focus next empty input or last input
     if (updatedValue.length < length) {
@@ -70,6 +80,8 @@ export default function OTPInput({ length = 6, value, onChange, disabled = false
     if (!pastedData) return;
     
     onChange(pastedData);
+    checkComplete(pastedData);
+    
     if (pastedData.length === length) {
       inputsRef.current[length - 1]?.focus();
       inputsRef.current[length - 1]?.blur();
@@ -95,13 +107,13 @@ export default function OTPInput({ length = 6, value, onChange, disabled = false
             onKeyDown={(e) => handleKeyDown(e, index)}
             onPaste={handlePaste}
             disabled={disabled}
-              className={`
-                w-10 h-12 sm:w-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-xl bg-fha-bg shadow-fha-inset transition-all outline-none border-none
-                ${disabled ? 'opacity-50 cursor-not-allowed text-fha-text-muted' : 'text-fha-text'}
-                ${error ? 'ring-1 ring-fha-error focus:ring-1 focus:ring-fha-error shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'focus:ring-1 focus:ring-fha-cyan'}
-                ${digit && !error ? 'text-fha-cyan ring-1 ring-fha-cyan/30' : ''}
-              `}
-            aria-label={`OTP digit ${index + 1}`}
+            className={`
+              w-11 h-14 sm:w-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-fha bg-white border transition-all outline-none
+              ${disabled ? 'opacity-50 cursor-not-allowed bg-[var(--fha-surface-2)] text-[var(--fha-text-muted)]' : 'text-[var(--fha-text)]'}
+              ${error ? 'border-[var(--fha-error)] focus:border-[var(--fha-error)] focus:ring-2 focus:ring-[var(--fha-error-border)] focus:ring-offset-0' : 'border-[var(--fha-border-strong)] focus:border-[var(--fha-brand)] focus:ring-2 focus:ring-[var(--fha-brand-soft-border)] focus:ring-offset-0'}
+              ${digit && !error ? 'border-[var(--fha-brand)] text-[var(--fha-brand)]' : ''}
+            `}
+            aria-label={`Ký tự OTP thứ ${index + 1}`}
           />
         );
       })}

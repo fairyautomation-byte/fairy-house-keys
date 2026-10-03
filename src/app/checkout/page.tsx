@@ -1,6 +1,9 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
+import { useToast } from '@/components/ui/ToastProvider';
 
 const PLAN_PRICES: Record<string, {name: string, price: number, features: string[]}> = {
   trial: { name: '3 Ngày Dùng Thử', price: 0, features: ['100 lượt scan/ngày', 'Dùng 1 lần duy nhất'] },
@@ -17,8 +20,10 @@ function CheckoutContent() {
   const [selectedPlanId, setSelectedPlanId] = useState(initialPlan);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [successState, setSuccessState] = useState(false);
   const [orderInfo, setOrderInfo] = useState<{transactionCode: string, amount: number} | null>(null);
+  
+  const { success } = useToast();
 
   // Fallback if invalid initial plan
   useEffect(() => {
@@ -53,7 +58,7 @@ function CheckoutContent() {
           transactionCode: data.transactionCode,
           amount: data.amount
         });
-        setSuccess(true);
+        setSuccessState(true);
       }
     } catch (err: any) {
       setError(err.message);
@@ -64,48 +69,44 @@ function CheckoutContent() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Đã copy: ' + text);
+    success('Đã copy: ' + text);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex py-12 px-4 sm:px-6 relative overflow-hidden font-sans">
-      {/* Background Aurora Orbs */}
-      <div className="absolute top-[0%] left-[20%] w-[50%] h-[50%] rounded-full bg-violet-600/20 blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[0%] right-[20%] w-[50%] h-[50%] rounded-full bg-cyan-600/20 blur-[120px] pointer-events-none"></div>
-
-      <div className="max-w-4xl w-full mx-auto space-y-8 relative z-10">
+    <div className="min-h-screen bg-[var(--fha-surface-2)] flex py-12 px-4 sm:px-6 relative overflow-hidden font-sans">
+      <div className="max-w-[800px] w-full mx-auto space-y-8 relative z-10">
         
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">Thanh toán</h1>
-          <p className="mt-3 text-slate-400">Chọn gói dịch vụ phù hợp với nhu cầu của bạn</p>
+        <div className="text-center mb-8">
+          <h1 className="text-[32px] font-black text-[var(--fha-text)] tracking-tight">Thanh toán</h1>
+          <p className="mt-3 text-[var(--fha-text-muted)]">Chọn gói dịch vụ phù hợp với nhu cầu của bạn</p>
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20 text-center font-medium">
-            {error}
-          </div>
+          <Alert type="danger" message={error} />
         )}
 
-        {!success ? (
-          <div className="bg-slate-900/60 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl border border-slate-700/50">
-            <h2 className="text-xl font-bold mb-6 border-b border-slate-700/50 pb-4 text-white">Chọn Gói Đăng Ký</h2>
+        {!successState ? (
+          <div className="bg-white p-8 sm:p-10 rounded-fha-lg shadow-sm border border-[var(--fha-border)]">
+            <h2 className="text-[20px] font-bold mb-6 border-b border-[var(--fha-border)] pb-4 text-[var(--fha-text)]">Chọn Gói Đăng Ký</h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {Object.entries(PLAN_PRICES).map(([id, p]) => (
                 <div 
                   key={id}
                   onClick={() => setSelectedPlanId(id)}
-                  className={`cursor-pointer rounded-2xl p-5 border transition-all flex flex-col relative overflow-hidden ${selectedPlanId === id ? 'bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]' : 'bg-slate-950/50 border-slate-700/80 hover:border-slate-500'}`}
+                  className={`cursor-pointer rounded-fha p-5 border transition-all flex flex-col relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] ${selectedPlanId === id ? 'bg-[var(--fha-brand-soft)] border-[var(--fha-brand)] shadow-sm' : 'bg-white border-[var(--fha-border-strong)] hover:border-[var(--fha-text-muted)]'}`}
+                  tabIndex={0}
+                  onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') setSelectedPlanId(id); }}
                 >
-                  {selectedPlanId === id && <div className="absolute top-0 right-0 bg-cyan-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">ĐANG CHỌN</div>}
-                  <h3 className="text-lg font-bold text-slate-200 mb-1">{p.name}</h3>
-                  <p className={`font-black text-2xl mb-4 pb-4 border-b border-slate-800/80 ${selectedPlanId === id ? 'text-cyan-400' : 'text-slate-400'}`}>
+                  {selectedPlanId === id && <div className="absolute top-0 right-0 bg-[var(--fha-brand)] text-white text-[10px] font-bold px-2 py-1 rounded-bl">ĐANG CHỌN</div>}
+                  <h3 className="text-[15px] font-bold text-[var(--fha-text)] mb-1">{p.name}</h3>
+                  <p className={`font-black text-[22px] mb-4 pb-4 border-b ${selectedPlanId === id ? 'text-[var(--fha-brand)] border-[var(--fha-brand)]/20' : 'text-[var(--fha-text)] border-[var(--fha-border)]'}`}>
                     {p.price === 0 ? 'Miễn phí' : `${p.price.toLocaleString('vi-VN')}đ`}
                   </p>
                   <ul className="space-y-2 mt-auto">
                     {p.features.map((f, i) => (
-                      <li key={i} className="text-[13px] text-slate-400 flex items-start gap-2">
-                        <span className={`font-bold mt-0.5 ${selectedPlanId === id ? 'text-cyan-400' : 'text-slate-600'}`}>✓</span>
+                      <li key={i} className="text-[13px] text-[var(--fha-text-muted)] flex items-start gap-2">
+                        <span className={`font-bold mt-0.5 ${selectedPlanId === id ? 'text-[var(--fha-brand)]' : 'text-[var(--fha-text-muted)]'}`}>✓</span>
                         {f}
                       </li>
                     ))}
@@ -114,57 +115,56 @@ function CheckoutContent() {
               ))}
             </div>
             
-            <div className="flex justify-between items-center mb-8 pb-8 border-b border-slate-700/50">
-              <span className="text-slate-400 text-lg">Tổng tiền thanh toán:</span>
-              <span className="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
+            <div className="flex justify-between items-center mb-8 pb-8 border-b border-[var(--fha-border)]">
+              <span className="text-[var(--fha-text-muted)] text-[16px] font-medium">Tổng tiền thanh toán:</span>
+              <span className="font-black text-[28px] text-[var(--fha-text)]">
                 {plan.price === 0 ? 'Miễn phí' : `${plan.price.toLocaleString('vi-VN')}đ`}
               </span>
             </div>
 
-            <button 
+            <Button 
               onClick={handleCheckout} 
-              disabled={loading}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all disabled:opacity-50 text-lg mb-4"
+              loading={loading}
+              size="lg"
+              variant="primary"
+              fullWidth
+              className="mb-4 h-[52px] text-[16px]"
             >
-              {loading ? 'Đang xử lý...' : (isTrial ? 'Kích hoạt ngay' : 'Tiến hành thanh toán')}
-            </button>
+              {isTrial ? 'Kích hoạt dùng thử ngay' : 'Tiến hành thanh toán'}
+            </Button>
 
-            <button
+            <Button
               onClick={() => router.push('/')}
-              className="w-full py-3.5 rounded-xl bg-transparent border border-slate-700 text-slate-400 font-medium hover:bg-slate-800 hover:text-white transition-all text-sm flex items-center justify-center gap-2"
+              variant="ghost"
+              fullWidth
+              className="text-[var(--fha-text-muted)]"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-              Để tôi suy nghĩ thêm, về Trang Chủ
-            </button>
+              <svg className="w-[18px] h-[18px] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+              Trở về Trang Chủ
+            </Button>
           </div>
         ) : (
-          <div className="bg-slate-900/80 backdrop-blur-3xl p-1 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-700/50 overflow-hidden max-w-4xl mx-auto w-full animate-fade-in">
+          <div className="bg-white rounded-fha-lg shadow-sm border border-[var(--fha-border)] overflow-hidden max-w-[800px] mx-auto w-full animate-fade-in">
             {/* Header / Banner */}
-            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-violet-600 p-6 text-center rounded-t-3xl border-b border-slate-700/50">
-              <h2 className="text-2xl font-extrabold text-white mb-1 uppercase tracking-wide drop-shadow-md">Thông tin thanh toán</h2>
-              <p className="text-cyan-100/90 text-sm font-medium">Fairy House Auto Data</p>
+            <div className="bg-[var(--fha-surface-2)] p-6 text-center border-b border-[var(--fha-border)]">
+              <h2 className="text-[20px] font-black text-[var(--fha-text)] uppercase tracking-wide">Thông tin chuyển khoản</h2>
+              <p className="text-[var(--fha-text-muted)] text-[13px] font-medium mt-1">Fairy House Auto Data</p>
             </div>
             
-            <div className="p-6 md:p-10 bg-slate-900 grid grid-cols-1 md:grid-cols-2 gap-10 rounded-b-3xl relative">
+            <div className="p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-10 relative">
               
               {/* Left: QR Code */}
-              <div className="flex flex-col items-center justify-center bg-slate-950/60 rounded-3xl p-8 border border-slate-800/80 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                <div className="p-4 bg-white rounded-2xl shadow-[0_0_40px_rgba(6,182,212,0.15)] relative mb-6 transition-transform duration-300 group-hover:scale-[1.02]">
+              <div className="flex flex-col items-center justify-center bg-[var(--fha-surface-2)] rounded-fha-lg p-8 border border-[var(--fha-border-strong)] relative overflow-hidden">
+                <div className="p-4 bg-white rounded-fha border border-[var(--fha-border-strong)] relative mb-6">
                   <img 
                     src={`https://img.vietqr.io/image/970422-0378791667-compact2.png?amount=${orderInfo?.amount}&addInfo=${orderInfo?.transactionCode}&accountName=Nguyen%20Minh%20Tri`} 
                     alt="VietQR" 
                     className="w-56 h-56 object-contain"
                   />
-                  {/* Decorative corners */}
-                  <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-cyan-500 rounded-tl-xl"></div>
-                  <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-cyan-500 rounded-tr-xl"></div>
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-cyan-500 rounded-bl-xl"></div>
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-cyan-500 rounded-br-xl"></div>
                 </div>
-                <h3 className="text-cyan-400 font-bold uppercase tracking-widest text-sm mb-2">Quét mã QR</h3>
-                <p className="text-center text-xs text-slate-400 leading-relaxed">
-                  Sử dụng ứng dụng ngân hàng để quét.<br/>Vui lòng kiểm tra đúng người nhận trước khi thanh toán.
+                <h3 className="text-[var(--fha-text)] font-bold uppercase tracking-widest text-[13px] mb-2">Quét mã QR</h3>
+                <p className="text-center text-[12px] text-[var(--fha-text-muted)] leading-relaxed font-medium">
+                  Sử dụng ứng dụng ngân hàng để quét.<br/>Kiểm tra đúng số tiền và nội dung trước khi thanh toán.
                 </p>
               </div>
 
@@ -172,12 +172,12 @@ function CheckoutContent() {
               <div className="flex flex-col justify-center space-y-6">
                 
                 {/* Plan Info */}
-                <div className="flex justify-between items-center bg-slate-800/60 p-5 rounded-2xl border border-slate-700/80 shadow-inner">
+                <div className="flex justify-between items-center bg-[var(--fha-brand-soft)] p-5 rounded-fha border border-[var(--fha-brand)]/20">
                   <div>
-                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1 font-semibold">Gói đang chọn</div>
-                    <div className="text-lg font-bold text-white">{plan.name}</div>
+                    <div className="text-[11px] text-[var(--fha-brand)] uppercase tracking-wider mb-1 font-bold">Gói đang chọn</div>
+                    <div className="text-[16px] font-bold text-[var(--fha-text)]">{plan.name}</div>
                   </div>
-                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                  <div className="text-[22px] font-black text-[var(--fha-brand)]">
                     {orderInfo?.amount.toLocaleString('vi-VN')}đ
                   </div>
                 </div>
@@ -185,65 +185,62 @@ function CheckoutContent() {
                 {/* Details List */}
                 <div className="space-y-1">
                   
-                  <div className="flex justify-between items-center py-3 border-b border-slate-800/60 group">
-                    <span className="text-sm text-slate-400 font-medium">Ngân hàng</span>
-                    <span className="font-bold text-slate-200">MB Bank</span>
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--fha-border)]">
+                    <span className="text-[14px] text-[var(--fha-text-muted)] font-medium">Ngân hàng</span>
+                    <span className="font-bold text-[var(--fha-text)]">MB Bank</span>
                   </div>
 
-                  <div className="flex justify-between items-center py-3 border-b border-slate-800/60 group">
-                    <span className="text-sm text-slate-400 font-medium">Tên người nhận</span>
-                    <span className="font-bold text-slate-200 uppercase">Nguyễn Minh Trí</span>
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--fha-border)]">
+                    <span className="text-[14px] text-[var(--fha-text-muted)] font-medium">Người nhận</span>
+                    <span className="font-bold text-[var(--fha-text)] uppercase">Nguyễn Minh Trí</span>
                   </div>
 
-                  <div className="flex justify-between items-center py-3 border-b border-slate-800/60 group">
-                    <span className="text-sm text-slate-400 font-medium">Số tài khoản</span>
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--fha-border)]">
+                    <span className="text-[14px] text-[var(--fha-text-muted)] font-medium">Số tài khoản</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-rose-400 tracking-wider text-base">0378791667</span>
-                      <button onClick={() => copyToClipboard('0378791667')} className="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 text-cyan-400 hover:bg-cyan-500 hover:text-white transition-colors border border-slate-700 font-medium">Sao chép</button>
+                      <span className="font-bold text-[var(--fha-text)] tracking-wider text-[15px] font-mono">0378791667</span>
+                      <button onClick={() => copyToClipboard('0378791667')} className="text-[12px] px-3 py-1.5 rounded bg-white text-[var(--fha-text)] border border-[var(--fha-border-strong)] hover:border-[var(--fha-brand)] hover:text-[var(--fha-brand)] font-semibold transition-colors">Copy</button>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center py-3 border-b border-slate-800/60 group">
-                    <span className="text-sm text-slate-400 font-medium">Số tiền</span>
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--fha-border)]">
+                    <span className="text-[14px] text-[var(--fha-text-muted)] font-medium">Số tiền</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-emerald-400 tracking-wider text-base">{orderInfo?.amount.toLocaleString('vi-VN')}</span>
-                      <button onClick={() => copyToClipboard(orderInfo?.amount.toString() || '')} className="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 text-cyan-400 hover:bg-cyan-500 hover:text-white transition-colors border border-slate-700 font-medium">Sao chép</button>
+                      <span className="font-bold text-[var(--fha-text)] tracking-wider text-[15px] font-mono">{orderInfo?.amount.toLocaleString('vi-VN')}</span>
+                      <button onClick={() => copyToClipboard(orderInfo?.amount.toString() || '')} className="text-[12px] px-3 py-1.5 rounded bg-white text-[var(--fha-text)] border border-[var(--fha-border-strong)] hover:border-[var(--fha-brand)] hover:text-[var(--fha-brand)] font-semibold transition-colors">Copy</button>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center py-3 border-b border-slate-800/60 group">
-                    <span className="text-sm text-slate-400 font-medium">Nội dung CK</span>
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--fha-border)]">
+                    <span className="text-[14px] text-[var(--fha-text-muted)] font-medium">Nội dung CK</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-yellow-400 tracking-wider bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20 text-base">{orderInfo?.transactionCode}</span>
-                      <button onClick={() => copyToClipboard(orderInfo?.transactionCode || '')} className="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 text-cyan-400 hover:bg-cyan-500 hover:text-white transition-colors border border-slate-700 font-medium">Sao chép</button>
+                      <span className="font-bold text-[var(--fha-brand)] tracking-wider text-[15px] font-mono">{orderInfo?.transactionCode}</span>
+                      <button onClick={() => copyToClipboard(orderInfo?.transactionCode || '')} className="text-[12px] px-3 py-1.5 rounded bg-white text-[var(--fha-text)] border border-[var(--fha-border-strong)] hover:border-[var(--fha-brand)] hover:text-[var(--fha-brand)] font-semibold transition-colors">Copy</button>
                     </div>
                   </div>
 
                 </div>
 
                 {/* Warning / Note */}
-                <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/30 rounded-2xl p-4 text-sm text-amber-200/90 leading-relaxed">
-                  <strong className="text-amber-400 block mb-1.5 flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Lưu ý quan trọng
-                  </strong>
-                  Vui lòng nhập chính xác <strong>Nội dung CK</strong> ở trên. Sau khi chuyển khoản thành công, hãy chụp lại biên lai và gửi qua Zalo để được duyệt và kích hoạt tài khoản nhanh nhất.
-                </div>
+                <Alert 
+                  type="warning"
+                  title="Lưu ý quan trọng"
+                  message="Vui lòng nhập chính xác Nội dung CK ở trên. Sau khi chuyển khoản thành công, chụp biên lai gửi qua Zalo để được kích hoạt nhanh nhất."
+                />
 
                 {/* Actions */}
-                <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <a 
                     href="https://zalo.me/0378791667" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:shadow-[0_0_25px_rgba(37,99,235,0.6)]"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-fha bg-[#0068ff] hover:bg-[#0055d4] text-white font-bold transition-colors shadow-sm text-[14px]"
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21.144 10.457c0-4.63-4.225-8.457-9.457-8.457-5.232 0-9.457 3.827-9.457 8.457 0 4.629 4.225 8.457 9.457 8.457 1.157 0 2.257-.184 3.284-.523l3.655 2.115c.348.201.769-.074.721-.476l-.422-3.159c1.65-1.579 2.676-3.834 2.676-6.414z"/></svg>
                     Gửi biên lai Zalo
                   </a>
-                  <button onClick={() => router.push('/dashboard')} className="flex items-center justify-center px-4 py-3.5 rounded-full bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 hover:text-white transition-all border border-slate-600">
-                    Trở về Trang Quản Lý
-                  </button>
+                  <Button onClick={() => router.push('/dashboard')} variant="secondary" className="w-full h-full text-[14px]">
+                    Về Trang Quản Lý
+                  </Button>
                 </div>
 
               </div>

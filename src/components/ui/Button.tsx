@@ -2,7 +2,7 @@ import React, { ButtonHTMLAttributes } from 'react';
 import Spinner from './Spinner';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'link';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'link' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   fullWidth?: boolean;
@@ -20,20 +20,27 @@ export default function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fha-cyan disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = [
+    'inline-flex items-center justify-center gap-2',
+    'font-semibold rounded-fha',
+    'transition-colors duration-150',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--fha-brand)]',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+  ].join(' ');
   
   const sizeStyles = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-2.5 text-sm',
-    lg: 'px-8 py-3.5 text-base'
+    sm: 'h-8 px-3 text-sm',
+    md: 'h-10 px-4 text-sm',
+    lg: 'h-11 px-5 text-md',
   };
 
   const variantStyles = {
-    primary: 'bg-fha-cyan text-[#0a0f1a] shadow-fha-outset hover:bg-fha-cyan-hover hover:brightness-110 active:shadow-fha-inset active:translate-y-[2px]',
-    secondary: 'bg-fha-surface-2 text-fha-text shadow-fha-outset hover:bg-fha-surface-3 active:shadow-fha-inset active:translate-y-[2px]',
-    ghost: 'bg-transparent text-fha-text hover:bg-white/10 active:bg-white/5',
-    danger: 'bg-fha-error text-white shadow-fha-outset hover:bg-red-600 active:shadow-fha-inset active:translate-y-[2px]',
-    link: 'bg-transparent text-fha-cyan hover:underline p-0'
+    primary: 'bg-[var(--fha-brand)] text-white hover:bg-[var(--fha-brand-hover)] active:bg-[var(--fha-brand-active)]',
+    secondary: 'bg-white text-[var(--fha-text)] border border-[var(--fha-border-strong)] hover:bg-[var(--fha-surface-2)] active:bg-[var(--fha-surface-3)]',
+    outline: 'bg-white text-[var(--fha-text)] border border-[var(--fha-border-strong)] hover:bg-[var(--fha-surface-2)] active:bg-[var(--fha-surface-3)]',
+    ghost: 'bg-transparent text-[var(--fha-text-muted)] hover:bg-[var(--fha-surface-2)] active:bg-[var(--fha-surface-3)]',
+    danger: 'bg-[var(--fha-error)] text-white hover:bg-[#991B1B] active:bg-[#7F1D1D]',
+    link: 'bg-transparent text-[var(--fha-brand)] hover:underline p-0 h-auto',
   };
 
   return (
@@ -43,9 +50,9 @@ export default function Button({
       {...props}
     >
       {loading ? (
-        <Spinner size="sm" color={variant === 'primary' || variant === 'danger' ? 'white' : 'cyan'} className="mr-2" />
+        <Spinner size="sm" color={variant === 'primary' || variant === 'danger' ? 'white' : 'brand'} />
       ) : icon ? (
-        <span className="mr-2">{icon}</span>
+        <span className="shrink-0">{icon}</span>
       ) : null}
       {children}
     </button>

@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Design tokens — single source of truth */
 @import '../styles/tokens.css';
+
+/* Font loaded via next/font in layout.tsx — NO @import here */
 
 * {
   box-sizing: border-box;
@@ -14,125 +16,106 @@ body {
   background: var(--fha-bg);
   color: var(--fha-text);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global focus visible */
+/* ── Focus ring ── */
 *:focus-visible {
   outline: none;
   box-shadow: var(--fha-shadow-focus);
 }
 
-/* Base form reset */
+/* ── Base form reset ── */
 input, textarea, select, button {
   font-family: inherit;
 }
 
-/* Monospace text utility */
+/* ── Typography utilities ── */
 .fha-mono {
   font-family: var(--fha-font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Custom scrollbar */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Custom scrollbar (light) ── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #111827; }
-::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+::-webkit-scrollbar-track { background: var(--fha-bg); }
+::-webkit-scrollbar-thumb { background: var(--fha-border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fha-text-faint); }
 
-/* Glass morphism */
-.glass {
-  background: rgba(17, 24, 39, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--fha-border-muted);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, var(--fha-cyan), #7c3aed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glow effect */
-.glow-purple {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
-}
-.glow-cyan {
-  box-shadow: var(--fha-shadow-glow);
-}
-.glow-emerald {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-}
-
-/* Key display */
+/* ── Key display ── */
 .key-display {
   font-family: var(--fha-font-mono);
-  letter-spacing: 2px;
-  background: var(--fha-surface-2);
-  border: 1px solid var(--fha-cyan-border);
+  letter-spacing: 1.5px;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Shimmer loading */
+/* ── Shimmer loading ── */
 .shimmer {
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.05) 50%,
-    rgba(255,255,255,0) 100%
+    var(--fha-surface-2) 0%,
+    var(--fha-surface-3) 50%,
+    var(--fha-surface-2) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* ── Animations ── */
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* Animations */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-}
-
 .animate-fade-in {
-  animation: fade-in 0.4s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slideUp 0.3s ease-out;
 }
 
-.animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
-}
-
-/* Pricing card hover */
-.pricing-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.pricing-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-/* Fix browser autofill styling */
+/* ── Fix browser autofill ── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-    transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
-    -webkit-text-fill-color: var(--fha-text) !important;
-    caret-color: var(--fha-text) !important;
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: var(--fha-text) !important;
+  caret-color: var(--fha-text) !important;
+}
+
+/* ── Legacy classes (resolve harmlessly, will be removed per-page) ── */
+.glass {
+  background: var(--fha-surface);
+  border: 1px solid var(--fha-border);
+}
+
+.gradient-text {
+  color: var(--fha-brand);
+  /* No gradient — flat brand color */
+}
+
+.glow-purple,
+.glow-cyan,
+.glow-emerald {
+  /* Removed — no glow in Direction A */
+}
+
+.pricing-hover {
+  transition: border-color var(--fha-transition-fast);
+}
+.pricing-hover:hover {
+  border-color: var(--fha-brand);
 }

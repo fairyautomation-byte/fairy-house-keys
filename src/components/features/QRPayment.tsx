@@ -1,7 +1,7 @@
 import React from 'react';
-import Image from 'next/image';
 import Button from '../ui/Button';
 import Spinner from '../ui/Spinner';
+import { formatCurrency } from '@/lib/format';
 
 export type PaymentState = 'loading' | 'pending' | 'checking' | 'success' | 'expired' | 'failed';
 
@@ -31,7 +31,7 @@ export default function QRPayment({
   onCancel
 }: QRPaymentProps) {
   const [currentTimeLeft, setCurrentTimeLeft] = React.useState(timeLeft);
-  const [redirectCountdown, setRedirectCountdown] = React.useState(10);
+  const [redirectCountdown, setRedirectCountdown] = React.useState(5);
 
   React.useEffect(() => {
     if (state === 'success' && redirectCountdown > 0) {
@@ -66,46 +66,50 @@ export default function QRPayment({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  const formatCurrency = (val: number) => val.toLocaleString('vi-VN') + 'đ';
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // Ideally useToast here, but for simplicity we rely on OS visual feedback or just the quick flash
+  };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-fha-glass backdrop-blur-2xl rounded-3xl border border-fha-glass-border shadow-fha-outset overflow-hidden">
+    <div className="w-full max-w-[420px] mx-auto bg-white rounded-fha-lg border border-[var(--fha-border)] shadow-fha-md overflow-hidden">
       
       {/* Header */}
-      <div className="bg-fha-surface/40 p-5 border-b border-fha-glass-border text-center relative">
-        <h3 className="text-lg font-bold text-fha-text">Thanh Toán Chuyển Khoản</h3>
-        <p className="text-sm text-fha-text-muted mt-1">Mã đơn: <span className="font-mono text-fha-cyan">{transactionCode}</span></p>
+      <div className="bg-[var(--fha-surface-2)] p-5 border-b border-[var(--fha-border)] text-center relative">
+        <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Thanh Toán Chuyển Khoản</h3>
+        <p className="text-[13px] text-[var(--fha-text-muted)] mt-1">Mã đơn: <span className="font-mono text-[var(--fha-brand)] font-semibold">{transactionCode}</span></p>
         
         {displayState === 'pending' && currentTimeLeft > 0 && (
-          <div className="absolute top-5 right-5 text-fha-warning bg-fha-warning-bg px-2 py-1 rounded text-xs font-bold font-mono">
+          <div className="absolute top-5 right-5 text-[var(--fha-warning-text)] bg-[var(--fha-warning-bg)] border border-[var(--fha-warning-border)] px-2 py-1 rounded text-xs font-bold font-mono">
             {formatTime(currentTimeLeft)}
           </div>
         )}
       </div>
 
-      <div className="p-6 flex flex-col items-center">
+      <div className="p-6 sm:p-8 flex flex-col items-center">
         
         {/* State Content */}
-        <div className="w-full max-w-[240px] aspect-square rounded-2xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 shadow-fha-outset border-4 border-fha-surface/50">
+        <div className="w-full max-w-[220px] aspect-square rounded-2xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 border-2 border-[var(--fha-border-strong)]">
           
           {displayState === 'loading' && (
-            <div className="w-full h-full bg-slate-200 animate-shimmer" />
+            <div className="w-full h-full shimmer" />
           )}
 
           {displayState === 'pending' && qrUrl && (
-            <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain p-2" />
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain p-1" />
           )}
 
           {displayState === 'checking' && (
-            <div className="absolute inset-0 bg-white/90 backdrop-blur flex flex-col items-center justify-center text-slate-800">
-              <Spinner size="lg" color="cyan" />
+            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center text-[var(--fha-text)]">
+              <Spinner size="lg" color="brand" />
               <p className="mt-4 font-semibold text-sm">Đang xác nhận...</p>
             </div>
           )}
 
           {displayState === 'success' && (
-            <div className="absolute inset-0 bg-emerald-50 flex flex-col items-center justify-center text-emerald-600">
-              <svg className="w-16 h-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="absolute inset-0 bg-[var(--fha-success-bg)] flex flex-col items-center justify-center text-[var(--fha-success)]">
+              <svg className="w-14 h-14 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="font-bold">Thành công!</p>
@@ -113,7 +117,7 @@ export default function QRPayment({
           )}
 
           {displayState === 'expired' && (
-            <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center text-slate-500">
+            <div className="absolute inset-0 bg-[var(--fha-surface-2)] flex flex-col items-center justify-center text-[var(--fha-text-muted)]">
               <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -122,7 +126,7 @@ export default function QRPayment({
           )}
 
           {displayState === 'failed' && (
-            <div className="absolute inset-0 bg-rose-50 flex flex-col items-center justify-center text-rose-500">
+            <div className="absolute inset-0 bg-[var(--fha-error-bg)] flex flex-col items-center justify-center text-[var(--fha-error)]">
               <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -133,37 +137,45 @@ export default function QRPayment({
 
         {/* Amount */}
         <div className="text-center mb-6">
-          <p className="text-sm text-fha-text-muted mb-1">Số tiền thanh toán</p>
-          <div className="text-3xl font-black font-mono text-fha-cyan">
+          <p className="text-[13px] font-medium text-[var(--fha-text-muted)] mb-1">Số tiền thanh toán</p>
+          <div className="text-[32px] font-bold font-mono tracking-tight text-[var(--fha-brand)]">
             {formatCurrency(amount)}
           </div>
         </div>
 
         {(displayState === 'pending' || displayState === 'loading' || displayState === 'checking') && bankInfo && (
-          <div className="w-full bg-fha-bg shadow-fha-inset rounded-xl p-4 space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-fha-text-muted">Ngân hàng</span>
-              <span className="font-semibold text-fha-text">{bankInfo.bankName}</span>
+          <div className="w-full bg-[var(--fha-surface-2)] border border-[var(--fha-border)] rounded-fha p-4 space-y-3 text-[13px]">
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--fha-text-muted)]">Ngân hàng</span>
+              <span className="font-medium text-[var(--fha-text)]">{bankInfo.bankName}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-fha-text-muted">Số tài khoản</span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-bold text-fha-text">{bankInfo.accountNumber}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--fha-text-muted)]">Chủ tài khoản</span>
+              <span className="font-medium text-[var(--fha-text)] uppercase">{bankInfo.accountName}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[var(--fha-text-muted)]">Số tài khoản</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono font-semibold text-[var(--fha-text)]">{bankInfo.accountNumber}</span>
                 <button 
-                  onClick={() => navigator.clipboard.writeText(bankInfo.accountNumber)}
-                  className="text-fha-cyan hover:text-fha-cyan-hover"
+                  onClick={() => handleCopy(bankInfo.accountNumber)}
+                  className="p-1 rounded text-[var(--fha-text-faint)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-brand-soft)] transition-colors"
+                  aria-label="Sao chép số tài khoản"
+                  title="Sao chép"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 </button>
               </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-fha-text-muted">Nội dung (Bắt buộc)</span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-bold text-fha-warning">{transactionCode}</span>
+            <div className="flex justify-between items-start pt-3 border-t border-[var(--fha-border-strong)]">
+              <span className="text-[var(--fha-text-muted)] mt-0.5">Nội dung (Bắt buộc)</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono font-bold text-[var(--fha-brand)]">{transactionCode}</span>
                 <button 
-                  onClick={() => navigator.clipboard.writeText(transactionCode)}
-                  className="text-fha-cyan hover:text-fha-cyan-hover"
+                  onClick={() => handleCopy(transactionCode)}
+                  className="p-1 rounded text-[var(--fha-text-faint)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-brand-soft)] transition-colors"
+                  aria-label="Sao chép nội dung"
+                  title="Sao chép"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 </button>
@@ -186,9 +198,9 @@ export default function QRPayment({
           )}
 
           {displayState === 'success' && (
-            <div className="w-full space-y-3">
-              <p className="text-[13px] text-fha-text-muted text-center">
-                Giao dịch hoàn tất. Tự động quay về Trang Quản Lý sau <span className="font-bold text-fha-text">{redirectCountdown}s</span>...
+            <div className="w-full space-y-4">
+              <p className="text-sm text-[var(--fha-text-muted)] text-center">
+                Giao dịch hoàn tất. Tự động quay về Trang Quản Lý sau <span className="font-bold text-[var(--fha-text)]">{redirectCountdown}s</span>...
               </p>
               <Button variant="primary" fullWidth onClick={() => window.location.href = '/dashboard'}>
                 Vào Trang Quản Lý

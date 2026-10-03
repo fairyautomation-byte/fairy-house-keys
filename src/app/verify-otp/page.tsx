@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import OTPInput from '@/components/features/OTPInput';
+import Alert from '@/components/ui/Alert';
 
 function VerifyOTPContent() {
   const router = useRouter();
@@ -109,64 +110,62 @@ function VerifyOTPContent() {
   };
 
   return (
-    <div className="min-h-screen bg-fha-bg flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--fha-surface-2)] flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
-
-
       {/* Logo */}
-      <Link href="/" className="mb-8 flex items-center gap-3 relative z-10 hover:scale-105 transition-transform">
-        <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-full shadow-fha-cyan" />
-        <span className="font-bold text-xl tracking-tight text-fha-text">
-          Fairy House <span className="text-fha-cyan">AutoData</span>
-        </span>
+      <Link href="/" className="mb-8 flex flex-col items-center gap-3 relative z-10 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded-fha">
+        <Image src="/logo.png" alt="Logo" width={48} height={48} className="rounded" />
       </Link>
 
-      <div className="w-full max-w-[440px] bg-fha-glass backdrop-blur-2xl shadow-fha-outset rounded-3xl border border-fha-glass-border overflow-hidden animate-slide-up relative z-10">
-        <div className="p-8 sm:p-10">
+      <div className="w-full max-w-[420px] bg-white shadow-fha-lg rounded-fha-lg border border-[var(--fha-border)] overflow-hidden animate-slide-up relative z-10">
+        <div className="p-6 sm:p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-fha-text mb-2">Xác thực Email</h1>
-            <p className="text-sm text-fha-text-muted">
+            <h1 className="text-[22px] font-bold text-[var(--fha-text)] mb-1">Xác thực Email</h1>
+            <p className="text-[14px] text-[var(--fha-text-muted)]">
               Chúng tôi đã gửi mã xác thực đến
               <br />
-              <strong className="text-fha-text">{email}</strong>
+              <strong className="text-[var(--fha-text)]">{email}</strong>
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-3 bg-fha-error-bg border border-fha-error-border rounded-fha-radius text-sm text-fha-error-text font-medium text-center">
+            <Alert variant="danger" className="mb-6">
               {error}
-            </div>
+            </Alert>
           )}
 
           {resendMessage && !success && (
-            <div className="mb-6 p-3 bg-fha-success-bg border border-fha-success-border rounded-fha-radius text-sm text-fha-success-text font-medium text-center">
+            <Alert variant="success" className="mb-6">
               {resendMessage}
-            </div>
+            </Alert>
           )}
 
           {success ? (
             <div className="py-8 text-center animate-fade-in flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full bg-fha-success-bg border-2 border-fha-success flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-fha-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 rounded-full bg-[var(--fha-success-bg)] border-2 border-[var(--fha-success)] flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-[var(--fha-success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-fha-text mb-2">Xác thực thành công!</h3>
-              <p className="text-fha-success-text text-sm">Đang chuyển hướng...</p>
+              <h3 className="text-xl font-bold text-[var(--fha-text)] mb-2">Xác thực thành công!</h3>
+              <p className="text-[var(--fha-success)] text-sm">Đang chuyển hướng...</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <OTPInput 
-                length={6} 
-                value={otp} 
-                onChange={setOtp} 
-                disabled={loading} 
-                error={!!error}
-              />
-
-              <div className="text-center text-[12px] text-fha-warning bg-fha-warning-bg/50 px-3 py-2 rounded-lg border border-fha-warning-border">
-                💡 Vui lòng kiểm tra cả hộp thư <strong>Spam (Thư rác)</strong>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-[13px] font-medium text-[var(--fha-text-muted)] mb-2">Mã xác thực (OTP)</label>
+                <OTPInput 
+                  length={6} 
+                  value={otp} 
+                  onChange={setOtp} 
+                  disabled={loading} 
+                  error={!!error}
+                />
               </div>
+
+              <Alert variant="warning">
+                Vui lòng kiểm tra cả hộp thư <strong>Spam (Thư rác)</strong>
+              </Alert>
 
               <Button 
                 type="submit" 
@@ -175,6 +174,7 @@ function VerifyOTPContent() {
                 size="lg" 
                 loading={loading}
                 disabled={otp.length !== 6}
+                className="h-[44px]"
               >
                 Xác Thực
               </Button>
@@ -184,16 +184,16 @@ function VerifyOTPContent() {
 
         {/* Footer Link */}
         {!success && (
-          <div className="px-8 py-5 border-t border-fha-border bg-fha-surface text-center flex flex-col gap-3">
+          <div className="px-6 py-5 border-t border-[var(--fha-border)] bg-[var(--fha-surface-2)] text-center flex flex-col gap-3">
             <button
               onClick={handleResend}
               disabled={resendLoading || countdown > 0}
-              className="text-sm font-medium text-fha-text-muted hover:text-fha-text transition-colors disabled:opacity-50 disabled:hover:text-fha-text-muted"
+              className="text-[14px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)] transition-colors disabled:opacity-50 disabled:hover:text-[var(--fha-text-muted)] focus-visible:outline-none focus-visible:underline"
             >
               {resendLoading ? 'Đang gửi...' : countdown > 0 ? `Gửi lại mã (${countdown}s)` : 'Gửi lại mã xác thực'}
             </button>
-            <div className="text-sm">
-              <Link href="/register" className="text-fha-text-faint hover:text-fha-text transition-colors">
+            <div className="text-[14px]">
+              <Link href="/register" className="text-[var(--fha-text-faint)] hover:text-[var(--fha-text)] transition-colors focus-visible:outline-none focus-visible:underline">
                 &larr; Quay lại trang đăng ký
               </Link>
             </div>
@@ -206,7 +206,7 @@ function VerifyOTPContent() {
 
 export default function VerifyOTPPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-fha-bg flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-fha-cyan/20 border-t-fha-cyan rounded-full"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--fha-surface-2)] flex items-center justify-center"><div className="shimmer w-10 h-10 rounded-fha"></div></div>}>
       <VerifyOTPContent />
     </Suspense>
   );

@@ -9,11 +9,11 @@ interface PageHeaderProps {
 
 export default function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-fha-border">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--fha-border)]">
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-fha-text">{title}</h1>
+        <h1 className="text-[22px] md:text-2xl font-bold text-[var(--fha-text)] tracking-tight">{title}</h1>
         {description && (
-          <p className="text-[13px] md:text-sm text-fha-text-muted mt-1">{description}</p>
+          <p className="text-sm text-[var(--fha-text-muted)] mt-1">{description}</p>
         )}
       </div>
       {actions && (

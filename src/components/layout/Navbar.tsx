@@ -13,28 +13,28 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full h-[60px] bg-fha-glass backdrop-blur-2xl border-b border-fha-glass-border shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full h-[64px] bg-white border-b border-[var(--fha-border)] shadow-sm">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
           
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3">
-              <Image src="/logo.png" alt="Fairy House Logo" width={32} height={32} className="rounded-full shadow-fha-cyan" />
-              <span className="font-bold text-base tracking-tight text-fha-text hidden sm:block">
-                Fairy House <span className="text-fha-cyan">AutoData</span>
+            <Link href="/" className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded-fha">
+              <Image src="/logo.png" alt="Fairy House Logo" width={32} height={32} className="rounded" />
+              <span className="font-bold text-base tracking-tight text-[var(--fha-text)] hidden sm:block">
+                Fairy House <span className="text-[var(--fha-brand)]">AutoData</span>
               </span>
             </Link>
           </div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/#features" className="text-[14px] font-medium text-fha-text-muted hover:text-fha-text transition-colors">
+            <Link href="/#features" className="text-[14px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
               Tính Năng
             </Link>
-            <Link href="/#pricing" className="text-[14px] font-medium text-fha-text-muted hover:text-fha-text transition-colors">
+            <Link href="/#pricing" className="text-[14px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
               Bảng Giá
             </Link>
-            <Link href="/#faq" className="text-[14px] font-medium text-fha-text-muted hover:text-fha-text transition-colors">
+            <Link href="/#faq" className="text-[14px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
               FAQ
             </Link>
           </nav>
@@ -61,8 +61,8 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
           <div className="md:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 -mr-2 text-fha-text-muted hover:text-fha-text focus:outline-none"
-              aria-label="Open menu"
+              className="p-2 -mr-2 text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)] rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)]"
+              aria-label="Mở menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -74,31 +74,31 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] flex justify-end md:hidden">
+        <div className="fixed inset-0 z-50 flex justify-end md:hidden">
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+            className="fixed inset-0 bg-[#111827]/45 transition-opacity" 
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="relative w-64 max-w-full bg-fha-glass backdrop-blur-3xl border-l border-fha-glass-border h-full shadow-[0_0_40px_rgba(0,0,0,0.8)] flex flex-col p-6 animate-slide-up">
+          <div className="relative w-[280px] max-w-[85vw] bg-white border-l border-[var(--fha-border)] h-full shadow-fha-overlay flex flex-col pt-[64px] animate-fade-in">
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute top-4 right-4 p-2 text-fha-text-muted hover:text-fha-text"
-              aria-label="Close menu"
+              className="absolute top-3 right-3 p-2 text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)] rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)]"
+              aria-label="Đóng menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             
-            <div className="flex flex-col gap-6 mt-8">
-              <nav className="flex flex-col gap-4">
-                <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-fha-text-muted hover:text-fha-text">Tính Năng</Link>
-                <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-fha-text-muted hover:text-fha-text">Bảng Giá</Link>
-                <Link href="/#faq" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-fha-text-muted hover:text-fha-text">FAQ</Link>
+            <div className="flex flex-col gap-6 p-6">
+              <nav className="flex flex-col gap-5">
+                <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-[15px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)]">Tính Năng</Link>
+                <Link href="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[15px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)]">Bảng Giá</Link>
+                <Link href="/#faq" onClick={() => setMobileMenuOpen(false)} className="text-[15px] font-medium text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)]">FAQ</Link>
               </nav>
 
-              <div className="h-px bg-fha-border w-full" />
+              <div className="h-px bg-[var(--fha-border)] w-full" />
 
               <div className="flex flex-col gap-3">
                 {isLoggedIn ? (

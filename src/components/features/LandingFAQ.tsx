@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 
 const faqs = [
   { q: 'Trial có hoàn toàn miễn phí không?', a: 'Chắc chắn rồi. Gói Trial hoàn toàn miễn phí trong 3 ngày với hạn mức 100 lượt scan/ngày để bạn trải nghiệm sức mạnh của Extension.' },
-  { q: 'Sau khi thanh toán tôi phải làm gì?', a: 'Sau khi thanh toán qua QR code, hệ thống sẽ tự động duyệt đơn của bạn trong vòng vài giây đến vài phút và kích hoạt key ngay lập tức.' },
-  { q: 'Khi hết lượt scan trong ngày thì sao?', a: 'Hệ thống sẽ tạm dừng quét và tự động cấp lại đầy đủ số lượt scan mới vào lúc 00:00 (giờ Việt Nam) ngày hôm sau.' },
-  { q: 'Tôi có thể mua nhiều Key cùng lúc không?', a: 'Hệ thống hiện tại cấp phát Key độc lập cho mỗi lần mua. Bạn có thể mua nhiều Key để sử dụng cho nhiều thiết bị hoặc nhân viên khác nhau. Khi Key cũ hết hạn, bạn chỉ cần mua Key mới và nhập vào Extension.' }
+  { q: 'Sau khi thanh toán tôi phải làm gì?', a: 'Sau khi chuyển khoản, hệ thống PayOS sẽ tự động duyệt đơn của bạn trong vài giây và cung cấp Key ngay lập tức trên màn hình.' },
+  { q: 'Khi hết lượt scan trong ngày thì sao?', a: 'Hệ thống sẽ tạm dừng tính năng và tự động cấp lại đầy đủ số lượt scan mới vào lúc 00:00 (giờ Việt Nam) mỗi ngày.' },
+  { q: '1 Key có thể dùng trên nhiều máy không?', a: 'Không. 1 Key chỉ được sử dụng cho 1 thiết bị duy nhất. Nếu bạn có nhiều thiết bị hoặc nhiều nhân viên, vui lòng mua số lượng Key tương ứng.' }
 ];
 
 export default function LandingFAQ() {
@@ -16,21 +16,21 @@ export default function LandingFAQ() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {faqs.map((faq, index) => {
         const isOpen = openIndex === index;
         return (
           <div 
             key={index} 
-            className={`border rounded-2xl overflow-hidden transition-colors ${isOpen ? 'border-fha-cyan-border bg-fha-surface-2' : 'border-fha-border bg-fha-surface/50 hover:border-fha-border-muted'}`}
+            className={`border rounded-fha transition-colors ${isOpen ? 'border-[var(--fha-border-strong)] bg-white shadow-fha-sm' : 'border-[var(--fha-border)] bg-[var(--fha-surface-2)] hover:border-[var(--fha-border-strong)]'}`}
           >
             <button
               onClick={() => toggle(index)}
-              className="w-full px-6 py-4 flex items-center justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fha-cyan"
+              className="w-full px-5 py-4 flex items-center justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded-fha"
             >
-              <span className="font-semibold text-fha-text">{faq.q}</span>
+              <span className={`font-semibold ${isOpen ? 'text-[var(--fha-brand)]' : 'text-[var(--fha-text)]'}`}>{faq.q}</span>
               <svg 
-                className={`w-5 h-5 text-fha-text-muted transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+                className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[var(--fha-brand)]' : 'text-[var(--fha-text-muted)]'}`} 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
@@ -39,9 +39,9 @@ export default function LandingFAQ() {
               </svg>
             </button>
             <div 
-              className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-40 pb-4 opacity-100' : 'max-h-0 opacity-0'}`}
+              className={`px-5 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-40 pb-5 opacity-100' : 'max-h-0 opacity-0'}`}
             >
-              <p className="text-sm text-fha-text-muted leading-relaxed">
+              <p className="text-sm text-[var(--fha-text-muted)] leading-relaxed">
                 {faq.a}
               </p>
             </div>

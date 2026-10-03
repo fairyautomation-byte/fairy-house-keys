@@ -1,7 +1,7 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes, useId } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+  label?: React.ReactNode;
   error?: string;
   hint?: string;
   leftIcon?: React.ReactNode;
@@ -18,44 +18,62 @@ export default function Input({
   id,
   ...props
 }: InputProps) {
-  const inputId = id || Math.random().toString(36).substr(2, 9);
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const errorId = `${inputId}-error`;
+  const hintId = `${inputId}-hint`;
   
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <label htmlFor={inputId} className="text-[13px] font-medium text-fha-text-muted">
-          {label} {props.required && <span className="text-fha-error">*</span>}
+        <label htmlFor={inputId} className="text-[13px] font-medium text-[var(--fha-text-muted)]">
+          {label} {props.required && <span className="text-[var(--fha-error)]">*</span>}
         </label>
       )}
       
       <div className="relative">
         {leftIcon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-fha-text-muted">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fha-text-faint)] pointer-events-none">
             {leftIcon}
           </div>
         )}
         
         <input
           id={inputId}
-          className={`w-full bg-fha-bg border-none shadow-fha-inset text-fha-text text-sm rounded-xl placeholder-fha-text-faint
-            transition-all focus:outline-none focus:ring-1 focus:ring-fha-cyan
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${leftIcon ? 'pl-11' : 'pl-4'} 
-            ${rightIcon ? 'pr-11' : 'pr-4'} 
-            ${error ? 'ring-1 ring-fha-error focus:ring-fha-error' : ''}
-            py-3`}
+          aria-invalid={!!error}
+          aria-describedby={
+            error ? errorId : hint ? hintId : undefined
+          }
+          className={`w-full bg-white border text-sm rounded-fha text-[var(--fha-text)] placeholder-[var(--fha-text-faint)]
+            transition-colors duration-150 h-10
+            focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-[var(--fha-brand)] focus:ring-[var(--fha-brand-soft-border)]
+            disabled:opacity-50 disabled:bg-[var(--fha-surface-2)] disabled:cursor-not-allowed
+            ${leftIcon ? 'pl-10' : 'pl-3'} 
+            ${rightIcon ? 'pr-10' : 'pr-3'} 
+            ${error 
+              ? 'border-[var(--fha-error)] focus:border-[var(--fha-error)] focus:ring-[var(--fha-error-border)]' 
+              : 'border-[var(--fha-border-strong)]'
+            }`}
           {...props}
         />
         
         {rightIcon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-fha-text-muted">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fha-text-muted)]">
             {rightIcon}
           </div>
         )}
       </div>
       
-      {error && <p className="text-[13px] text-fha-error" role="alert" aria-live="polite">{error}</p>}
-      {hint && !error && <p className="text-[13px] text-fha-text-muted">{hint}</p>}
+      {error && (
+        <p id={errorId} className="text-[13px] text-[var(--fha-error)]" role="alert" aria-live="polite">
+          {error}
+        </p>
+      )}
+      {hint && !error && (
+        <p id={hintId} className="text-[13px] text-[var(--fha-text-muted)]">
+          {hint}
+        </p>
+      )}
     </div>
   );
 }

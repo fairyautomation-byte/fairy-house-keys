@@ -22,29 +22,33 @@ export default function Modal({ open, onClose, title, children, footer, size = '
     if (open) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      // Basic focus trap - focus modal on open
+      setTimeout(() => {
+        if (modalRef.current) modalRef.current.focus();
+      }, 10);
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     }
     
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [open, onClose]);
 
   if (!open) return null;
 
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-xl',
-    lg: 'max-w-3xl'
+    sm: 'sm:max-w-[480px]',
+    md: 'sm:max-w-[640px]',
+    lg: 'sm:max-w-[800px]'
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-[#111827]/45 transition-opacity" 
         onClick={onClose}
         aria-hidden="true"
       />
@@ -52,15 +56,16 @@ export default function Modal({ open, onClose, title, children, footer, size = '
       {/* Modal panel */}
       <div 
         ref={modalRef}
-        className={`relative w-full ${sizeClasses[size]} bg-fha-surface-2 rounded-fha-radius-lg shadow-fha-lg border border-fha-border flex flex-col max-h-[90vh] animate-slide-up`}
+        tabIndex={-1}
+        className={`relative w-full ${sizeClasses[size]} bg-white rounded-t-xl sm:rounded-fha-lg shadow-fha-overlay border border-[var(--fha-border)] flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-slide-up sm:animate-fade-in outline-none`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-fha-text-muted hover:text-fha-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fha-cyan rounded"
-          aria-label="Close"
+          className="absolute top-4 right-4 text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)] p-1.5 rounded-fha transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)]"
+          aria-label="Đóng"
         >
           <svg className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
             <path d="M6 18L18 6M6 6l12 12"></path>
@@ -68,19 +73,19 @@ export default function Modal({ open, onClose, title, children, footer, size = '
         </button>
 
         {title && (
-          <div className="px-6 py-4 border-b border-fha-border">
-            <h3 id="modal-title" className="text-lg font-semibold text-fha-text">
+          <div className="px-5 sm:px-6 py-4 border-b border-[var(--fha-border)]">
+            <h3 id="modal-title" className="text-lg font-semibold text-[var(--fha-text)] pr-8">
               {title}
             </h3>
           </div>
         )}
 
-        <div className="p-6 overflow-y-auto">
+        <div className="p-5 sm:p-6 overflow-y-auto">
           {children}
         </div>
 
         {footer && (
-          <div className="px-6 py-4 border-t border-fha-border bg-fha-surface/50 flex justify-end gap-3 rounded-b-fha-radius-lg">
+          <div className="px-5 sm:px-6 py-4 border-t border-[var(--fha-border)] bg-[var(--fha-surface-2)] flex flex-col-reverse sm:flex-row justify-end gap-3 sm:rounded-b-fha-lg">
             {footer}
           </div>
         )}
@@ -120,20 +125,21 @@ export function ConfirmModal({
       size={size}
       footer={
         <>
-          <Button variant="ghost" onClick={onCancel || onClose} disabled={loading}>
+          <Button variant="secondary" onClick={onCancel || onClose} disabled={loading} fullWidth className="sm:w-auto">
             {cancelText}
           </Button>
           <Button 
             variant={danger ? 'danger' : 'primary'} 
             onClick={onConfirm}
             loading={loading}
+            fullWidth className="sm:w-auto"
           >
             {confirmText}
           </Button>
         </>
       }
     >
-      <div className="text-fha-text-muted">
+      <div className="text-[var(--fha-text-muted)] text-[15px] leading-relaxed">
         {message}
       </div>
     </Modal>
