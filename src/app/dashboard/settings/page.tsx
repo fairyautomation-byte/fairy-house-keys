@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -124,6 +125,24 @@ export default function SettingsPage() {
               </Button>
             </div>
           </form>
+        </Card>
+
+        {/* Navigation Section */}
+        <Card variant="default">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Trang chủ website</h3>
+              <p className="text-[13px] text-[var(--fha-text-muted)] mt-1">Quay lại trang giới thiệu sản phẩm và bảng giá</p>
+            </div>
+            <Link href="/" passHref className="w-full sm:w-auto">
+              <Button variant="secondary" fullWidth className="sm:w-auto justify-center">
+                <svg className="w-4 h-4 mr-2 text-[var(--fha-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Về Trang Chủ Web
+              </Button>
+            </Link>
+          </div>
         </Card>
 
         {/* Logout Section */}

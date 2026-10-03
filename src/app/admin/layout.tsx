@@ -54,13 +54,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">Admin Portal</span>
             </Link>
           </div>
-          <button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[var(--fha-error)] hover:bg-[var(--fha-error-bg)] rounded-fha border border-[var(--fha-error-border)] transition-colors active:scale-95 disabled:opacity-50"
-          >
-            <span>{loggingOut ? 'Thoát...' : 'Đăng xuất'}</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <Link
+              href="/"
+              className="px-2 py-1 text-xs font-semibold text-[var(--fha-text)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)] transition-colors"
+            >
+              Trang chủ
+            </Link>
+            <button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[var(--fha-error)] hover:bg-[var(--fha-error-bg)] rounded-fha border border-[var(--fha-error-border)] transition-colors active:scale-95 disabled:opacity-50"
+            >
+              <span>{loggingOut ? 'Thoát...' : 'Đăng xuất'}</span>
+            </button>
+          </div>
         </header>
 
         {/* Admin Mobile Drawer */}
