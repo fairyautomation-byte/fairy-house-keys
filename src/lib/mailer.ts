@@ -248,7 +248,7 @@ export async function sendOTPEmail(email: string, otp: string) {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
     to: email,
-    subject: `[Fairy House] Mã xác thực của bạn: ${otp}`,
+    subject: `[Fairy House Auto Data] Mã xác thực của bạn: ${otp}`,
     html: `
       <!DOCTYPE html>
       <html>

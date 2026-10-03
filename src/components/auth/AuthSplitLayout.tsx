@@ -87,7 +87,9 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
         <div className="w-full max-w-[420px] mb-6 flex items-center justify-between lg:hidden">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Logo" width={28} height={28} className="rounded" />
-            <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">Fairy House</span>
+            <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">
+              Fairy House <span className="text-[var(--fha-brand)]">AutoData</span>
+            </span>
           </Link>
           <Link href="/" className="text-xs font-semibold text-[var(--fha-brand)] hover:underline">
             Về Trang Chủ &rarr;

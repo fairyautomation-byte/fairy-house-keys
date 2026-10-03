@@ -34,7 +34,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <header className="md:hidden flex items-center justify-between px-4 h-14 bg-white border-b border-[var(--fha-border)] shrink-0 sticky top-0 z-30">
           <Link href="/dashboard" className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
             <Image src="/logo.png" alt="Logo" width={28} height={28} className="rounded shrink-0" />
-            <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">Fairy House</span>
+            <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">
+              Fairy House <span className="text-[var(--fha-brand)]">AutoData</span>
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             <Link 

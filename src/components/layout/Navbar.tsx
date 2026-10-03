@@ -118,7 +118,9 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
             <div className="px-6 pb-4 border-b border-[var(--fha-border)] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image src="/logo.png" alt="Logo" width={28} height={28} className="rounded" />
-                <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">Fairy House</span>
+                <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">
+                  Fairy House <span className="text-[var(--fha-brand)]">AutoData</span>
+                </span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
