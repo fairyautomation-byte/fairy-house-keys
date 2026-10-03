@@ -25,6 +25,21 @@ try {
     set: async () => {},
     update: async () => {},
     add: async () => {},
+    batch: () => ({
+      set: () => {},
+      update: () => {},
+      delete: () => {},
+      commit: async () => {},
+    }),
+    runTransaction: async (fn: any) => {
+      const tx = {
+        get: async (ref: any) => ({ exists: false, data: () => ({}) }),
+        set: () => {},
+        update: () => {},
+        delete: () => {},
+      };
+      return await fn(tx);
+    },
   };
 }
 
