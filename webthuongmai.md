@@ -218,6 +218,31 @@ interface OTPDocument {
 
 ---
 
+### 4.3 TIÊU CHUẨN BẢO MẬT NÂNG CAO CHỐNG CRACK (ENTERPRISE ANTI-CRACKING)
+
+Để bảo vệ bản quyền tuyệt đối cho các sản phẩm Chrome Extension thương mại, bắt buộc áp dụng 5 chốt chặn sau:
+
+#### 1. Khóa Cứng Định Danh Thiết Bị (Hardware ID Lock)
+* **Nguyên lý:** Phía Extension tạo mã `deviceId` duy nhất dựa trên `chrome.storage.local.get('device_id')` hoặc thông số phần cứng kết hợp `crypto.randomUUID()`.
+* **Kích hoạt lần đầu:** Server kiểm tra, nếu `license.device_id === null` $\rightarrow$ ghi nhận `license.device_id = deviceId`.
+* **Chặn dùng chung:** Nếu máy khác gửi key này với `deviceId` khác $\rightarrow$ Server lập tức trả về `403 FORBIDDEN (HARDWARE_MISMATCH)`. Người dùng muốn đổi máy phải liên hệ hỗ trợ để Admin bấm nút "Reset Thiết Bị" trên trang Admin.
+
+#### 2. Chống Dịch Ngược Code Extension (Extension Code Obfuscation)
+* **Nguyên lý:** Code JavaScript chạy trên Chrome rất dễ bị người dùng mở DevTools để sửa `if (valid)`.
+* **Biện pháp:** Trước khi nén file `.zip` phát hành cho khách hàng, toàn bộ code Extension phải được đóng gói qua **Terser** hoặc **JavaScript-Obfuscator** (xáo trộn tên biến, mã hóa chuỗi ký tự, làm rối luồng điều khiển Control Flow Flattening).
+
+#### 3. Cấp Token Ký Số Theo Phiên (Signed Session Token)
+* Khi gọi `validate` thành công, server trả về 1 JWT `scan_token` được ký bằng bí mật server (thời hạn 24 giờ).
+* Khi Extension gọi `scan`, server bắt buộc kiểm tra `scan_token`. Khách hàng không thể tự gửi request giả mạo nếu không có token do server cấp.
+
+#### 4. Mã Hóa Mật Khẩu Bằng Bcrypt
+* Toàn bộ mật khẩu người dùng trong collection `users` phải được băm bằng thuật toán `bcryptjs` với hệ số làm chậm `saltRounds = 10` hoặc `12`, vô hiệu hóa hoàn toàn nguy cơ quét từ điển bằng GPU nếu chẳng may database bị rò rỉ.
+
+#### 5. Bảo Vệ Concurrency Bằng Firestore Transaction
+* Mọi hành động nhạy cảm liên quan đến tiền bạc (Nạp ví PayOS, Trừ tiền mua Key, Trừ lượt scan) bắt buộc phải bọc trong `db.runTransaction()`. Cơ chế khoá nguyên tử này ngăn chặn triệt để tấn công Race-Condition (gửi 100 request đồng thời để mua nhiều key với cùng 1 số dư).
+
+---
+
 ## 5. QUY CHUẨN THIẾT KẾ BỐ CỤC UI/UX (SKILL `ui-ux`)
 
 Tuyệt đối không sử dụng cùng một bố cục chung cho tất cả các trang. Từng màn hình phải có cấu trúc riêng biệt đáp ứng mục tiêu người dùng:
