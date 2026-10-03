@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Fairy House Auto Data';
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://fairy-house-keys.vercel.app';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://fairyautomation.io.vn';
 const ADMIN_EMAIL = process.env.GMAIL_USER || '';
 const SUPPORT_ZALO = '0378791667';
 
