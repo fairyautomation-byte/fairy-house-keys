@@ -9,11 +9,24 @@ import { useToast } from '@/components/ui/ToastProvider';
 export default function SettingsPage() {
   const { success, error } = useToast();
   const [loading, setLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [form, setForm] = useState({
     oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    } catch (err) {
+      setLoggingOut(false);
+      error('Không thể đăng xuất');
+    }
+  };
 
   const handleChange = (name: string, value: string) => {
     setForm({ ...form, [name]: value });
@@ -111,6 +124,29 @@ export default function SettingsPage() {
               </Button>
             </div>
           </form>
+        </Card>
+
+        {/* Logout Section */}
+        <Card variant="default">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Đăng xuất tài khoản</h3>
+              <p className="text-[13px] text-[var(--fha-text-muted)] mt-1">Đăng xuất khỏi phiên làm việc trên thiết bị này</p>
+            </div>
+            <Button 
+              variant="danger" 
+              onClick={handleLogout}
+              loading={loggingOut}
+              className="w-full sm:w-auto"
+              icon={
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              }
+            >
+              Đăng xuất
+            </Button>
+          </div>
         </Card>
       </div>
     </div>

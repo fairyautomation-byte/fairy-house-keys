@@ -63,8 +63,8 @@ export default function Home() {
                 <div className="flex-1 bg-white border border-[var(--fha-border)] h-7 rounded flex items-center px-3 justify-center text-[12px] text-[var(--fha-text-muted)] font-mono">
                   facebook.com/groups/target
                 </div>
-                <div className="w-8 h-7 bg-white border border-[var(--fha-border-strong)] rounded flex items-center justify-center text-[var(--fha-brand)] text-[11px] font-black">
-                  FH
+                <div className="w-8 h-7 bg-white border border-[var(--fha-border-strong)] rounded flex items-center justify-center overflow-hidden p-0.5">
+                  <Image src="/logo.png" alt="Extension" width={20} height={20} className="rounded-sm" />
                 </div>
               </div>
               <div className="w-full aspect-[16/9] relative flex flex-col p-8 bg-[url('/grid-pattern.svg')] bg-center bg-cover">
@@ -217,9 +217,7 @@ export default function Home() {
       <footer className="bg-[var(--fha-surface-2)] border-t border-[var(--fha-border)] py-12">
         <div className="max-w-[1200px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-white border border-[var(--fha-border-strong)] flex items-center justify-center text-[var(--fha-brand)] font-black text-[12px]">
-              FH
-            </div>
+            <Image src="/logo.png" alt="Fairy House AutoData Logo" width={32} height={32} className="rounded shrink-0" />
             <span className="font-bold text-[var(--fha-text)] text-sm tracking-tight">Fairy House AutoData</span>
           </div>
           

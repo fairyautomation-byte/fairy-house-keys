@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -76,9 +78,15 @@ function CheckoutContent() {
     <div className="min-h-screen bg-[var(--fha-surface-2)] flex py-12 px-4 sm:px-6 relative overflow-hidden font-sans">
       <div className="max-w-[800px] w-full mx-auto space-y-8 relative z-10">
         
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Link href="/" className="mb-4 inline-flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded p-1">
+            <Image src="/logo.png" alt="Fairy House" width={40} height={40} className="rounded shrink-0" />
+            <span className="font-bold text-base tracking-tight text-[var(--fha-text)]">
+              Fairy House <span className="text-[var(--fha-brand)]">AutoData</span>
+            </span>
+          </Link>
           <h1 className="text-[32px] font-black text-[var(--fha-text)] tracking-tight">Thanh toán</h1>
-          <p className="mt-3 text-[var(--fha-text-muted)]">Chọn gói dịch vụ phù hợp với nhu cầu của bạn</p>
+          <p className="mt-2 text-[var(--fha-text-muted)]">Chọn gói dịch vụ phù hợp với nhu cầu của bạn</p>
         </div>
 
         {error && (

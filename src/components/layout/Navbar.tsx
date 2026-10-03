@@ -81,6 +81,10 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
             aria-hidden="true"
           />
           <div className="relative w-[280px] max-w-[85vw] bg-white border-l border-[var(--fha-border)] h-full shadow-fha-overlay flex flex-col pt-[64px] animate-fade-in">
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <Image src="/logo.png" alt="Logo" width={28} height={28} className="rounded" />
+              <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">Fairy House</span>
+            </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="absolute top-3 right-3 p-2 text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)] rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)]"
