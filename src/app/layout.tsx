@@ -29,6 +29,15 @@ export const metadata: Metadata = {
   title: 'Fairy House AutoData — Quét data Facebook & kết bạn tự động',
   description: 'Mua license key Fairy House AutoData V2.0 — Chrome Extension quét data khách hàng Facebook, tự động kết bạn theo UID. Kích hoạt tức thì, hỗ trợ 24/7.',
   keywords: ['fairy house autodata', 'quét data facebook', 'kết bạn tự động', 'chrome extension', 'license key'],
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
   openGraph: {
     title: 'Fairy House AutoData — Quét data Facebook & kết bạn tự động',
     description: 'Chrome Extension quét data khách hàng Facebook, tự động kết bạn theo UID. Mua license, kích hoạt tức thì.',
