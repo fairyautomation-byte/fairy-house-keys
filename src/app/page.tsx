@@ -167,24 +167,24 @@ export default function Home() {
       {/* ======================================================== */}
       <section className="py-16 sm:py-20 bg-white border-t border-[var(--fha-border)]">
         <div className="fha-container-standard">
-          <div className="bg-[var(--fha-surface-2)] rounded-fha-lg border-2 border-[var(--fha-border-strong)] p-8 sm:p-12 shadow-fha-sm">
-            <div className="grid lg:grid-cols-12 gap-8 items-center">
+          <div className="bg-[var(--fha-surface-2)] rounded-fha-lg border-2 border-[var(--fha-border-strong)] p-8 sm:p-12 3xl:p-16 shadow-fha-sm">
+            <div className="grid lg:grid-cols-12 gap-8 3xl:gap-12 items-center">
               
-              <div className="lg:col-span-8 space-y-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-2.5 py-1 rounded">
+              <div className="lg:col-span-8 space-y-3 3xl:space-y-4">
+                <span className="text-[10px] 3xl:text-xs font-bold uppercase tracking-wider text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-2.5 py-1 rounded">
                   Bắt Đầu Ngay Hôm Nay
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-[var(--fha-text)] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl 3xl:text-4xl font-black text-[var(--fha-text)] tracking-tight">
                   Sẵn Sàng Nhân Đôi Doanh Số Bán Hàng Online Của Bạn?
                 </h2>
-                <p className="text-sm text-[var(--fha-text-muted)] leading-relaxed max-w-xl">
+                <p className="text-sm 3xl:text-base text-[var(--fha-text-muted)] leading-relaxed max-w-xl 3xl:max-w-2xl">
                   Trải nghiệm đầy đủ sức mạnh quét data tự động với gói dùng thử 3 Ngày hoàn toàn miễn phí. Kích hoạt tức thì, không rủi ro.
                 </p>
               </div>
 
               <div className="lg:col-span-4 flex flex-col gap-3">
                 <Link href={isLoggedIn ? "/dashboard" : "/register"} passHref>
-                  <Button variant="primary" fullWidth size="lg" className="h-[48px] text-sm font-bold">
+                  <Button variant="primary" fullWidth size="lg" className="h-[48px] 3xl:h-[56px] text-sm 3xl:text-base font-bold">
                     {isLoggedIn ? "Vào Trang Quản Lý" : "Tạo Tài Khoản & Nhận Key (0đ)"}
                   </Button>
                 </Link>

@@ -36,33 +36,33 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
             </span>
           </Link>
 
-          <div className="mt-16 space-y-4 max-w-lg">
-            <span className="px-3 py-1 rounded bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] text-xs font-bold uppercase tracking-wider border border-[var(--fha-brand)]">
+          <div className="mt-16 space-y-4 max-w-lg 3xl:max-w-xl">
+            <span className="px-3 py-1 rounded bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] text-xs 3xl:text-sm font-bold uppercase tracking-wider border border-[var(--fha-brand)]">
               Tiện Ích Số 1 Tiếp Cận Khách Hàng
             </span>
-            <h2 className="text-3xl font-black text-[var(--fha-text)] tracking-tight leading-snug">
+            <h2 className="text-3xl 3xl:text-4xl font-black text-[var(--fha-text)] tracking-tight leading-snug">
               Tự Động Hóa Quét UID Khách Hàng. Chống Checkpoint Tuyệt Đối.
             </h2>
-            <p className="text-sm text-[var(--fha-text-muted)] leading-relaxed">
+            <p className="text-sm 3xl:text-base text-[var(--fha-text-muted)] leading-relaxed">
               Hệ thống bản quyền 1 Key / 1 Thiết bị với công nghệ mô phỏng hành vi người thật Human-Emulation 2.0. Kích hoạt tự động tức thì qua PayOS.
             </p>
           </div>
 
           {/* Value Metric Chips */}
-          <div className="mt-8 grid grid-cols-2 gap-3.5 max-w-md">
-            <div className="bg-white p-3.5 rounded-fha border border-[var(--fha-border)] shadow-fha-sm">
-              <div className="text-lg font-black font-mono text-[var(--fha-text)]">15,000+ UID</div>
-              <div className="text-[11px] text-[var(--fha-text-muted)] mt-0.5">Xử lý tự động mỗi ngày</div>
+          <div className="mt-8 grid grid-cols-2 gap-3.5 max-w-md 3xl:max-w-lg">
+            <div className="bg-white p-3.5 3xl:p-4 rounded-fha border border-[var(--fha-border)] shadow-fha-sm">
+              <div className="text-lg 3xl:text-xl font-black font-mono text-[var(--fha-text)]">15,000+ UID</div>
+              <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Xử lý tự động mỗi ngày</div>
             </div>
-            <div className="bg-white p-3.5 rounded-fha border border-[var(--fha-border)] shadow-fha-sm">
-              <div className="text-lg font-black font-mono text-[var(--fha-success)]">99.8% An toàn</div>
-              <div className="text-[11px] text-[var(--fha-text-muted)] mt-0.5">Không bị checkpoint nick</div>
+            <div className="bg-white p-3.5 3xl:p-4 rounded-fha border border-[var(--fha-border)] shadow-fha-sm">
+              <div className="text-lg 3xl:text-xl font-black font-mono text-[var(--fha-success)]">99.8% An toàn</div>
+              <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Không bị checkpoint nick</div>
             </div>
           </div>
         </div>
 
         {/* Bottom Social Proof Testimonial */}
-        <div className="relative z-10 pt-10 border-t border-[var(--fha-border)] max-w-md">
+        <div className="relative z-10 pt-10 border-t border-[var(--fha-border)] max-w-md 3xl:max-w-lg">
           <div className="flex items-center gap-1 text-[var(--fha-warning)] mb-2">
             {[1, 2, 3, 4, 5].map((s) => (
               <svg key={s} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -70,10 +70,10 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
               </svg>
             ))}
           </div>
-          <p className="text-xs text-[var(--fha-text)] italic leading-relaxed">
+          <p className="text-xs 3xl:text-sm text-[var(--fha-text)] italic leading-relaxed">
             &ldquo;Extension chạy mượt, trễ ngẫu nhiên thông minh nên nick chính của mình quét cả tháng không hề bị hỏi checkpoint. Tiết kiệm công sức kết bạn thủ công rất nhiều.&rdquo;
           </p>
-          <div className="mt-2 text-[11px] font-bold text-[var(--fha-text-muted)]">
+          <div className="mt-2 text-[11px] 3xl:text-xs font-bold text-[var(--fha-text-muted)]">
             — Minh Thuận, Chủ Shop Thời Trang Nữ (Hà Nội)
           </div>
         </div>
@@ -97,13 +97,13 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
         </div>
 
         {/* Main Card */}
-        <div className="w-full max-w-[420px] space-y-6">
+        <div className="w-full max-w-[420px] 3xl:max-w-[480px] space-y-6 3xl:space-y-8">
           
-          <div className="space-y-1.5">
-            <h1 className="text-2xl font-black text-[var(--fha-text)] tracking-tight">
+          <div className="space-y-1.5 3xl:space-y-2">
+            <h1 className="text-2xl 3xl:text-3xl font-black text-[var(--fha-text)] tracking-tight">
               {title}
             </h1>
-            <p className="text-xs sm:text-sm text-[var(--fha-text-muted)]">
+            <p className="text-xs sm:text-sm 3xl:text-base text-[var(--fha-text-muted)]">
               {subtitle}
             </p>
           </div>
