@@ -4,9 +4,9 @@ import { cookies } from 'next/headers';
 import { USER_COOKIE_NAME } from '@/lib/auth';
 import Navbar from '@/components/layout/Navbar';
 import Button from '@/components/ui/Button';
-import LiveExtensionPreview from '@/components/landing/LiveExtensionPreview';
+import ProductVideoPlayer from '@/components/landing/ProductVideoPlayer';
+import RealProductShowcase from '@/components/landing/RealProductShowcase';
 import RoiEstimator from '@/components/landing/RoiEstimator';
-import BentoFeatures from '@/components/landing/BentoFeatures';
 import WorkflowSteps from '@/components/landing/WorkflowSteps';
 import AnchorPricing from '@/components/landing/AnchorPricing';
 import GroupedFAQ from '@/components/landing/GroupedFAQ';
@@ -36,8 +36,8 @@ export default function Home() {
         <div className="fha-container-standard relative z-10">
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-6 2xl:gap-12 3xl:gap-16 items-center">
             
-            {/* Left Column (60%): Text & Value Proposition */}
-            <div className="lg:col-span-7 space-y-3 sm:space-y-4 lg:space-y-3 xl:space-y-5 2xl:space-y-6 3xl:space-y-8 text-left">
+            {/* Left Column (50%): Text & Value Proposition */}
+            <div className="lg:col-span-6 space-y-3 sm:space-y-4 lg:space-y-3 xl:space-y-5 2xl:space-y-6 3xl:space-y-8 text-left">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 3xl:px-4 3xl:py-1.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] text-[11px] sm:text-xs 3xl:text-sm font-bold tracking-wider uppercase border border-[var(--fha-brand)]">
                 <span className="w-1.5 h-1.5 3xl:w-2.5 3xl:h-2.5 rounded-full bg-[var(--fha-brand)] animate-pulse" />
                 Chrome Extension Thế Hệ Mới V2.0
@@ -98,13 +98,11 @@ export default function Home() {
 
             </div>
 
-            {/* Right Column (40%): Live Extension Interactive Simulator */}
-            <div className="lg:col-span-5 relative w-full overflow-hidden sm:overflow-visible">
-              <div className="relative w-full max-w-[430px] lg:max-w-[410px] xl:max-w-[480px] 2xl:max-w-[580px] 3xl:max-w-[680px] 4xl:max-w-[760px] mx-auto">
-                {/* Decorative background glow */}
-                <div className="hidden sm:block absolute -inset-4 bg-gradient-to-r from-[var(--fha-brand-soft)] to-transparent rounded-2xl opacity-60 blur-xl pointer-events-none" />
-                <LiveExtensionPreview />
-              </div>
+            {/* Right Column (50%): Chrome Video Showcase (video.mov) */}
+            <div className="lg:col-span-6 relative w-full overflow-hidden sm:overflow-visible">
+              {/* Subtle brand glow behind video */}
+              <div className="hidden sm:block absolute -inset-3 bg-gradient-to-r from-[var(--fha-brand-soft)] to-transparent rounded-2xl opacity-60 blur-xl pointer-events-none" />
+              <ProductVideoPlayer />
             </div>
 
           </div>
@@ -143,9 +141,9 @@ export default function Home() {
       <RoiEstimator />
 
       {/* ======================================================== */}
-      {/* SECTION 4: ASYMMETRIC BENTO FEATURE GRID                 */}
+      {/* SECTION 4: REAL PRODUCT SHOWCASE BENTO GRID (1.jpg-4.jpg)*/}
       {/* ======================================================== */}
-      <BentoFeatures />
+      <RealProductShowcase />
 
       {/* ======================================================== */}
       {/* SECTION 5: 3-STEP VISUAL WORKFLOW ONBOARDING             */}

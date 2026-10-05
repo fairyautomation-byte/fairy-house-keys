@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="vi" data-mau="xam">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wireframe Phương Án — Fairy House AutoData Landing Page</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Design Tokens từ codebase (Direction A: Hairline Flat Light) */
+    :root {
+      --fha-bg: #F6F7F9;
+      --fha-surface: #FFFFFF;
+      --fha-surface-2: #F1F3F5;
+      --fha-surface-3: #E9ECEF;
+      --fha-border: #E3E6EA;
+      --fha-border-strong: #CDD2D8;
+      --fha-text: #111827;
+      --fha-text-muted: #4B5563;
+      --fha-text-faint: #6B7280;
+      --fha-radius-lg: 12px;
+      --fha-radius-md: 8px;
+    }
+
+    /* Nấc Xám (Mặc định Wireframe): Tắt màu nhấn để tập trung vào bố cục */
+    :root[data-mau="xam"] {
+      --fha-brand: #262626;
+      --fha-brand-hover: #171717;
+      --fha-brand-soft: #F4F4F5;
+      --fha-brand-border: #D4D4D8;
+      --fha-success: #525252;
+      --fha-success-bg: #F4F4F5;
+      --fha-success-border: #D4D4D8;
+    }
+
+    /* Nấc Màu: Trả về bảng màu thật của thương hiệu */
+    :root[data-mau="mau"] {
+      --fha-brand: #0E7490;
+      --fha-brand-hover: #155E75;
+      --fha-brand-soft: #ECFEFF;
+      --fha-brand-border: #A5F3FC;
+      --fha-success: #067647;
+      --fha-success-bg: #ECFDF3;
+      --fha-success-border: #A6F4C5;
+    }
+
+    body {
+      background-color: var(--fha-bg);
+      color: var(--fha-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Wireframe Toolbar (Chuẩn skill ui-ux) ── */
+    .wf-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: 54px;
+      padding: 0 16px;
+      overflow-x: auto;
+      white-space: nowrap;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e5e5;
+      color: #737373;
+      font: 13px/1 system-ui, sans-serif;
+    }
+    .wf-bar *, .wf-reason * { box-sizing: border-box; }
+    .wf-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .wf-set { display: flex; align-items: center; gap: 2px; flex-shrink: 0; padding: 3px; border-radius: 8px; background: #f4f4f5; }
+    .wf-set a {
+      position: relative; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px;
+      border-radius: 6px; color: #737373; text-decoration: none; cursor: pointer; user-select: none;
+    }
+    .wf-set a:hover { color: #171717; }
+    .wf-set a[aria-current="page"] {
+      background: #ffffff; color: #171717; font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+    [data-wf-param="v"] a[data-recommended]::after {
+      content: ""; position: absolute; top: 4px; right: 4px;
+      width: 5px; height: 5px; border-radius: 50%; background: #0E7490;
+    }
+    .wf-switch { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; color: #737373; text-decoration: none; cursor: pointer; }
+    .wf-switch i { position: relative; width: 34px; height: 18px; border-radius: 10px; background: #e4e4e7; transition: background .15s; }
+    .wf-switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .15s; }
+    .wf-switch[aria-checked="true"] i { background: #0E7490; }
+    .wf-switch[aria-checked="true"] i::after { transform: translateX(16px); }
+
+    /* ── Khung Lý Do (Reasoning Box) ── */
+    .wf-reason { border-bottom: 1px solid #e5e5e5; background: #fafafa; color: #404040; font: 13px/1.5 system-ui, sans-serif; }
+    .wf-reason summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 42px; padding: 6px 16px; cursor: pointer; list-style: none; }
+    .wf-reason summary::-webkit-details-marker { display: none; }
+    .wf-reason-name { font-weight: 700; color: #171717; }
+    .wf-reason-tag { padding: 2px 8px; border-radius: 10px; background: #ecfeff; color: #0e7490; font-size: 11px; font-weight: 600; }
+    .wf-reason-why { flex: 1; min-width: 0; color: #525252; }
+    .wf-reason-body { display: grid; gap: 12px; padding: 8px 16px 16px; border-top: 1px solid #f0f0f0; }
+    .wf-reason-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .wf-reason h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .wf-reason ul { margin: 0; padding-left: 18px; line-height: 1.6; }
+    .wf-reason-tips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px solid #ebebeb; }
+    .wf-reason-tips button {
+      display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 1px solid #e5e5e5;
+      border-radius: 6px; background: #ffffff; color: #262626; font-size: 12px; cursor: pointer; transition: all .15s;
+    }
+    .wf-reason-tips button:hover { border-color: #d4d4d4; background: #f5f5f5; }
+
+    /* ── Đánh Số Khối (data-wf-block) ── */
+    [data-wf-block] { position: relative; }
+    [data-wf-block]::before {
+      content: attr(data-wf-block);
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      background: #171717;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Responsive Frame Mobile (375px) */
+    body[data-kho="mobile"] #wf-wrapper {
+      max-width: 375px;
+      margin: 20px auto;
+      border: 10px solid #1f2937;
+      border-radius: 36px;
+      background: #ffffff;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body data-kho="desktop">
+
+  <!-- 1. THANH ĐIỀU KHIỂN WIREFRAME CHUẨN SKILL UI-UX -->
+  <nav class="wf-bar" aria-label="Wireframe Toolbar">
+    <div class="wf-group">
+      <span>Phương án:</span>
+      <span class="wf-set" data-wf-param="v">
+        <a data-value="a" title="A · Asymmetric Hero Video + Bento Grid" data-recommended>A</a>
+        <a data-value="b" title="B · Full-Width Video + Tabbed Showcase">B</a>
+        <a data-value="c" title="C · Live Split Simulator + Timeline">C</a>
+        <a data-value="d" title="D · A Gọn Chữ & Số Liệu">D</a>
+        <a data-value="e" title="E · A Bỏ Lặp & Tối Giản">E</a>
+      </span>
+    </div>
+
+    <a class="wf-switch" data-wf-toggle="mau" data-on="mau" data-off="xam" role="switch">
+      Màu (Thương hiệu) <i></i>
+    </a>
+
+    <div class="wf-group">
+      <span>Khổ:</span>
+      <span class="wf-set" data-wf-param="kho">
+        <a data-value="desktop">Desktop</a>
+        <a data-value="mobile">Mobile (375px)</a>
+      </span>
+    </div>
+
+    <div class="wf-group">
+      <span>Trạng thái:</span>
+      <span class="wf-set" data-wf-param="tt">
+        <a data-value="du-lieu">Có dữ liệu</a>
+        <a data-value="dang-tai">Đang tải</a>
+        <a data-value="rong">Rỗng</a>
+        <a data-value="loi">Lỗi</a>
+      </span>
+    </div>
+  </nav>
+
+  <!-- 2. KHUNG LÝ DO (REASONING & FEEDBACK CHIPS) -->
+  <details class="wf-reason" open>
+    <summary>
+      <span class="wf-reason-name" id="reason-title">A · Asymmetric Hero Video + Asymmetric Bento Grid</span>
+      <span class="wf-reason-tag" id="reason-tag">Khuyên dùng</span>
+      <span class="wf-reason-why" id="reason-why">Tối ưu tỷ lệ chuyển đổi: Người dùng xem ngay video chứng thực 1080p ở cột Hero phải, lướt xuống thấy liền bảng SĐT thật.</span>
+    </summary>
+    <div class="wf-reason-body">
+      <div class="wf-reason-cols" id="reason-cols">
+        <!-- Render động từ JS -->
+      </div>
+      <div class="wf-reason-tips">
+        <span class="font-bold text-xs text-neutral-600">Gợi ý phản hồi nhanh (bấm để chép):</span>
+        <button type="button" data-copy="Duyệt phương án A, tiến hành dựng">✓ Duyệt phương án A, tiến hành dựng</button>
+        <button type="button" data-copy="Thích bố cục A + nội dung D (gọn chữ)">A + D (Gọn chữ hơn)</button>
+        <button type="button" data-copy="Thích kiểu Tab của phương án B">Đổi Bento sang dạng Tab như B</button>
+        <button type="button" data-copy="Tăng kích thước video to hơn ở Hero">Phóng to khung Video ở Hero</button>
+      </div>
+    </div>
+  </details>
+
+  <!-- 3. VÙNG HIỂN THỊ THIẾT KẾ (DESIGN CANVAS) -->
+  <div id="wf-wrapper">
+    <main id="wf-design">
+      <!-- Nội dung phương án được render bằng JavaScript -->
+    </main>
+  </div>
+
+  <!-- JAVASCRIPT ĐIỀU HƯỚNG VÀ RENDER PHƯƠNG ÁN -->
+  <script>
+    const params = new URLSearchParams(location.search);
+    const state = {
+      v: params.get("v") || "a",
+      mau: params.get("mau") || "xam",
+      kho: params.get("kho") || "desktop",
+      tt: params.get("tt") || "du-lieu"
+    };
+
+    // Áp dụng thuộc tính lên DOM
+    document.documentElement.dataset.mau = state.mau;
+    document.body.dataset.kho = state.kho;
+
+    // Cập nhật trạng thái Toolbar
+    function syncToolbar() {
+      document.querySelectorAll("[data-wf-param]").forEach(set => {
+        const param = set.dataset.wfParam;
+        set.querySelectorAll("a").forEach(link => {
+          if (link.dataset.value === state[param]) {
+            link.setAttribute("aria-current", "page");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+          link.onclick = (e) => {
+            e.preventDefault();
+            state[param] = link.dataset.value;
+            params.set(param, link.dataset.value);
+            history.replaceState(null, "", "?" + params.toString());
+            syncToolbar();
+            renderLayout();
+          };
+        });
+      });
+
+      // Switch Màu
+      const toggle = document.querySelector("[data-wf-toggle='mau']");
+      const isMau = state.mau === "mau";
+      toggle.setAttribute("aria-checked", String(isMau));
+      toggle.onclick = (e) => {
+        e.preventDefault();
+        state.mau = isMau ? "xam" : "mau";
+        params.set("mau", state.mau);
+        history.replaceState(null, "", "?" + params.toString());
+        document.documentElement.dataset.mau = state.mau;
+        syncToolbar();
+      };
+    }
+
+    // Dữ liệu giải thích từng phương án
+    const reasons = {
+      a: {
+        title: "A · Asymmetric Hero Video + Asymmetric Bento Grid",
+        tag: "Khuyên dùng",
+        why: "Cột trái truyền tải giá trị cốt lõi & CTA; cột phải là khung Chrome phát video.mov 1080p chân thực, tiếp nối bằng Bento Grid ảnh 1-4.",
+        pros: ["Tỷ lệ chuyển đổi cao nhất: Video đặt ngang tầm mắt ở Hero", "Bento Grid ảnh 3 (Bảng SĐT) chiếm 2 cột làm nổi bật kết quả", "Giữ đúng phong cách SaaS quốc tế hiện đại"],
+        cons: ["Cần đảm bảo video preload='metadata' để tránh nặng trang ở thiết bị yếu"],
+        bestWhen: "Phù hợp nhất cho đại đa số khách hàng muốn 'thấy tận mắt thao tác và kết quả thật'."
+      },
+      b: {
+        title: "B · Full-Width Video Center Stage + Tabbed Interactive Showcase",
+        tag: "Tập trung Video",
+        why: "Đưa video.mov ra chính giữa màn hình với kích thước lớn; 4 hình ảnh được xếp vào bộ Tab 4 bước tương tác.",
+        pros: ["Video hiển thị cực lớn, chi tiết rõ nét không cần phóng to", "Tab tương tác giúp tiết kiệm chiều dài trang, người xem tự chọn bước cần xem"],
+        cons: ["Người dùng lười click có thể bỏ qua các tab ảnh số 2, 3, 4", "Hero kéo dài hơn trước khi thấy bảng giá"],
+        bestWhen: "Hợp khi video là điểm bán hàng duy nhất và khách cần xem chi tiết từng cú click chuột."
+      },
+      c: {
+        title: "C · Live Split-Screen Simulator Focus + Timeline Steps",
+        tag: "Dành cho Dân Kỹ Thuật",
+        why: "Giao diện mô phỏng 50/50: bên trái là bảng điều khiển chọn số lượng UID, bên phải là màn hình chạy tiến trình; tiếp sau là Timeline 4 ảnh.",
+        pros: ["Cảm giác tương tác trực tiếp rất mạnh mẽ", "Bảng giá đẩy lên cao hơn giúp chốt đơn nhanh"],
+        cons: ["Ít không gian cho text giải thích giá trị lợi ích", "Trên màn hình điện thoại 375px phải xếp chồng dài"],
+        bestWhen: "Hợp với tệp khách hàng am hiểu công nghệ, thích bấm thử trước khi mua."
+      },
+      d: {
+        title: "D · Biến thể A Gọn Chữ (Tối Giản Văn Bản, Đẩy Mạnh Số Liệu)",
+        tag: "Biến thể của A",
+        why: "Bố cục của A nhưng cắt giảm 50% câu chữ dài dòng, thay bằng số liệu đo lường thật và các badge kiểm chứng.",
+        pros: ["Đọc lướt cực nhanh, không gây ngộp thông tin", "Nhấn mạnh số liệu: 30 UID -> 9 SĐT, 5s cấp Key VietQR"],
+        cons: ["Ít từ khóa phụ trợ cho SEO"],
+        bestWhen: "Khách hàng đến từ kênh quảng cáo Facebook/Tiktok lướt nhanh bằng điện thoại."
+      },
+      e: {
+        title: "E · Biến thể A Bỏ Lặp (Mỗi Thông Tin Xuất Hiện Đúng 1 Lần)",
+        tag: "Biến thể của A",
+        why: "Khử triệt để hiện tượng lặp lại thông điệp giữa Hero, Bento và FAQ (tuân thủ luật V1b của skill).",
+        pros: ["Trang cực kỳ súc tích, mạch lạc từ trên xuống dưới", "Không có đoạn văn hay huy hiệu nào bị trùng lặp"],
+        cons: ["Cần khách hàng đọc tuần tự từ trên xuống dưới"],
+        bestWhen: "Người duyệt thích sự tinh giản tối đa, không muốn thấy một câu xuất hiện hai lần."
+      }
+    };
+
+    function updateReasoning() {
+      const cur = reasons[state.v] || reasons.a;
+      document.getElementById("reason-title").textContent = cur.title;
+      document.getElementById("reason-tag").textContent = cur.tag;
+      document.getElementById("reason-why").textContent = cur.why;
+      document.getElementById("reason-cols").innerHTML = `
+        <div>
+          <h4 class="text-emerald-700 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-600"></span>Ưu điểm</h4>
+          <ul>${cur.pros.map(p => `<li>${p}</li>`).join("")}</ul>
+        </div>
+        <div>
+          <h4 class="text-amber-700 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-600"></span>Đánh đổi</h4>
+          <ul>${cur.cons.map(c => `<li>${c}</li>`).join("")}</ul>
+        </div>
+        <div>
+          <h4 class="text-neutral-700 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-neutral-600"></span>Hợp khi</h4>
+          <p class="text-xs text-neutral-600">${cur.bestWhen}</p>
+        </div>
+      `;
+    }
+
+    // Render HTML từng Phương Án
+    function renderLayout() {
+      updateReasoning();
+      const main = document.getElementById("wf-design");
+
+      if (state.tt === "dang-tai") {
+        main.innerHTML = `<div class="p-12 text-center text-neutral-400 font-mono text-sm">Đang nạp cấu trúc layout...</div>`;
+        return;
+      }
+      if (state.tt === "rong") {
+        main.innerHTML = `<div class="p-12 text-center text-neutral-400 font-mono text-sm">Chưa có dữ liệu chiến dịch nào được chọn.</div>`;
+        return;
+      }
+      if (state.tt === "loi") {
+        main.innerHTML = `<div class="p-12 text-center text-red-500 font-mono text-sm">Lỗi 500: Không thể kết nối máy chủ bản quyền PayOS.</div>`;
+        return;
+      }
+
+      // Xây dựng Layout theo state.v
+      if (state.v === "a" || state.v === "d" || state.v === "e") {
+        renderOptionA(main, state.v);
+      } else if (state.v === "b") {
+        renderOptionB(main);
+      } else if (state.v === "c") {
+        renderOptionC(main);
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ==========================================
+    // PHƯƠNG ÁN A (VÀ BIẾN THỂ D, E)
+    // ==========================================
+    function renderOptionA(container, variant) {
+      const isCompact = variant === "d";
+      const isNoRepeat = variant === "e";
+
+      container.innerHTML = `
+        <!-- Khối 1: Header / Navbar -->
+        <header data-wf-block="1" class="border-b border-[var(--fha-border)] bg-white px-6 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded bg-[var(--fha-brand)] text-white flex items-center justify-center font-bold text-xs">FH</div>
+            <span class="font-bold text-sm text-[var(--fha-text)]">Fairy House AutoData</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] font-semibold border border-[var(--fha-brand-border)]">v2.0 Native</span>
+          </div>
+          <nav class="hidden md:flex items-center gap-6 text-xs text-[var(--fha-text-muted)] font-medium">
+            <a href="#video">Video Thực Tế</a>
+            <a href="#features">Tính Năng</a>
+            <a href="#pricing">Bảng Giá</a>
+            <a href="#guide">Cài Đặt</a>
+          </nav>
+          <div class="flex items-center gap-3">
+            <button class="px-3 py-1.5 text-xs text-[var(--fha-text)] font-semibold hover:bg-neutral-100 rounded">Đăng Nhập</button>
+            <button class="px-3.5 py-1.5 text-xs bg-[var(--fha-brand)] text-white font-bold rounded shadow-sm">Dùng Thử 0đ</button>
+          </div>
+        </header>
+
+        <!-- Khối 2: Asymmetric Split Hero + Chrome Video Player -->
+        <section data-wf-block="2" class="border-b border-[var(--fha-border)] bg-white py-10 px-6">
+          <div class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 items-center">
+            
+            <!-- Cột trái (7/12): Giá trị cốt lõi -->
+            <div class="lg:col-span-6 space-y-4">
+              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] text-xs font-bold border border-[var(--fha-brand-border)]">
+                <span class="w-2 h-2 rounded-full bg-[var(--fha-brand)] animate-pulse"></span>
+                CHROME EXTENSION KHAI THÁC DATA FACEBOOK V2.0
+              </div>
+
+              <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--fha-text)] leading-tight">
+                Quét SĐT Khách Hàng Facebook Tự Động. <br>
+                <span class="text-[var(--fha-brand)]">Không Lo Checkpoint Nick.</span>
+              </h1>
+
+              <p class="text-sm text-[var(--fha-text-muted)] leading-relaxed">
+                ${isCompact 
+                  ? "Bóc tách số điện thoại thật từ thành viên nhóm Facebook, tự động gửi kết bạn và kích hoạt bản quyền tức thì qua PayOS VietQR." 
+                  : "Mô phỏng hành vi người thật (Human-Emulation 2.0). Trích xuất danh sách khách hàng tiềm năng kèm SĐT chuẩn xác, tự động kết bạn an toàn và nhận bản quyền PayOS VietQR sau 5 giây."}
+              </p>
+
+              <div class="flex flex-wrap gap-3 pt-2">
+                <button class="h-11 px-6 bg-[var(--fha-brand)] text-white font-bold text-xs rounded-md shadow-sm flex items-center gap-2">
+                  Dùng Thử Miễn Phí 3 Ngày (0đ)
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+                <button class="h-11 px-5 border border-[var(--fha-border)] text-[var(--fha-text)] font-semibold text-xs rounded-md bg-white hover:bg-neutral-50">
+                  Xem Bảng Giá Cước
+                </button>
+              </div>
+
+              <div class="pt-4 border-t border-[var(--fha-border)] flex items-center gap-6 text-[11px] text-[var(--fha-text-muted)] font-medium">
+                <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--fha-success)]"></i> 1 Key / 1 Thiết Bị</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--fha-success)]"></i> Không Cần Mật Khẩu FB</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[var(--fha-success)]"></i> Duyệt PayOS 5 Giây</span>
+              </div>
+            </div>
+
+            <!-- Cột phải (6/12): Khung Chrome Player phát video.mov -->
+            <div class="lg:col-span-6">
+              <div class="rounded-xl border border-[var(--fha-border-strong)] bg-neutral-900 shadow-md overflow-hidden">
+                <!-- Mac/Chrome bar -->
+                <div class="bg-neutral-800 px-3 py-2 flex items-center justify-between border-b border-neutral-700 text-xs">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                  </div>
+                  <div class="text-[11px] font-mono text-neutral-300 bg-neutral-900/60 px-3 py-0.5 rounded truncate max-w-[240px]">
+                    facebook.com/groups/tat-tan-tat-my-luong
+                  </div>
+                  <span class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Đang quét trực tiếp
+                  </span>
+                </div>
+
+                <!-- Video / Player Container -->
+                <div class="relative aspect-video bg-black flex items-center justify-center group cursor-pointer">
+                  <!-- Video Tag tham chiếu video.mov -->
+                  <video src="../public/video.mov" preload="metadata" muted playsinline class="w-full h-full object-cover opacity-85"></video>
+                  
+                  <!-- Nút Play Trung Tâm -->
+                  <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/30 group-hover:bg-black/10 transition-all">
+                    <div class="w-14 h-14 rounded-full bg-[var(--fha-brand)] text-white flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-transform">
+                      <i data-lucide="play" class="w-6 h-6 ml-1"></i>
+                    </div>
+                    <span class="mt-3 text-xs font-semibold text-white drop-shadow">Xem Video Thực Tế 1080p (4m36s)</span>
+                  </div>
+
+                  <!-- Badge thông số góc -->
+                  <div class="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/70 text-white text-[10px] font-mono">
+                    1080p Native • 30 UID quét ra 9 SĐT
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Khối 3: Metric Ticker -->
+        <section data-wf-block="3" class="border-b border-[var(--fha-border)] bg-[var(--fha-surface-2)] py-6 px-6">
+          <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="p-2">
+              <div class="text-2xl font-black font-mono text-[var(--fha-text)]">15.000+</div>
+              <div class="text-xs text-[var(--fha-text-muted)] font-medium mt-1">UID Đã Quét Mỗi Ngày</div>
+            </div>
+            <div class="p-2">
+              <div class="text-2xl font-black font-mono text-[var(--fha-success)]">99.8%</div>
+              <div class="text-xs text-[var(--fha-text-muted)] font-medium mt-1">Không Checkpoint Nick</div>
+            </div>
+            <div class="p-2">
+              <div class="text-2xl font-black font-mono text-[var(--fha-brand)]">5 Giây</div>
+              <div class="text-xs text-[var(--fha-text-muted)] font-medium mt-1">Cấp Key Tự Động PayOS</div>
+            </div>
+            <div class="p-2">
+              <div class="text-2xl font-black font-mono text-[var(--fha-text)]">24/7</div>
+              <div class="text-xs text-[var(--fha-text-muted)] font-medium mt-1">Hỗ Trợ Kỹ Thuật Zalo</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Khối 4: Bento Grid 4 Sức Mạnh Cốt Lõi (Sử dụng 1.jpg, 2.jpg, 3.jpg, 4.jpg) -->
+        <section data-wf-block="4" class="border-b border-[var(--fha-border)] bg-white py-12 px-6">
+          <div class="max-w-6xl mx-auto space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-2">
+              <span class="text-xs font-bold text-[var(--fha-brand)] uppercase tracking-wider">Chứng Thực Bằng Hình Ảnh Thực Tế</span>
+              <h2 class="text-2xl font-extrabold text-[var(--fha-text)]">Bốn Sức Mạnh Khai Thác Khách Hàng</h2>
+              <p class="text-xs text-[var(--fha-text-muted)]">Giao diện thực tế được chụp trực tiếp từ tiện ích Chrome và Dashboard của khách hàng.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+              
+              <!-- Bento Card 1 (Lớn 7/12): Bảng trích xuất SĐT thật (3.jpg) -->
+              <div class="md:col-span-7 rounded-xl border border-[var(--fha-border)] bg-white p-5 flex flex-col justify-between hover:border-[var(--fha-brand)] transition-colors">
+                <div class="space-y-2 mb-4">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[var(--fha-success-bg)] text-[var(--fha-success)] border border-[var(--fha-success-border)]">Kết Quả Thực Chứng</span>
+                    <span class="text-xs font-mono text-[var(--fha-text-muted)]">30 Quét ➔ 9 SĐT (30%)</span>
+                  </div>
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Bảng Trích Xuất SĐT Thật Kèm Nút Call & Zalo</h3>
+                  <p class="text-xs text-[var(--fha-text-muted)] leading-relaxed">
+                    Dữ liệu hiển thị chi tiết tên, UID, giới tính và số điện thoại thật. Cho phép liên hệ 1-click hoặc xuất file Excel/UID ngay lập tức.
+                  </p>
+                </div>
+                <div class="rounded-lg border border-[var(--fha-border)] overflow-hidden bg-neutral-100 aspect-[16/9]">
+                  <img src="../public/3.jpg" alt="Bảng kết quả quét SĐT" class="w-full h-full object-cover">
+                </div>
+              </div>
+
+              <!-- Bento Card 2 (5/12): Thiết lập chiến dịch (1.jpg) -->
+              <div class="md:col-span-5 rounded-xl border border-[var(--fha-border)] bg-white p-5 flex flex-col justify-between hover:border-[var(--fha-brand)] transition-colors">
+                <div class="space-y-2 mb-4">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] border border-[var(--fha-brand-border)]">Thiết Lập 2 Cú Nhấp</span>
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Quét Nhanh Hoặc Quét Sâu Theo Vùng Miền</h3>
+                  <p class="text-xs text-[var(--fha-text-muted)] leading-relaxed">
+                    Tùy chọn chỉ tiêu từ 50 đến 50.000 khách. Hỗ trợ lọc khu vực tỉnh/thành và độ tuổi chính xác.
+                  </p>
+                </div>
+                <div class="rounded-lg border border-[var(--fha-border)] overflow-hidden bg-neutral-100 aspect-[16/9]">
+                  <img src="../public/1.jpg" alt="Thiết lập chiến dịch quét" class="w-full h-full object-cover">
+                </div>
+              </div>
+
+              <!-- Bento Card 3 (5/12): Auto Kết Bạn + Terminal Log (4.jpg) -->
+              <div class="md:col-span-5 rounded-xl border border-[var(--fha-border)] bg-white p-5 flex flex-col justify-between hover:border-[var(--fha-brand)] transition-colors">
+                <div class="space-y-2 mb-4">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">Bảo Vệ Tài Khoản</span>
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Auto Kết Bạn Với Terminal Log & Giãn Cách An Toàn</h3>
+                  <p class="text-xs text-[var(--fha-text-muted)] leading-relaxed">
+                    Cơ chế đếm ngược delay ngẫu nhiên (chờ 23s) mô phỏng người thật, tránh thuật toán quét checkpoint Facebook.
+                  </p>
+                </div>
+                <div class="rounded-lg border border-[var(--fha-border)] overflow-hidden bg-neutral-100 aspect-[16/9]">
+                  <img src="../public/4.jpg" alt="Auto kết bạn Facebook" class="w-full h-full object-cover">
+                </div>
+              </div>
+
+              <!-- Bento Card 4 (7/12): Trung tâm quản lý License PayOS (2.jpg) -->
+              <div class="md:col-span-7 rounded-xl border border-[var(--fha-border)] bg-white p-5 flex flex-col justify-between hover:border-[var(--fha-brand)] transition-colors">
+                <div class="space-y-2 mb-4">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">Quản Lý Tập Trung</span>
+                    <span class="text-xs font-mono text-[var(--fha-text-muted)]">Ví PayOS Tự Động</span>
+                  </div>
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Bảng Điều Khiển Bản Quyền & Nạp Ví VietQR 24/7</h3>
+                  <p class="text-xs text-[var(--fha-text-muted)] leading-relaxed">
+                    Theo dõi hạn mức UID quét hàng ngày qua pin tiến trình (700/1.000 UID), copy mã license 1-click và nạp tiền kích hoạt tự động.
+                  </p>
+                </div>
+                <div class="rounded-lg border border-[var(--fha-border)] overflow-hidden bg-neutral-100 aspect-[16/9]">
+                  <img src="../public/2.jpg" alt="Dashboard quản trị license" class="w-full h-full object-cover">
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Khối 5: Quy Trình 3 Bước Cài Đặt (Workflow) -->
+        <section data-wf-block="5" class="border-b border-[var(--fha-border)] bg-[var(--fha-surface-2)] py-10 px-6">
+          <div class="max-w-5xl mx-auto space-y-6">
+            <div class="text-center max-w-md mx-auto">
+              <h2 class="text-xl font-bold text-[var(--fha-text)]">Bắt Đầu Sử Dụng Chỉ Trong 3 Bước</h2>
+              <p class="text-xs text-[var(--fha-text-muted)] mt-1">Cài đặt trực tiếp vào trình duyệt Chrome mà không cần cài phần mềm nặng máy.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="p-4 bg-white rounded-lg border border-[var(--fha-border)] space-y-2">
+                <span class="w-6 h-6 rounded-full bg-[var(--fha-brand)] text-white text-xs font-bold flex items-center justify-center">1</span>
+                <h4 class="font-bold text-sm text-[var(--fha-text)]">Tải File Cài Đặt (.ZIP)</h4>
+                <p class="text-xs text-[var(--fha-text-muted)]">Tải file tiện ích v2.0.4 Native dung lượng nhẹ chỉ ~3.5MB.</p>
+              </div>
+              <div class="p-4 bg-white rounded-lg border border-[var(--fha-border)] space-y-2">
+                <span class="w-6 h-6 rounded-full bg-[var(--fha-brand)] text-white text-xs font-bold flex items-center justify-center">2</span>
+                <h4 class="font-bold text-sm text-[var(--fha-text)]">Bật Developer Mode</h4>
+                <p class="text-xs text-[var(--fha-text-muted)]">Mở chrome://extensions, bật chế độ nhà phát triển và kéo thả file vào.</p>
+              </div>
+              <div class="p-4 bg-white rounded-lg border border-[var(--fha-border)] space-y-2">
+                <span class="w-6 h-6 rounded-full bg-[var(--fha-brand)] text-white text-xs font-bold flex items-center justify-center">3</span>
+                <h4 class="font-bold text-sm text-[var(--fha-text)]">Nhập Mã License Key</h4>
+                <p class="text-xs text-[var(--fha-text-muted)]">Dán mã key nhận được sau khi thanh toán hoặc nhận key dùng thử để bắt đầu quét.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Khối 6: Bảng Giá Chuẩn (Pricing Matrix) -->
+        <section data-wf-block="6" class="border-b border-[var(--fha-border)] bg-white py-12 px-6">
+          <div class="max-w-5xl mx-auto space-y-6">
+            <div class="text-center max-w-md mx-auto">
+              <h2 class="text-2xl font-extrabold text-[var(--fha-text)]">Bảng Giá Bản Quyền Tiện Ích</h2>
+              <p class="text-xs text-[var(--fha-text-muted)] mt-1">Thanh toán tự động bằng VietQR PayOS, kích hoạt ngay lập tức.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              <!-- Gói 1 Tháng -->
+              <div class="rounded-xl border-2 border-[var(--fha-brand)] bg-white p-6 flex flex-col justify-between relative shadow-sm">
+                <span class="absolute -top-3 left-6 px-2.5 py-0.5 rounded-full bg-[var(--fha-brand)] text-white text-[10px] font-bold">PHỔ BIẾN NHẤT</span>
+                <div class="space-y-3">
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Gói 1 Tháng</h3>
+                  <div class="text-2xl font-black font-mono text-[var(--fha-text)]">299.000đ <span class="text-xs font-normal text-neutral-500">/ tháng</span></div>
+                  <ul class="text-xs text-[var(--fha-text-muted)] space-y-2 pt-2 border-t border-[var(--fha-border)]">
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Hạn mức 1.000 UID/ngày</li>
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Đầy đủ tính năng quét SĐT</li>
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Auto kết bạn an toàn</li>
+                  </ul>
+                </div>
+                <button class="mt-6 w-full py-2.5 bg-[var(--fha-brand)] text-white text-xs font-bold rounded">Mua Gói Tháng</button>
+              </div>
+
+              <!-- Gói 3 Tháng -->
+              <div class="rounded-xl border border-[var(--fha-border)] bg-white p-6 flex flex-col justify-between">
+                <div class="space-y-3">
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Gói 3 Tháng</h3>
+                  <div class="text-2xl font-black font-mono text-[var(--fha-text)]">699.000đ <span class="text-xs font-normal text-neutral-500">/ 3 tháng</span></div>
+                  <ul class="text-xs text-[var(--fha-text-muted)] space-y-2 pt-2 border-t border-[var(--fha-border)]">
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Tiết kiệm 200.000đ</li>
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Hạn mức 2.000 UID/ngày</li>
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Hỗ trợ Ultraview 1:1</li>
+                  </ul>
+                </div>
+                <button class="mt-6 w-full py-2.5 border border-[var(--fha-border)] text-xs font-bold rounded hover:bg-neutral-50">Chọn Gói 3 Tháng</button>
+              </div>
+
+              <!-- Gói 1 Năm -->
+              <div class="rounded-xl border border-[var(--fha-border)] bg-white p-6 flex flex-col justify-between">
+                <div class="space-y-3">
+                  <h3 class="font-bold text-base text-[var(--fha-text)]">Gói 1 Năm (VIP)</h3>
+                  <div class="text-2xl font-black font-mono text-[var(--fha-text)]">1.990.000đ <span class="text-xs font-normal text-neutral-500">/ năm</span></div>
+                  <ul class="text-xs text-[var(--fha-text-muted)] space-y-2 pt-2 border-t border-[var(--fha-border)]">
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Không giới hạn UID quét</li>
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Cập nhật tính năng mới trọn đời</li>
+                    <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Kỹ thuật viên hỗ trợ riêng</li>
+                  </ul>
+                </div>
+                <button class="mt-6 w-full py-2.5 border border-[var(--fha-border)] text-xs font-bold rounded hover:bg-neutral-50">Chọn Gói 1 Năm</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Khối 7: Footer -->
+        <footer data-wf-block="7" class="bg-[var(--fha-surface-2)] py-8 px-6 text-center text-xs text-[var(--fha-text-muted)]">
+          <p>© 2026 Fairy House AutoData. Tất cả bản quyền được bảo lưu.</p>
+        </footer>
+      `;
+    }
+
+    // ==========================================
+    // PHƯƠNG ÁN B: FULL-WIDTH VIDEO + TABBED
+    // ==========================================
+    function renderOptionB(container) {
+      container.innerHTML = `
+        <header data-wf-block="1" class="border-b border-[var(--fha-border)] bg-white px-6 py-3 flex items-center justify-between">
+          <span class="font-bold text-sm text-[var(--fha-text)]">Fairy House AutoData</span>
+          <button class="px-3.5 py-1.5 text-xs bg-[var(--fha-brand)] text-white font-bold rounded">Dùng Thử 0đ</button>
+        </header>
+
+        <!-- Khối 2: Full-Width Video Center Stage -->
+        <section data-wf-block="2" class="border-b border-[var(--fha-border)] bg-neutral-900 py-12 px-6 text-white text-center">
+          <div class="max-w-4xl mx-auto space-y-4">
+            <span class="px-2 py-0.5 rounded bg-white/10 text-white text-[11px] font-mono">VIDEO DEMO THỰC TẾ 1080P</span>
+            <h1 class="text-3xl font-extrabold">Xem Tận Mắt Tool Quét SĐT Trực Tiếp Trên Facebook</h1>
+            <p class="text-xs text-neutral-400 max-w-xl mx-auto">Không cần cài đặt phức tạp, không lộ mật khẩu. Bấm video để xem toàn bộ quy trình.</p>
+            
+            <div class="mt-6 rounded-xl border border-neutral-700 overflow-hidden aspect-video bg-black relative group">
+              <video src="../public/video.mov" preload="metadata" muted playsinline class="w-full h-full object-cover"></video>
+              <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                <div class="w-16 h-16 rounded-full bg-[var(--fha-brand)] text-white flex items-center justify-center shadow-2xl">
+                  <i data-lucide="play" class="w-8 h-8 ml-1"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Khối 3: Tabbed Interactive Gallery (Ảnh 1-4) -->
+        <section data-wf-block="3" class="border-b border-[var(--fha-border)] bg-white py-12 px-6">
+          <div class="max-w-4xl mx-auto space-y-6">
+            <div class="flex border-b border-[var(--fha-border)] justify-center gap-4 text-xs font-bold text-[var(--fha-text-muted)]">
+              <button class="pb-3 border-b-2 border-[var(--fha-brand)] text-[var(--fha-brand)]">1. Thiết Lập Chiến Dịch</button>
+              <button class="pb-3 border-b-2 border-transparent">2. Trích Xuất SĐT</button>
+              <button class="pb-3 border-b-2 border-transparent">3. Auto Kết Bạn</button>
+              <button class="pb-3 border-b-2 border-transparent">4. Quản Trị & Cấp Key</button>
+            </div>
+            <div class="rounded-xl border border-[var(--fha-border)] overflow-hidden aspect-[16/9] bg-neutral-100">
+              <img src="../public/1.jpg" alt="Tab preview" class="w-full h-full object-cover">
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // ==========================================
+    // PHƯƠNG ÁN C: SPLIT SIMULATOR + TIMELINE
+    // ==========================================
+    function renderOptionC(container) {
+      container.innerHTML = `
+        <header data-wf-block="1" class="border-b border-[var(--fha-border)] bg-white px-6 py-3 flex items-center justify-between">
+          <span class="font-bold text-sm text-[var(--fha-text)]">Fairy House AutoData</span>
+          <button class="px-3.5 py-1.5 text-xs bg-[var(--fha-brand)] text-white font-bold rounded">Mua Key Ngay</button>
+        </header>
+
+        <!-- Khối 2: Simulator Split -->
+        <section data-wf-block="2" class="border-b border-[var(--fha-border)] bg-white py-10 px-6">
+          <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+            <div class="p-6 border border-[var(--fha-border)] rounded-xl bg-[var(--fha-surface-2)] space-y-4">
+              <h2 class="font-bold text-lg text-[var(--fha-text)]">Giả Lập Chiến Dịch Khai Thác</h2>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-[var(--fha-text-muted)]">Mục tiêu muốn lấy SĐT:</label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button class="py-1.5 bg-white border border-[var(--fha-border)] rounded text-xs font-bold">100</button>
+                  <button class="py-1.5 bg-[var(--fha-brand)] text-white rounded text-xs font-bold">200</button>
+                  <button class="py-1.5 bg-white border border-[var(--fha-border)] rounded text-xs font-bold">500</button>
+                  <button class="py-1.5 bg-white border border-[var(--fha-border)] rounded text-xs font-bold">1000</button>
+                </div>
+              </div>
+              <button class="w-full py-2.5 bg-[var(--fha-brand)] text-white font-bold text-xs rounded">Bắt Đầu Quét Thử</button>
+            </div>
+            <div class="rounded-xl border border-[var(--fha-border)] overflow-hidden aspect-[16/9]">
+              <img src="../public/3.jpg" alt="Kết quả giả lập" class="w-full h-full object-cover">
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // Xử lý nút Copy Gợi Ý
+    document.querySelectorAll("[data-copy]").forEach(btn => {
+      btn.onclick = async () => {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        const originalText = btn.textContent;
+        btn.textContent = "✓ Đã sao chép!";
+        btn.classList.add("bg-emerald-50", "text-emerald-700", "border-emerald-300");
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove("bg-emerald-50", "text-emerald-700", "border-emerald-300");
+        }, 1500);
+      };
+    });
+
+    // Khởi chạy ban đầu
+    syncToolbar();
+    renderLayout();
+  </script>
+</body>
+</html>
