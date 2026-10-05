@@ -54,7 +54,7 @@ export default function LiveExtensionPreview() {
   }, [isRunning]);
 
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white rounded-fha-lg border-2 border-[var(--fha-border-strong)] shadow-fha-overlay overflow-hidden select-none">
+    <div className="w-full bg-white rounded-fha-lg border-2 border-[var(--fha-border-strong)] shadow-fha-overlay overflow-hidden select-none">
       {/* Chrome Window Header */}
       <div className="bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] px-2.5 sm:px-3.5 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-2">
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">

@@ -24,22 +24,22 @@ export default function WorkflowSteps() {
   ];
 
   return (
-    <section id="workflow" className="py-20 sm:py-24 bg-white border-b border-[var(--fha-border)]">
-      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="workflow" className="py-20 sm:py-24 3xl:py-28 bg-white border-b border-[var(--fha-border)]">
+      <div className="fha-container-standard">
         
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
+        <div className="max-w-2xl 3xl:max-w-3xl mx-auto text-center mb-16 3xl:mb-20">
+          <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
             Lộ Trình Bắt Đầu
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl 3xl:text-5xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
             Chỉ 3 Bước Để Làm Chủ Tệp Khách Hàng Tiềm Năng
           </h2>
-          <p className="text-base text-[var(--fha-text-muted)] mt-3">
+          <p className="text-base 3xl:text-lg text-[var(--fha-text-muted)] mt-3">
             Toàn bộ quy trình từ thanh toán tới sử dụng được tối ưu hóa tối đa, không cần cài đặt phần mềm nặng máy hay cấu hình phức tạp.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 3xl:gap-12 relative">
           
           {/* Connector line for desktop */}
           <div className="hidden md:block absolute top-1/4 left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-[var(--fha-border)] via-[var(--fha-brand)] to-[var(--fha-border)] z-0" />

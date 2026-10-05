@@ -87,37 +87,37 @@ export default function AnchorPricing() {
   const [billingCycle, setBillingCycle] = useState<'standard' | 'saving'>('saving');
 
   return (
-    <section id="pricing" className="py-20 sm:py-24 bg-white border-b border-[var(--fha-border)]">
-      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" className="py-20 sm:py-24 3xl:py-28 bg-white border-b border-[var(--fha-border)]">
+      <div className="fha-container-standard">
         
         {/* Header */}
-        <div className="max-w-3xl mx-auto text-center mb-12">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
+        <div className="max-w-3xl 3xl:max-w-4xl mx-auto text-center mb-12 3xl:mb-16">
+          <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
             Bảng Giá Minh Bạch
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl 3xl:text-5xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
             Đầu Tư Nhỏ, Thu Về Tệp Khách Hàng Bền Vững
           </h2>
-          <p className="text-base text-[var(--fha-text-muted)] mt-3">
+          <p className="text-base 3xl:text-lg text-[var(--fha-text-muted)] mt-3">
             Tất cả các gói đều kích hoạt tự động qua cổng <strong className="text-[var(--fha-text)] font-semibold">PayOS VietQR</strong> trong 5 giây, bảo đảm 1 key chỉ cấp cho 1 thiết bị.
           </p>
 
           {/* Value Anchor Callout */}
-          <div className="mt-6 inline-flex items-center gap-2 p-1.5 px-4 bg-[var(--fha-surface-2)] border border-[var(--fha-border-strong)] rounded-full text-xs font-semibold text-[var(--fha-text)]">
+          <div className="mt-6 inline-flex items-center gap-2 p-1.5 px-4 bg-[var(--fha-surface-2)] border border-[var(--fha-border-strong)] rounded-full text-xs 3xl:text-sm font-semibold text-[var(--fha-text)]">
             <span className="w-2 h-2 rounded-full bg-[var(--fha-brand)]" />
             <span>Khuyên dùng: Gói 3 Tháng để tiết kiệm 40% và đạt hiệu quả tiếp cận cao nhất</span>
           </div>
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 3xl:gap-8 items-stretch">
           {PLANS.map((plan) => {
             const isPopular = plan.popular;
 
             return (
               <div
                 key={plan.id}
-                className={`rounded-fha-lg border-2 p-6 sm:p-7 flex flex-col justify-between transition-all relative ${
+                className={`rounded-fha-lg border-2 p-6 sm:p-7 3xl:p-8 flex flex-col justify-between transition-all relative ${
                   isPopular 
                     ? 'border-[var(--fha-brand)] bg-white shadow-fha-md lg:scale-[1.02] z-10' 
                     : 'border-[var(--fha-border)] bg-white hover:border-[var(--fha-border-strong)] shadow-fha-sm'

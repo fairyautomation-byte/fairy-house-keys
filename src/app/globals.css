@@ -153,6 +153,20 @@ input:-webkit-autofill:active {
     padding-right: 2.5rem;
   }
 }
+@media (min-width: 1920px) {
+  .fha-container-wide {
+    max-width: 1880px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+@media (min-width: 2560px) {
+  .fha-container-wide {
+    max-width: 2360px;
+    padding-left: 4.5rem;
+    padding-right: 4.5rem;
+  }
+}
 
 .fha-container-standard {
   width: 100%;
@@ -176,7 +190,23 @@ input:-webkit-autofill:active {
 }
 @media (min-width: 1536px) {
   .fha-container-standard {
-    max-width: 1480px;
+    max-width: 1560px;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+@media (min-width: 1920px) {
+  .fha-container-standard {
+    max-width: 1780px;
+    padding-left: 3.5rem;
+    padding-right: 3.5rem;
+  }
+}
+@media (min-width: 2560px) {
+  .fha-container-standard {
+    max-width: 2200px;
+    padding-left: 4.5rem;
+    padding-right: 4.5rem;
   }
 }
 
@@ -197,13 +227,18 @@ input:-webkit-autofill:active {
 
 /* ── Fluid Typography ── */
 .fha-fluid-hero {
-  font-size: clamp(1.875rem, 1.25rem + 2.5vw, 3.5rem);
-  line-height: 1.15;
+  font-size: clamp(2rem, 1.4rem + 2.8vw, 4.75rem);
+  line-height: 1.12;
 }
 
 .fha-fluid-h2 {
-  font-size: clamp(1.5rem, 1.15rem + 1.4vw, 2.5rem);
-  line-height: 1.2;
+  font-size: clamp(1.6rem, 1.15rem + 1.8vw, 3.25rem);
+  line-height: 1.18;
+}
+
+.fha-fluid-body {
+  font-size: clamp(0.95rem, 0.85rem + 0.35vw, 1.25rem);
+  line-height: 1.65;
 }
 
 /* ── Table Sticky Column ── */

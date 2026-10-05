@@ -2,24 +2,24 @@ import React from 'react';
 
 export default function BentoFeatures() {
   return (
-    <section id="features" className="py-20 sm:py-24 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
-      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-20 sm:py-24 3xl:py-28 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
+      <div className="fha-container-standard">
         
         {/* Section Heading */}
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
+        <div className="max-w-2xl 3xl:max-w-3xl mx-auto text-center mb-16 3xl:mb-20">
+          <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
             Kiến Trúc Tính Năng V2.0
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl 3xl:text-5xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
             Được Thiết Kế Cho Người Bán Hàng Chuyên Nghiệp
           </h2>
-          <p className="text-base text-[var(--fha-text-muted)] mt-3">
+          <p className="text-base 3xl:text-lg text-[var(--fha-text-muted)] mt-3">
             Không chỉ là công cụ cào data thông thường. Đây là hệ thống thông minh mô phỏng hành vi người dùng thật, bảo vệ nick Facebook tối đa.
           </p>
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 3xl:gap-8">
           
           {/* Card 1: HERO BENTO (Span 2 cols on desktop) */}
           <div className="lg:col-span-2 bg-white rounded-fha-lg border-2 border-[var(--fha-border-strong)] p-7 sm:p-8 flex flex-col justify-between shadow-fha-sm hover:border-[var(--fha-brand)] transition-colors group">

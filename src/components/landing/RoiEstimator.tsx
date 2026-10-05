@@ -14,23 +14,23 @@ export default function RoiEstimator() {
   const recommendedLink = dailyScan <= 100 ? '/register?plan=trial' : dailyScan <= 1000 ? '/register?plan=monthly' : '/register?plan=quarterly';
 
   return (
-    <section id="estimator" className="py-20 bg-white border-b border-[var(--fha-border)]">
-      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[var(--fha-surface-2)] border-2 border-[var(--fha-border)] rounded-fha-lg p-6 sm:p-10 shadow-fha-sm">
+    <section id="estimator" className="py-20 3xl:py-28 bg-white border-b border-[var(--fha-border)]">
+      <div className="fha-container-standard">
+        <div className="bg-[var(--fha-surface-2)] border-2 border-[var(--fha-border)] rounded-fha-lg p-6 sm:p-10 3xl:p-14 shadow-fha-sm">
           
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
+          <div className="text-center max-w-2xl 3xl:max-w-3xl mx-auto mb-10 3xl:mb-14">
+            <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">
               Công Cụ Tính Hiệu Quả
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl 3xl:text-4xl font-black text-[var(--fha-text)] mt-3 tracking-tight">
               Bạn Cần Bao Nhiêu Khách Hàng Tiềm Năng Mỗi Ngày?
             </h2>
-            <p className="text-sm text-[var(--fha-text-muted)] mt-2">
+            <p className="text-sm 3xl:text-base text-[var(--fha-text-muted)] mt-2">
               Kéo thanh trượt để xem thời gian tiết kiệm và số đơn hàng ước tính mà Fairy House AutoData mang lại cho bạn mỗi tháng.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-8 items-center">
+          <div className="grid lg:grid-cols-12 gap-8 3xl:gap-12 items-center">
             
             {/* Left Column: Slider Controller (7 cols) */}
             <div className="lg:col-span-7 space-y-6">

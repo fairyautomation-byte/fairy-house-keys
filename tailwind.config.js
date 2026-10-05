@@ -94,6 +94,12 @@ module.exports = {
         'fha-radius-xl':   'var(--fha-radius-xl)',
         'fha-radius-full': 'var(--fha-radius-full)',
       },
+      screens: {
+        'xs': '475px',
+        '3xl': '1920px',
+        '4xl': '2560px',
+        '5xl': '3840px',
+      },
       maxWidth: {
         'auth':      '480px',
         'settings':  '760px',
@@ -104,6 +110,8 @@ module.exports = {
         'wide':      '1680px',
         'admin':     '1760px',
         'ultrawide': '1840px',
+        '2k':        '2240px',
+        '4k':        '2800px',
       },
       animation: {
         'fade-in':    'fadeIn 0.3s ease-out',
