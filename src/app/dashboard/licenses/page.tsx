@@ -65,7 +65,9 @@ export default function LicensesPage() {
       {licenses.length > 0 ? (
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
           {licenses.map((license, idx) => {
-            const dailyUsed = license.daily_used || 0;
+            const todayVN = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+            const isDifferentDay = license?.last_reset_date && license.last_reset_date !== todayVN;
+            const dailyUsed = isDifferentDay ? 0 : (license.daily_used || 0);
             const dailyLimit = license.daily_limit === -1 || license.daily_limit === null ? null : (license.daily_limit || 1000);
             const quotaPercent = dailyLimit ? Math.min(100, Math.round((dailyUsed / dailyLimit) * 100)) : 0;
             const isUnlimited = dailyLimit === null;

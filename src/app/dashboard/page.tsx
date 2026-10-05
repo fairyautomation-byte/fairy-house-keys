@@ -52,8 +52,10 @@ export default function DashboardOverview() {
   const activeLicense = licenses.find((l: any) => l.status === 'ACTIVE') || licenses[0];
   const activeLicensesCount = licenses.filter((l: any) => l.status === 'ACTIVE').length;
 
-  // Calculate quota percentage
-  const dailyUsed = activeLicense?.daily_used || 0;
+  // Calculate quota percentage with real-time Vietnam day check
+  const todayVN = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+  const isDifferentDay = activeLicense?.last_reset_date && activeLicense.last_reset_date !== todayVN;
+  const dailyUsed = isDifferentDay ? 0 : (activeLicense?.daily_used || 0);
   const dailyLimit = activeLicense?.daily_limit === -1 || activeLicense?.daily_limit === null ? null : (activeLicense?.daily_limit || 1000);
   const quotaPercent = dailyLimit ? Math.min(100, Math.round((dailyUsed / dailyLimit) * 100)) : 0;
   const remainingQuota = dailyLimit ? Math.max(0, dailyLimit - dailyUsed) : 'Không giới hạn';

@@ -59,6 +59,10 @@ export async function POST(req: NextRequest) {
     
     if (license.last_reset_date !== today) {
       dailyUsed = 0;
+      await licenseDoc.ref.update({
+        daily_used: 0,
+        last_reset_date: today,
+      }).catch((e: any) => console.error('Error updating license daily_used in validate:', e));
     }
 
     const dailyLimit = license.daily_limit;

@@ -81,6 +81,12 @@ export async function POST(req: NextRequest) {
 
         if (action === 'check') {
           newDailyUsed = currentUsed;
+          if (freshData.last_reset_date !== today) {
+            transaction.update(licenseRef, {
+              daily_used: 0,
+              last_reset_date: today,
+            });
+          }
         } else {
           newDailyUsed = currentUsed + count;
           transaction.update(licenseRef, {

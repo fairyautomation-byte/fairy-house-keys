@@ -21,13 +21,41 @@ export async function GET(req: NextRequest) {
       delete userData.password;
     }
 
+    // Real-time Vietnam Date YYYY-MM-DD
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+
     // Get current licenses
     const licenseSnap = await db.collection('licenses')
       .where('user_id', '==', user.uid)
       .where('status', 'in', ['ACTIVE', 'SUSPENDED'])
       .get();
       
-    const activeLicenses = licenseSnap.docs.map((doc: any) => doc.data());
+    const activeLicenses = await Promise.all(
+      licenseSnap.docs.map(async (doc: any) => {
+        const data = doc.data();
+        const docId = doc.id;
+
+        // Auto-reset daily quota if it's a new calendar day in Vietnam (00:00 VN)
+        if (data.last_reset_date !== today) {
+          doc.ref.update({
+            daily_used: 0,
+            last_reset_date: today,
+          }).catch((err: any) => console.error('Error auto-resetting quota in dashboard:', err));
+
+          return {
+            id: docId,
+            ...data,
+            daily_used: 0,
+            last_reset_date: today,
+          };
+        }
+
+        return {
+          id: docId,
+          ...data,
+        };
+      })
+    );
 
     // Get pending orders
     const orderSnap = await db.collection('orders')
