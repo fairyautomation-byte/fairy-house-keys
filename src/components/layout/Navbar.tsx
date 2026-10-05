@@ -14,7 +14,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   return (
     <>
       {/* Top Announcement Ribbon */}
-      <aside aria-label="Thông báo cập nhật" className="w-full bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] py-1.5 px-3 sm:px-4 text-center">
+      <aside aria-label="Thông báo cập nhật" className="w-full bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] py-0.5 sm:py-1 px-3 sm:px-4 text-center">
         <div className="fha-container-standard flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium text-[var(--fha-text-muted)] text-center leading-relaxed">
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] font-bold text-[10px] uppercase tracking-wider shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--fha-brand)] animate-pulse" />
@@ -28,7 +28,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
       </aside>
 
       {/* Main Navbar */}
-      <header className="sticky top-0 z-40 w-full h-[64px] bg-white/95 backdrop-blur-md border-b border-[var(--fha-border)] shadow-sm">
+      <header className="sticky top-0 z-40 w-full h-[54px] sm:h-[58px] xl:h-[64px] bg-white/95 backdrop-blur-md border-b border-[var(--fha-border)] shadow-sm">
         <div className="fha-container-standard h-full flex items-center justify-between">
           
           {/* Logo & Brand */}

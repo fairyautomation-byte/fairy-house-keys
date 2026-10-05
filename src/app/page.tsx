@@ -23,10 +23,10 @@ export default function Home() {
       {/* ======================================================== */}
       {/* SECTION 1: ASYMMETRIC SPLIT HERO                         */}
       {/* ======================================================== */}
-      <section className="relative pt-12 pb-20 md:pt-16 md:pb-28 border-b border-[var(--fha-border)] bg-white overflow-hidden">
+      <section className="relative pt-4 pb-6 sm:pt-8 sm:pb-12 lg:pt-5 lg:pb-7 xl:pt-10 xl:pb-16 2xl:pt-14 2xl:pb-20 border-b border-[var(--fha-border)] bg-white overflow-hidden">
         {/* Subtle Background Hairline Grid */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-40" 
+          className="absolute inset-0 pointer-events-none opacity-30" 
           style={{ 
             backgroundImage: 'linear-gradient(var(--fha-border) 1px, transparent 1px), linear-gradient(90deg, var(--fha-border) 1px, transparent 1px)', 
             backgroundSize: '48px 48px' 
@@ -34,30 +34,30 @@ export default function Home() {
         />
         
         <div className="fha-container-standard relative z-10">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 2xl:gap-12 3xl:gap-16 items-center">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-6 2xl:gap-12 3xl:gap-16 items-center">
             
             {/* Left Column (60%): Text & Value Proposition */}
-            <div className="lg:col-span-7 space-y-6 3xl:space-y-8 text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 3xl:px-4 3xl:py-1.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] text-xs 3xl:text-sm font-bold tracking-wider uppercase border border-[var(--fha-brand)]">
-                <span className="w-2 h-2 3xl:w-2.5 3xl:h-2.5 rounded-full bg-[var(--fha-brand)] animate-pulse" />
+            <div className="lg:col-span-7 space-y-3 sm:space-y-4 lg:space-y-3 xl:space-y-5 2xl:space-y-6 3xl:space-y-8 text-left">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 3xl:px-4 3xl:py-1.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] text-[11px] sm:text-xs 3xl:text-sm font-bold tracking-wider uppercase border border-[var(--fha-brand)]">
+                <span className="w-1.5 h-1.5 3xl:w-2.5 3xl:h-2.5 rounded-full bg-[var(--fha-brand)] animate-pulse" />
                 Chrome Extension Thế Hệ Mới V2.0
               </div>
 
-              <h1 className="fha-fluid-hero font-black tracking-tight text-[var(--fha-text)]">
+              <h1 className="text-2xl sm:text-3xl lg:text-[28px] xl:text-[36px] 2xl:text-[44px] 3xl:text-5xl font-black tracking-tight text-[var(--fha-text)] leading-[1.18]">
                 Quét Khách Hàng Facebook Tự Động.{' '}
                 <span className="text-[var(--fha-brand)]">
                   Không Lo Checkpoint.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg 3xl:text-xl text-[var(--fha-text-muted)] max-w-xl 3xl:max-w-2xl 4xl:max-w-3xl leading-relaxed">
+              <p className="text-xs sm:text-sm lg:text-[13px] xl:text-base 3xl:text-xl text-[var(--fha-text-muted)] max-w-xl 3xl:max-w-2xl 4xl:max-w-3xl leading-relaxed">
                 Tiết kiệm 85+ giờ tìm kiếm khách hàng thủ công mỗi tháng. Công nghệ <strong className="text-[var(--fha-text)] font-semibold">Human-Emulation 2.0</strong> mô phỏng hành vi người thật, tích hợp thanh toán tự động qua <strong className="text-[var(--fha-text)] font-semibold">PayOS VietQR</strong> cấp Key độc quyền trong 5 giây!
               </p>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5 pt-1 lg:pt-1 xl:pt-2">
                 <Link href={isLoggedIn ? "/dashboard" : "/register"} passHref>
-                  <Button variant="primary" size="lg" className="h-[50px] 3xl:h-[58px] px-8 3xl:px-10 text-sm 3xl:text-base font-bold shadow-fha-sm">
+                  <Button variant="primary" size="lg" className="h-[42px] sm:h-[46px] xl:h-[50px] 3xl:h-[58px] px-6 sm:px-8 3xl:px-10 text-xs sm:text-sm 3xl:text-base font-bold shadow-fha-sm">
                     {isLoggedIn ? "Vào Trang Quản Lý" : "Dùng Thử Miễn Phí 3 Ngày (0đ)"}
                     <svg className="w-4 h-4 3xl:w-5 3xl:h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -66,30 +66,30 @@ export default function Home() {
                 </Link>
 
                 <Link href="#pricing" passHref>
-                  <Button variant="outline" size="lg" className="h-[50px] 3xl:h-[58px] px-7 3xl:px-9 text-sm 3xl:text-base font-semibold bg-white hover:bg-[var(--fha-surface-2)]">
+                  <Button variant="outline" size="lg" className="h-[42px] sm:h-[46px] xl:h-[50px] 3xl:h-[58px] px-5 sm:px-7 3xl:px-9 text-xs sm:text-sm 3xl:text-base font-semibold bg-white hover:bg-[var(--fha-surface-2)]">
                     Xem Bảng Giá Cước
                   </Button>
                 </Link>
               </div>
 
               {/* Trust Footprint */}
-              <div className="pt-6 3xl:pt-8 border-t border-[var(--fha-border)] flex flex-wrap items-center gap-6 3xl:gap-8 text-xs 3xl:text-sm text-[var(--fha-text-muted)]">
+              <div className="pt-3.5 sm:pt-4 xl:pt-6 3xl:pt-8 border-t border-[var(--fha-border)] flex flex-wrap items-center gap-3.5 sm:gap-6 3xl:gap-8 text-[11px] sm:text-xs 3xl:text-sm text-[var(--fha-text-muted)]">
                 <div className="flex items-center gap-1.5 font-medium">
-                  <svg className="w-4 h-4 3xl:w-5 3xl:h-5 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 3xl:w-5 3xl:h-5 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>1 Key / 1 Thiết Bị Độc Quyền</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 font-medium">
-                  <svg className="w-4 h-4 3xl:w-5 3xl:h-5 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 3xl:w-5 3xl:h-5 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Kích Hoạt Tức Thì Qua PayOS</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 font-medium">
-                  <svg className="w-4 h-4 3xl:w-5 3xl:h-5 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 3xl:w-5 3xl:h-5 text-[var(--fha-success)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Không Cần Mật Khẩu Facebook</span>
@@ -100,7 +100,7 @@ export default function Home() {
 
             {/* Right Column (40%): Live Extension Interactive Simulator */}
             <div className="lg:col-span-5 relative w-full overflow-hidden sm:overflow-visible">
-              <div className="relative w-full max-w-[500px] 2xl:max-w-[580px] 3xl:max-w-[680px] 4xl:max-w-[760px] mx-auto">
+              <div className="relative w-full max-w-[430px] lg:max-w-[410px] xl:max-w-[480px] 2xl:max-w-[580px] 3xl:max-w-[680px] 4xl:max-w-[760px] mx-auto">
                 {/* Decorative background glow */}
                 <div className="hidden sm:block absolute -inset-4 bg-gradient-to-r from-[var(--fha-brand-soft)] to-transparent rounded-2xl opacity-60 blur-xl pointer-events-none" />
                 <LiveExtensionPreview />
