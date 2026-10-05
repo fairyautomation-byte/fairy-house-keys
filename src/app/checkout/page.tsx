@@ -211,8 +211,8 @@ function CheckoutContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--fha-surface-2)] py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--fha-surface-2)] py-10 px-4 sm:px-6 lg:px-8 2xl:px-12 3xl:px-16 4xl:px-24 font-sans">
+      <div className="w-full space-y-8">
         
         {/* Brand Bar */}
         <div className="flex items-center justify-between pb-6 border-b border-[var(--fha-border)]">

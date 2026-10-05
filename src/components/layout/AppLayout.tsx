@@ -63,7 +63,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 2xl:p-10 3xl:p-12 w-full max-w-[1680px] 2xl:max-w-[1780px] 3xl:max-w-[1980px] 4xl:max-w-[2400px] mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 2xl:p-10 3xl:p-12 w-full">
           {children}
         </main>
       </div>

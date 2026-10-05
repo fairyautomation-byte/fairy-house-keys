@@ -125,103 +125,52 @@ input:-webkit-autofill:active {
   border-color: var(--fha-brand);
 }
 
-/* ── Container Hierarchy ── */
-.fha-container-wide {
+/* ── Container Hierarchy (Full Width 100%) ── */
+.fha-container-wide,
+.fha-container-standard,
+.fha-container-narrow {
   width: 100%;
-  max-width: 1680px;
-  margin-left: auto;
-  margin-right: auto;
   padding-left: 1rem;
   padding-right: 1rem;
 }
 @media (min-width: 640px) {
-  .fha-container-wide {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  .fha-container-wide {
+  .fha-container-wide,
+  .fha-container-standard,
+  .fha-container-narrow {
     padding-left: 2rem;
     padding-right: 2rem;
   }
 }
-@media (min-width: 1536px) {
-  .fha-container-wide {
-    max-width: 1780px;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-  }
-}
-@media (min-width: 1920px) {
-  .fha-container-wide {
-    max-width: 1880px;
+@media (min-width: 1024px) {
+  .fha-container-wide,
+  .fha-container-standard,
+  .fha-container-narrow {
     padding-left: 3rem;
     padding-right: 3rem;
   }
 }
-@media (min-width: 2560px) {
-  .fha-container-wide {
-    max-width: 2360px;
-    padding-left: 4.5rem;
-    padding-right: 4.5rem;
-  }
-}
-
-.fha-container-standard {
-  width: 100%;
-  max-width: 1360px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-@media (min-width: 640px) {
-  .fha-container-standard {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  .fha-container-standard {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
 @media (min-width: 1536px) {
-  .fha-container-standard {
-    max-width: 1560px;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+  .fha-container-wide,
+  .fha-container-standard,
+  .fha-container-narrow {
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 }
 @media (min-width: 1920px) {
-  .fha-container-standard {
-    max-width: 1780px;
-    padding-left: 3.5rem;
-    padding-right: 3.5rem;
+  .fha-container-wide,
+  .fha-container-standard,
+  .fha-container-narrow {
+    padding-left: 5rem;
+    padding-right: 5rem;
   }
 }
 @media (min-width: 2560px) {
-  .fha-container-standard {
-    max-width: 2200px;
-    padding-left: 4.5rem;
-    padding-right: 4.5rem;
-  }
-}
-
-.fha-container-narrow {
-  width: 100%;
-  max-width: 840px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-@media (min-width: 640px) {
+  .fha-container-wide,
+  .fha-container-standard,
   .fha-container-narrow {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 6rem;
+    padding-right: 6rem;
   }
 }
 
