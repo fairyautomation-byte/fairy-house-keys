@@ -19,7 +19,8 @@ export default function TermsPage() {
     <div className="min-h-screen bg-[var(--fha-bg)] text-[var(--fha-text)] font-sans selection:bg-[var(--fha-brand-soft)]">
       <Navbar isLoggedIn={isLoggedIn} />
 
-      <main className="max-w-[860px] mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-8">
+      <main className="fha-container-standard py-10 sm:py-16">
+        <div className="max-w-4xl 3xl:max-w-5xl mx-auto space-y-8">
         {/* Breadcrumb & Header */}
         <div className="space-y-3">
           <nav className="flex items-center gap-2 text-xs text-[var(--fha-text-muted)] font-medium">
@@ -196,6 +197,7 @@ export default function TermsPage() {
             </svg>
             <span>Quay lại trang chủ Fairy House AutoData</span>
           </Link>
+        </div>
         </div>
       </main>
 

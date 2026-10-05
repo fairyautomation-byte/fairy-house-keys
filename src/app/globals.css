@@ -125,23 +125,42 @@ input:-webkit-autofill:active {
   border-color: var(--fha-brand);
 }
 
-/* ── Container Hierarchy (Full Width 100%) ── */
+/* ── Container Hierarchy (Full Width 100% with Safe Area Support) ── */
 .fha-container-wide,
 .fha-container-standard,
 .fha-container-narrow {
   width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
 }
 @media (min-width: 640px) {
   .fha-container-wide,
   .fha-container-standard,
   .fha-container-narrow {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+  }
+}
+@media (min-width: 768px) {
+  /* Tablet / iPad Portrait */
+  .fha-container-wide,
+  .fha-container-standard,
+  .fha-container-narrow {
+    padding-left: max(2rem, env(safe-area-inset-left, 0px));
+    padding-right: max(2rem, env(safe-area-inset-right, 0px));
   }
 }
 @media (min-width: 1024px) {
+  /* Tablet Landscape / Laptop */
+  .fha-container-wide,
+  .fha-container-standard,
+  .fha-container-narrow {
+    padding-left: max(2.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(2.5rem, env(safe-area-inset-right, 0px));
+  }
+}
+@media (min-width: 1280px) {
+  /* Desktop Standard */
   .fha-container-wide,
   .fha-container-standard,
   .fha-container-narrow {
@@ -150,6 +169,7 @@ input:-webkit-autofill:active {
   }
 }
 @media (min-width: 1536px) {
+  /* Desktop Wide */
   .fha-container-wide,
   .fha-container-standard,
   .fha-container-narrow {
@@ -158,6 +178,7 @@ input:-webkit-autofill:active {
   }
 }
 @media (min-width: 1920px) {
+  /* Full HD / 2K */
   .fha-container-wide,
   .fha-container-standard,
   .fha-container-narrow {
@@ -166,12 +187,27 @@ input:-webkit-autofill:active {
   }
 }
 @media (min-width: 2560px) {
+  /* 4K Ultra Wide */
   .fha-container-wide,
   .fha-container-standard,
   .fha-container-narrow {
     padding-left: 6rem;
     padding-right: 6rem;
   }
+}
+
+/* ── Safe Area Utilities for Mobile / iPhone Notch & Home Bar ── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 /* ── Fluid Typography ── */

@@ -71,8 +71,9 @@ export default function GroupedFAQ() {
   };
 
   return (
-    <section id="faq" className="py-24 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
-      <div className="max-w-[840px] mx-auto px-4 sm:px-6">
+    <section id="faq" className="py-20 sm:py-24 3xl:py-28 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
+      <div className="fha-container-standard">
+        <div className="max-w-4xl 3xl:max-w-5xl mx-auto">
         
         {/* Heading */}
         <div className="text-center mb-12">
@@ -168,6 +169,7 @@ export default function GroupedFAQ() {
           </a>
         </div>
 
+        </div>
       </div>
     </section>
   );

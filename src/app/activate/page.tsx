@@ -4,8 +4,9 @@ import Button from '@/components/ui/Button';
 
 export default function ActivatePage() {
   return (
-    <div className="min-h-screen bg-[var(--fha-surface-2)] py-12 px-4 sm:px-6 font-sans">
-      <div className="max-w-[860px] mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--fha-surface-2)] py-8 sm:py-12 font-sans">
+      <div className="fha-container-standard">
+        <div className="max-w-4xl 3xl:max-w-5xl mx-auto space-y-8">
         
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -145,6 +146,7 @@ export default function ActivatePage() {
           </a>
         </div>
 
+        </div>
       </div>
     </div>
   );

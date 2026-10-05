@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Be_Vietnam_Pro, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/ToastProvider';
@@ -16,6 +16,14 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#ffffff',
+};
 
 export const metadata: Metadata = {
   title: 'Fairy House AutoData — Quét data Facebook & kết bạn tự động',

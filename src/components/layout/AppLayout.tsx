@@ -29,7 +29,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex h-screen bg-[var(--fha-bg)] overflow-hidden font-sans relative text-[var(--fha-text)]">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto flex flex-col relative pb-[72px] lg:pb-0 z-10">
+      <div 
+        className="flex-1 overflow-y-auto flex flex-col relative lg:!pb-0 z-10"
+        style={{ paddingBottom: 'calc(76px + env(safe-area-inset-bottom, 0px))' }}
+      >
         {/* Mobile & Tablet Top Header (< 1024px) */}
         <header className="lg:hidden flex items-center justify-between px-4 sm:px-6 h-14 bg-white border-b border-[var(--fha-border)] shrink-0 sticky top-0 z-30 shadow-sm">
           <Link href="/dashboard" className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
