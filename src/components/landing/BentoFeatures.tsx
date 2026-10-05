@@ -2,8 +2,8 @@ import React from 'react';
 
 export default function BentoFeatures() {
   return (
-    <section id="features" className="py-24 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-20 sm:py-24 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
+      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading */}
         <div className="max-w-2xl mx-auto text-center mb-16">

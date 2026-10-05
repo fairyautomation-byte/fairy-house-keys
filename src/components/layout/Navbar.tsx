@@ -15,7 +15,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
     <>
       {/* Top Announcement Ribbon */}
       <aside aria-label="Thông báo cập nhật" className="w-full bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] py-1.5 px-3 sm:px-4 text-center">
-        <div className="max-w-[1200px] mx-auto flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium text-[var(--fha-text-muted)] text-center leading-relaxed">
+        <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium text-[var(--fha-text-muted)] text-center leading-relaxed">
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] font-bold text-[10px] uppercase tracking-wider shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--fha-brand)] animate-pulse" />
             V2.0 Live
@@ -29,7 +29,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
       {/* Main Navbar */}
       <header className="sticky top-0 z-40 w-full h-[64px] bg-white/95 backdrop-blur-md border-b border-[var(--fha-border)] shadow-sm">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+        <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           
           {/* Logo & Brand */}
           <div className="flex items-center gap-4">

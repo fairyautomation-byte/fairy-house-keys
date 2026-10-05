@@ -29,9 +29,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex h-screen bg-[var(--fha-bg)] overflow-hidden font-sans relative text-[var(--fha-text)]">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto flex flex-col relative pb-[64px] md:pb-0 z-10">
-        {/* Mobile Top Header */}
-        <header className="md:hidden flex items-center justify-between px-4 h-14 bg-white border-b border-[var(--fha-border)] shrink-0 sticky top-0 z-30">
+      <div className="flex-1 overflow-y-auto flex flex-col relative pb-[72px] lg:pb-0 z-10">
+        {/* Mobile & Tablet Top Header (< 1024px) */}
+        <header className="lg:hidden flex items-center justify-between px-4 sm:px-6 h-14 bg-white border-b border-[var(--fha-border)] shrink-0 sticky top-0 z-30 shadow-sm">
           <Link href="/dashboard" className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--fha-brand)] rounded">
             <Image src="/logo.png" alt="Logo" width={28} height={28} className="rounded shrink-0" />
             <span className="font-bold text-sm tracking-tight text-[var(--fha-text)]">
@@ -63,7 +63,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 lg:px-10 max-w-[1200px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 2xl:p-10 w-full max-w-[1680px] 2xl:max-w-[1780px] mx-auto">
           {children}
         </main>
       </div>

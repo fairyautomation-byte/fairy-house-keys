@@ -139,6 +139,24 @@ export default function AdminDashboard() {
           data={recentOrders}
           rowKey={(item) => item.id}
           loading={loading}
+          mobileRender={(item) => (
+            <div className="p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-bold text-[var(--fha-brand)]">{item.transaction_code}</span>
+                <StatusBadge status={item.status} size="sm" />
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold uppercase text-[var(--fha-text)]">{item.plan_id}</span>
+                <span className="font-mono font-medium text-[var(--fha-text)]">{formatCurrency(item.amount)}</span>
+              </div>
+              {item.status === 'PENDING_PAYMENT_REVIEW' && (
+                <div className="flex justify-end gap-2 pt-2 border-t border-[var(--fha-border)]">
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmAction({type: 'reject', id: item.id})}>Từ chối</Button>
+                  <Button size="sm" variant="primary" onClick={() => setConfirmAction({type: 'approve', id: item.id})}>Duyệt</Button>
+                </div>
+              )}
+            </div>
+          )}
           emptyState={
             <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Chưa có giao dịch nào</div>
           }

@@ -65,7 +65,7 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-[260px] h-screen bg-[var(--fha-surface)] border-r border-[var(--fha-border-strong)] sticky top-0 shadow-sm z-30">
+    <aside className="hidden lg:flex flex-col w-[260px] h-screen bg-[var(--fha-surface)] border-r border-[var(--fha-border-strong)] sticky top-0 shadow-sm z-30">
       
       {/* Brand */}
       <div className="h-[64px] flex items-center px-6 border-b border-[var(--fha-border)] shrink-0 bg-[var(--fha-surface-2)]">

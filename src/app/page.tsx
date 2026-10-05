@@ -33,7 +33,7 @@ export default function Home() {
           }} 
         />
         
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 relative z-10">
+        <div className="fha-container-standard relative z-10">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
             {/* Left Column (60%): Text & Value Proposition */}
@@ -43,7 +43,7 @@ export default function Home() {
                 Chrome Extension Thế Hệ Mới V2.0
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--fha-text)] leading-[1.15]">
+              <h1 className="fha-fluid-hero font-black tracking-tight text-[var(--fha-text)] leading-[1.15]">
                 Quét Khách Hàng Facebook Tự Động.{' '}
                 <span className="text-[var(--fha-brand)]">
                   Không Lo Checkpoint.
@@ -115,7 +115,7 @@ export default function Home() {
       {/* SECTION 2: METRIC & SOCIAL PROOF TICKER                  */}
       {/* ======================================================== */}
       <section className="py-8 bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div className="fha-container-standard">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="p-3">
               <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--fha-text)] tracking-tight">15,000+</div>
@@ -165,8 +165,8 @@ export default function Home() {
       {/* ======================================================== */}
       {/* SECTION 8: HIGH-CONVERTING SPLIT FINAL CTA               */}
       {/* ======================================================== */}
-      <section className="py-20 bg-white border-t border-[var(--fha-border)]">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
+      <section className="py-16 sm:py-20 bg-white border-t border-[var(--fha-border)]">
+        <div className="fha-container-standard">
           <div className="bg-[var(--fha-surface-2)] rounded-fha-lg border-2 border-[var(--fha-border-strong)] p-8 sm:p-12 shadow-fha-sm">
             <div className="grid lg:grid-cols-12 gap-8 items-center">
               

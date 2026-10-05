@@ -85,6 +85,27 @@ export default function TransactionsPage() {
           data={orders}
           rowKey={(item) => item.id || item.transaction_code}
           loading={loading}
+          mobileRender={(item) => (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-[var(--fha-brand)] font-bold">{item.transaction_code}</span>
+                <StatusBadge status={item.status} size="sm" />
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <div>
+                  <div className="font-bold text-sm text-[var(--fha-text)]">
+                    {item.type === 'DEPOSIT' ? 'Nạp Tiền Vào Ví' : getPlanName(item.plan_id)}
+                  </div>
+                  <div className="text-[11px] text-[var(--fha-text-muted)] mt-0.5">
+                    {formatDate(item.created_at?._seconds ? item.created_at._seconds * 1000 : item.created_at, true)}
+                  </div>
+                </div>
+                <div className={`font-mono font-bold text-base ${item.type === 'DEPOSIT' ? 'text-[var(--fha-success)]' : 'text-[var(--fha-text)]'}`}>
+                  {item.type === 'DEPOSIT' ? '+' : ''}{formatCurrency(item.amount)}
+                </div>
+              </div>
+            </div>
+          )}
           emptyState={
             <EmptyState 
               title="Chưa có giao dịch nào" 

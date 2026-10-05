@@ -105,7 +105,7 @@ export default function StorePage() {
       />
 
       {/* Plan Matrix */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6 items-stretch">
         {plans.map((plan) => {
           const isPopular = plan.popular || plan.id === 'quarterly';
           const canAfford = walletBalance >= plan.price;

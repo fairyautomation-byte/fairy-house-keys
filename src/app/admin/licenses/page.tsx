@@ -97,6 +97,21 @@ export default function AdminLicensesPage() {
           data={filteredLicenses}
           rowKey={(item) => item.id || item.license_key}
           loading={loading}
+          mobileRender={(item) => (
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs uppercase text-[var(--fha-text)]">{item.plan_id}</span>
+                <StatusBadge status={item.status} size="sm" />
+              </div>
+              <div className="font-mono text-xs text-[var(--fha-brand)] font-bold break-all bg-[var(--fha-surface-2)] p-2 rounded border border-[var(--fha-border)]">
+                {item.license_key}
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[var(--fha-text-muted)]">
+                <span className="truncate max-w-[180px]">{item.email}</span>
+                <span>{item.expires_at ? formatDate(item.expires_at) : 'Vô thời hạn'}</span>
+              </div>
+            </div>
+          )}
           emptyState={
             <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Chưa có license nào hoặc tính năng đang được cập nhật</div>
           }

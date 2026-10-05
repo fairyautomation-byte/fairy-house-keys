@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ConfirmModal } from '@/components/ui/Modal';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatCurrency } from '@/lib/format';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -167,7 +167,24 @@ export default function AdminUsersPage() {
           columns={columns}
           data={filteredUsers}
           rowKey={(item) => item.id}
-          loading={loading}
+          mobileRender={(item) => (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-[var(--fha-text)]">{item.full_name || 'Khách hàng'}</span>
+                <StatusBadge status={item.email_verified ? 'ACTIVE' : 'PENDING'} size="sm" />
+              </div>
+              <div className="text-xs text-[var(--fha-text-muted)] truncate">{item.email}</div>
+              <div className="flex items-center justify-between pt-1 border-t border-[var(--fha-border)] text-xs">
+                <span className="font-mono text-[var(--fha-brand)] font-bold">{formatCurrency(item.wallet_balance || 0)}</span>
+                <button
+                  onClick={() => setConfirmDelete({ id: item.id, email: item.email })}
+                  className="text-xs font-semibold text-[var(--fha-error)] hover:underline"
+                >
+                  Xóa tài khoản
+                </button>
+              </div>
+            </div>
+          )}
           emptyState={
             <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Không tìm thấy người dùng nào</div>
           }

@@ -15,7 +15,7 @@ export default function RoiEstimator() {
 
   return (
     <section id="estimator" className="py-20 bg-white border-b border-[var(--fha-border)]">
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
+      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-[var(--fha-surface-2)] border-2 border-[var(--fha-border)] rounded-fha-lg p-6 sm:p-10 shadow-fha-sm">
           
           <div className="text-center max-w-2xl mx-auto mb-10">

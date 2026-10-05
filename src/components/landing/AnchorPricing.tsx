@@ -87,8 +87,8 @@ export default function AnchorPricing() {
   const [billingCycle, setBillingCycle] = useState<'standard' | 'saving'>('saving');
 
   return (
-    <section id="pricing" className="py-24 bg-white border-b border-[var(--fha-border)]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" className="py-20 sm:py-24 bg-white border-b border-[var(--fha-border)]">
+      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-12">
@@ -110,7 +110,7 @@ export default function AnchorPricing() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
           {PLANS.map((plan) => {
             const isPopular = plan.popular;
 
@@ -119,7 +119,7 @@ export default function AnchorPricing() {
                 key={plan.id}
                 className={`rounded-fha-lg border-2 p-6 sm:p-7 flex flex-col justify-between transition-all relative ${
                   isPopular 
-                    ? 'border-[var(--fha-brand)] bg-white shadow-fha-md scale-[1.02] z-10' 
+                    ? 'border-[var(--fha-brand)] bg-white shadow-fha-md lg:scale-[1.02] z-10' 
                     : 'border-[var(--fha-border)] bg-white hover:border-[var(--fha-border-strong)] shadow-fha-sm'
                 }`}
               >

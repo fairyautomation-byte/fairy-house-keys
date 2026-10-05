@@ -24,8 +24,8 @@ export default function WorkflowSteps() {
   ];
 
   return (
-    <section id="workflow" className="py-24 bg-white border-b border-[var(--fha-border)]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="workflow" className="py-20 sm:py-24 bg-white border-b border-[var(--fha-border)]">
+      <div className="max-w-[1360px] 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="max-w-2xl mx-auto text-center mb-16">
           <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--fha-brand)] bg-[var(--fha-brand-soft)] px-3 py-1 rounded">

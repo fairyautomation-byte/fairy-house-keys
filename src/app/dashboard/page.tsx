@@ -108,13 +108,29 @@ export default function DashboardOverview() {
               </div>
 
               <div>
-                <div className="text-xs text-[var(--fha-text-muted)] font-medium">Mã License đang hoạt động:</div>
-                <div className="text-lg sm:text-xl font-black font-mono text-[var(--fha-text)] tracking-wider mt-0.5 select-all">
-                  {activeLicense.license_key}
+                <div className="text-xs text-[var(--fha-text-muted)] font-medium mb-1">Mã License đang hoạt động:</div>
+                <div className="flex items-center gap-2">
+                  <div className="px-3.5 py-1.5 rounded-fha bg-[var(--fha-surface-2)] border border-[var(--fha-border-strong)] text-base sm:text-lg font-black font-mono text-[var(--fha-text)] tracking-wider select-all">
+                    {activeLicense.license_key}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(activeLicense.license_key);
+                      alert('Đã sao chép License Key vào bộ nhớ tạm!');
+                    }}
+                    className="p-2 rounded-fha border border-[var(--fha-border-strong)] bg-white hover:bg-[var(--fha-surface-2)] text-[var(--fha-text-muted)] hover:text-[var(--fha-brand)] transition-colors active:scale-95"
+                    title="Sao chép License Key"
+                    aria-label="Sao chép License Key"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--fha-text-muted)]">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--fha-text-muted)] pt-1">
                 <div>
                   Hết hạn:{' '}
                   <strong className="text-[var(--fha-text)] font-semibold">
@@ -370,7 +386,7 @@ export default function DashboardOverview() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-[var(--fha-border)] bg-[var(--fha-surface-2)] text-[var(--fha-text-muted)] font-semibold uppercase tracking-wider">
-                  <th className="py-3 px-5">Mã đơn</th>
+                  <th className="py-3 px-5 fha-sticky-col bg-[var(--fha-surface-2)]">Mã đơn</th>
                   <th className="py-3 px-5">Gói dịch vụ</th>
                   <th className="py-3 px-5">Số tiền</th>
                   <th className="py-3 px-5">Trạng thái</th>
@@ -380,7 +396,7 @@ export default function DashboardOverview() {
               <tbody className="divide-y divide-[var(--fha-border)]">
                 {filteredOrders.map((order: any, idx: number) => (
                   <tr key={order.id || idx} className="hover:bg-[var(--fha-surface-2)]/50 transition-colors">
-                    <td className="py-3.5 px-5 font-mono font-bold text-[var(--fha-text)]">
+                    <td className="py-3.5 px-5 font-mono font-bold text-[var(--fha-text)] fha-sticky-col">
                       #{order.order_code || (order.id ? order.id.slice(0, 8) : 'ORD')}
                     </td>
                     <td className="py-3.5 px-5 font-medium text-[var(--fha-text)]">

@@ -36,9 +36,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen bg-fha-bg overflow-hidden font-sans">
       <AdminSidebar />
-      <div className="flex-1 overflow-y-auto flex flex-col relative pb-[60px] md:pb-0">
-        {/* Admin Mobile Header */}
-        <header className="md:hidden flex items-center justify-between px-4 h-14 bg-white border-b border-[var(--fha-border)] shrink-0 sticky top-0 z-30">
+      <div className="flex-1 overflow-y-auto flex flex-col relative pb-[60px] lg:pb-0">
+        {/* Admin Mobile & Tablet Header (< 1024px) */}
+        <header className="lg:hidden flex items-center justify-between px-4 sm:px-6 h-14 bg-white border-b border-[var(--fha-border)] shrink-0 sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-1.5">
             <Link
               href="/"
-              className="px-2 py-1 text-xs font-semibold text-[var(--fha-text)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)] transition-colors"
+              className="px-2.5 py-1 text-xs font-semibold text-[var(--fha-text)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)] transition-colors"
             >
               Trang chủ
             </Link>
@@ -73,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Admin Mobile Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-[var(--fha-border)] px-4 py-3 shadow-md space-y-1 z-20 animate-fade-in">
+          <div className="lg:hidden bg-white border-b border-[var(--fha-border)] px-4 py-3 shadow-md space-y-1 z-20 animate-fade-in">
             {adminNavItems.map(item => {
               const isActive = item.href === '/admin' ? pathname === item.href : pathname?.startsWith(item.href);
               return (
@@ -92,7 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         )}
 
-        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 2xl:p-10 w-full max-w-[1760px] 2xl:max-w-[1840px] mx-auto">
           {children}
         </main>
       </div>

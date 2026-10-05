@@ -88,10 +88,10 @@ export default function GroupedFAQ() {
         </div>
 
         {/* Category Tabs */}
-        <div className="flex items-center justify-center gap-2 mb-8 p-1 bg-white rounded-fha border border-[var(--fha-border)]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 mb-8 p-1.5 bg-white rounded-fha border border-[var(--fha-border)]">
           <button
             onClick={() => { setActiveCategory('license'); setOpenIndices({ 0: true }); }}
-            className={`flex-1 py-2 px-3 text-xs font-bold rounded-md transition-all ${
+            className={`py-2 px-3 text-xs font-bold rounded-md transition-all text-center ${
               activeCategory === 'license' 
                 ? 'bg-[var(--fha-brand)] text-white shadow-sm' 
                 : 'text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)]'
@@ -101,7 +101,7 @@ export default function GroupedFAQ() {
           </button>
           <button
             onClick={() => { setActiveCategory('tech'); setOpenIndices({ 0: true }); }}
-            className={`flex-1 py-2 px-3 text-xs font-bold rounded-md transition-all ${
+            className={`py-2 px-3 text-xs font-bold rounded-md transition-all text-center ${
               activeCategory === 'tech' 
                 ? 'bg-[var(--fha-brand)] text-white shadow-sm' 
                 : 'text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)]'
@@ -111,7 +111,7 @@ export default function GroupedFAQ() {
           </button>
           <button
             onClick={() => { setActiveCategory('payment'); setOpenIndices({ 0: true }); }}
-            className={`flex-1 py-2 px-3 text-xs font-bold rounded-md transition-all ${
+            className={`py-2 px-3 text-xs font-bold rounded-md transition-all text-center ${
               activeCategory === 'payment' 
                 ? 'bg-[var(--fha-brand)] text-white shadow-sm' 
                 : 'text-[var(--fha-text-muted)] hover:text-[var(--fha-text)] hover:bg-[var(--fha-surface-2)]'

@@ -201,12 +201,12 @@ export default function WalletPage() {
               <div className="space-y-1.5">
                 <span className="text-[11px] font-semibold text-[var(--fha-text-muted)]">Mệnh giá phổ biến:</span>
                 <div className="grid grid-cols-3 gap-2">
-                  {[50000, 100000, 200000, 500000, 1000000].map(amt => (
+                  {[50000, 100000, 200000, 500000, 1000000, 2000000].map(amt => (
                     <button
                       key={amt}
                       type="button"
                       onClick={() => setDepositAmount(amt.toLocaleString('vi-VN'))}
-                      className={`py-2 px-1 text-center rounded-fha text-xs font-bold border transition-colors ${
+                      className={`py-2 px-1 text-center rounded-fha text-xs font-bold border transition-colors active:scale-95 ${
                         depositAmount === amt.toLocaleString('vi-VN')
                           ? 'border-[var(--fha-brand)] bg-[var(--fha-brand-soft)] text-[var(--fha-brand)]'
                           : 'border-[var(--fha-border)] bg-[var(--fha-surface-2)] text-[var(--fha-text)] hover:border-[var(--fha-border-strong)]'

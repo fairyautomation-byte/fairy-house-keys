@@ -92,6 +92,23 @@ export default function AdminOrdersPage() {
           data={filteredOrders}
           rowKey={(item) => item.id}
           loading={loading}
+          mobileRender={(item) => (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-[var(--fha-brand)] font-bold">{item.transaction_code}</span>
+                <StatusBadge status={item.status} size="sm" />
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <div>
+                  <div className="font-bold text-sm text-[var(--fha-text)] truncate max-w-[200px]">{item.email || 'N/A'}</div>
+                  <div className="text-[11px] font-semibold uppercase text-[var(--fha-text-muted)] mt-0.5">{item.plan_id}</div>
+                </div>
+                <div className="font-mono font-bold text-sm text-[var(--fha-text)]">
+                  {formatCurrency(item.amount)}
+                </div>
+              </div>
+            </div>
+          )}
           emptyState={
             <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Không tìm thấy đơn hàng nào</div>
           }

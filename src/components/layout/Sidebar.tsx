@@ -114,7 +114,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen bg-white border-r border-[var(--fha-border)] sticky top-0 z-20 shrink-0">
+    <aside className="hidden lg:flex flex-col w-64 h-screen bg-white border-r border-[var(--fha-border)] sticky top-0 z-20 shrink-0">
       
       {/* Brand Header */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-[var(--fha-border)] shrink-0 bg-white">

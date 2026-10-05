@@ -44,7 +44,7 @@ export default function Input({
           aria-describedby={
             error ? errorId : hint ? hintId : undefined
           }
-          className={`w-full bg-white border text-sm rounded-fha text-[var(--fha-text)] placeholder-[var(--fha-text-faint)]
+          className={`w-full bg-white border text-base md:text-sm rounded-fha text-[var(--fha-text)] placeholder-[var(--fha-text-faint)]
             transition-colors duration-150 h-10
             focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-[var(--fha-brand)] focus:ring-[var(--fha-brand-soft-border)]
             disabled:opacity-50 disabled:bg-[var(--fha-surface-2)] disabled:cursor-not-allowed

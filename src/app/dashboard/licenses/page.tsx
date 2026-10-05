@@ -63,7 +63,7 @@ export default function LicensesPage() {
       />
 
       {licenses.length > 0 ? (
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
           {licenses.map((license, idx) => {
             const dailyUsed = license.daily_used || 0;
             const dailyLimit = license.daily_limit === -1 || license.daily_limit === null ? null : (license.daily_limit || 1000);
