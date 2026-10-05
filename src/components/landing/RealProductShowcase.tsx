@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { createPortal } from 'react-dom';
 
 interface ShowcaseItem {
   id: number;
@@ -59,16 +60,30 @@ const SHOWCASE_ITEMS: ShowcaseItem[] = [
 
 export default function RealProductShowcase() {
   const [activeModalItem, setActiveModalItem] = useState<ShowcaseItem | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Lắng nghe phím ESC để đóng Lightbox
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Khóa cuộn trang và lắng nghe phím ESC để đóng Lightbox
+  useEffect(() => {
+    if (activeModalItem) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && activeModalItem) {
         setActiveModalItem(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [activeModalItem]);
 
   return (
@@ -312,18 +327,19 @@ export default function RealProductShowcase() {
         </div>
       </div>
 
-      {/* LIGHTBOX MODAL PHÓNG TO HÌNH ẢNH CHI TIẾT */}
-      {activeModalItem && (
+      {/* LIGHTBOX MODAL PHÓNG TO HÌNH ẢNH CHI TIẾT (PORTAL TRÁNH BỊ NAVBAR CHE) */}
+      {mounted && activeModalItem && createPortal(
         <div 
           onClick={() => setActiveModalItem(null)}
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+          className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-5xl bg-white border border-[var(--fha-border-strong)] rounded-fha-lg shadow-fha-overlay overflow-hidden flex flex-col max-h-[95vh]"
+            className="w-full max-w-5xl bg-white border border-[var(--fha-border-strong)] rounded-fha-lg shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto"
           >
             {/* Modal Header */}
-            <div className="bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div className="bg-[var(--fha-surface-2)] border-b border-[var(--fha-border)] px-4 sm:px-6 py-3 flex items-center justify-between shrink-0">
               <div>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold border mr-2 ${activeModalItem.badgeColor}`}>
                   {activeModalItem.badge}
@@ -334,9 +350,11 @@ export default function RealProductShowcase() {
               </div>
               <button 
                 onClick={() => setActiveModalItem(null)}
-                className="w-7 h-7 rounded hover:bg-neutral-200 text-neutral-500 hover:text-black flex items-center justify-center font-bold text-base transition-colors"
+                className="px-2.5 py-1 rounded bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-bold text-xs flex items-center gap-1 transition-colors"
+                title="Đóng (Phím ESC)"
               >
-                ✕
+                <span>✕</span>
+                <span className="hidden sm:inline">Đóng (ESC)</span>
               </button>
             </div>
 
@@ -353,7 +371,7 @@ export default function RealProductShowcase() {
             </div>
 
             {/* Modal Footer Description */}
-            <div className="p-4 sm:p-5 bg-white border-t border-[var(--fha-border)] space-y-2">
+            <div className="p-4 sm:p-5 bg-white border-t border-[var(--fha-border)] space-y-2 shrink-0">
               <p className="text-xs sm:text-sm text-[var(--fha-text-muted)] leading-relaxed">
                 {activeModalItem.desc}
               </p>
@@ -369,7 +387,8 @@ export default function RealProductShowcase() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );

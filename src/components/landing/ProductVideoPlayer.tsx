@@ -1,13 +1,19 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function ProductVideoPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const modalVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -27,16 +33,30 @@ export default function ProductVideoPlayer() {
     setIsMuted(nextMuted);
   };
 
-  // Lắng nghe phím ESC để đóng Lightbox
+  // Khóa cuộn trang và lắng nghe phím ESC khi mở Modal
   useEffect(() => {
+    if (isLightboxOpen) {
+      document.body.style.overflow = 'hidden';
+      // Tự động tạm dừng video ở nền khi mở modal
+      if (videoRef.current && isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    } else {
+      document.body.style.overflow = '';
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isLightboxOpen) {
         setIsLightboxOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isLightboxOpen]);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isLightboxOpen, isPlaying]);
 
   return (
     <>
@@ -138,8 +158,11 @@ export default function ProductVideoPlayer() {
                   e.stopPropagation();
                   setIsLightboxOpen(true);
                 }}
-                className="px-2 py-0.5 rounded bg-[var(--fha-brand)] hover:bg-[var(--fha-brand-hover)] text-white text-[10px] font-semibold flex items-center gap-1 shadow-sm"
+                className="px-2.5 py-1 rounded bg-[var(--fha-brand)] hover:bg-[var(--fha-brand-hover)] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-colors"
               >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
                 Phóng To 1080p
               </button>
             </div>
@@ -147,32 +170,37 @@ export default function ProductVideoPlayer() {
         </div>
       </div>
 
-      {/* MODAL LIGHTBOX XEM VIDEO ĐỘ NÉT CAO 1080P */}
-      {isLightboxOpen && (
+      {/* MODAL LIGHTBOX XEM VIDEO ĐỘ NÉT CAO 1080P (GẮN QUA PORTAL TRÁNH BỊ NAVBAR CHE) */}
+      {mounted && isLightboxOpen && createPortal(
         <div 
           onClick={() => setIsLightboxOpen(false)}
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+          className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-5xl bg-neutral-900 border-2 border-neutral-700 rounded-fha-lg shadow-fha-overlay overflow-hidden flex flex-col"
+            className="w-full max-w-6xl max-h-[96vh] bg-neutral-900 border-2 border-neutral-700 rounded-fha-lg shadow-2xl overflow-hidden flex flex-col my-auto"
           >
             {/* Modal Header */}
-            <div className="bg-neutral-800 border-b border-neutral-700 px-4 py-2.5 flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-bold text-xs sm:text-sm">Video Trực Quan: Fairy House AutoData V2.0 Quét Data Facebook</span>
+            <div className="bg-neutral-800 border-b border-neutral-700 px-4 py-3 flex items-center justify-between text-white shrink-0">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-bold text-xs sm:text-sm tracking-wide">
+                  Video Trực Quan 1080p: Fairy House AutoData V2.0 Quét Data Facebook
+                </span>
               </div>
               <button 
                 onClick={() => setIsLightboxOpen(false)}
-                className="w-7 h-7 rounded hover:bg-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold text-base transition-colors"
+                className="px-3 py-1 rounded bg-neutral-700 hover:bg-red-600 text-white font-bold text-xs flex items-center gap-1.5 transition-colors"
+                title="Đóng (Phím ESC)"
               >
-                ✕
+                <span>✕</span>
+                <span className="hidden sm:inline">Đóng (ESC)</span>
               </button>
             </div>
 
             {/* Modal Video Container */}
-            <div className="relative aspect-video bg-black flex items-center justify-center">
+            <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
               <video
                 ref={modalVideoRef}
                 src="/video.mov"
@@ -184,16 +212,17 @@ export default function ProductVideoPlayer() {
             </div>
 
             {/* Modal Footer Info */}
-            <div className="bg-neutral-800/80 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-300">
+            <div className="bg-neutral-800/90 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-300 shrink-0">
               <span className="font-mono text-[11px] text-neutral-400">
                 Độ phân giải: 1914 × 1080 Native • Thời lượng: 04:36
               </span>
               <span className="text-[11px] text-emerald-400 font-semibold">
-                ✓ Đã kiểm chứng: Ra 9 SĐT thật từ 30 UID thành viên nhóm
+                ✓ Video sắc nét gốc 100% • Quét 30 UID ra 9 SĐT thật
               </span>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
