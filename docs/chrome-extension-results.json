@@ -1,0 +1,43 @@
+{
+  "results": [
+    "ZIP installation, service worker and popup activation",
+    "Missing Facebook cookie denied",
+    "Actual Chrome content storage and message restrictions",
+    "Content injection and workstation iframe initialization",
+    "Group GraphQL parsing, gender and phone rows through iframe bridge",
+    "UID export download",
+    "Excel export download",
+    "Phone broker, lost-response retry and single quota debit",
+    "Quota limit denied",
+    "Screenshot HTML/404 regression",
+    "Server suspension immediately reflected in popup",
+    "Logout clears stored license"
+  ],
+  "events": [
+    {
+      "path": "/api/license/phones",
+      "requestId": "6a4d09c3-e005-486f-804a-3b6d6b452140"
+    },
+    {
+      "path": "/api/license/phones",
+      "requestId": "6a4d09c3-e005-486f-804a-3b6d6b452140"
+    },
+    {
+      "path": "/api/license/phones",
+      "requestId": "b47f5708-b3b2-44bd-afb1-ff09e43a7af3"
+    },
+    {
+      "path": "/api/license/phones",
+      "requestId": "66bfc4a5-e4c1-4e2e-be65-7004319dc8a8"
+    },
+    {
+      "path": "/api/license/validate",
+      "requestId": null
+    },
+    {
+      "path": "/api/license/validate",
+      "requestId": null
+    }
+  ],
+  "browserErrors": []
+}

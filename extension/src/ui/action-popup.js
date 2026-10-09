@@ -240,7 +240,14 @@
           .then(function (r) {
             if (r && r.ok && r.details) {
               renderLicenseDetails(r.license, r.details);
+            } else {
+              setLoggedPanel(false); setLoginPanel(true);
+              showLoginError((r && r.error) || 'Phiên không còn hợp lệ. Vui lòng thử lại.');
             }
+          })
+          .catch(function () {
+            setLoggedPanel(false); setLoginPanel(true);
+            showLoginError('Không kết nối được máy chủ. Vui lòng thử lại.');
           })
           .finally(function () {
             setTimeout(function () {

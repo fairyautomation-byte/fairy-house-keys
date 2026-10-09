@@ -302,6 +302,16 @@ function getVietnamToday() {
   }
 }
 
+async function readBackendJson(response) {
+  try { return await response.json(); }
+  catch (_) {
+    const message = response.status === 404
+      ? 'Website chưa được cập nhật cho tiện ích này. Vui lòng cập nhật backend trước khi quét.'
+      : 'Máy chủ trả về trang web thay vì dữ liệu. Vui lòng kiểm tra địa chỉ API và quyền truy cập máy chủ.';
+    const error = new Error(message); error.code = 'BACKEND_API_UNAVAILABLE'; throw error;
+  }
+}
+
 async function getPhoneMap(uids) {
   const session = await chrome.storage.local.get(['ztServerToken']);
   if (!session.ztServerToken) throw new Error('Vui lòng nhập License Key.');
@@ -312,7 +322,7 @@ async function getPhoneMap(uids) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       response = await timedFetch(ZT_API_BASE + '/api/license/phones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ licenseKey: key, uids: list, requestId }) });
-      data = await response.json();
+      data = await readBackendJson(response);
       if (response.ok && data.ok) break;
       if (data.code === 'DAILY_LIMIT_REACHED') throw new Error('License Key đã hết lượt hôm nay.');
       if (response.status < 500 && data.code !== 'RATE_LIMIT_EXCEEDED') throw new Error(data.error || 'Không có quyền tra dữ liệu.');
@@ -342,7 +352,7 @@ async function ztServerLoginFlow(licenseKey, isRefresh = false) {
   if (!isRefresh) { lastRefreshMeResponse = null; lastRefreshKey = null; }
   try {
     const response = await timedFetch(ZT_API_BASE + '/api/license/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ licenseKey: key }) });
-    const data = await response.json();
+    const data = await readBackendJson(response);
     return await writeSession(async () => {
       const current = await chrome.storage.local.get(['ztServerToken','ztServerLicenseDetails']);
       if (generation !== sessionGeneration || isRefresh && current.ztServerToken !== key) return { ok: false, error: 'SESSION_CHANGED' };
@@ -489,7 +499,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg.quotaAction === 'consume') { sendResponse({ ok: true, data: {} }); return; }
       const state = await chrome.storage.local.get(['ztServerToken']);
       const response = await timedFetch(ZT_API_BASE + '/api/license/invite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ licenseKey: state.ztServerToken, action: msg.quotaAction === 'reserve' ? 'consume' : 'check', requestId: msg.requestId || crypto.randomUUID() }) });
-      const data = await response.json(); sendResponse(response.ok ? data : { ok: false, error: data.error || 'Không có quyền gửi lời mời.' });
+      const data = await readBackendJson(response); sendResponse(response.ok ? data : { ok: false, error: data.error || 'Không có quyền gửi lời mời.' });
     })().catch(() => sendResponse({ ok: false, error: 'Không kiểm tra được giới hạn kết bạn.' })); return true;
   }
   if (msg?.action === 'OPEN_ZT_UI') {
