@@ -1,27 +1,61 @@
-import nodemailer from 'nodemailer';
+import { emailAddress } from "./security";
+import { db } from "./firebase";
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
 
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Fairy House Auto Data';
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://fairyautomation.io.vn';
-const ADMIN_EMAIL = process.env.GMAIL_USER || '';
-const SUPPORT_ZALO = '0378791667';
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Fairy House Auto Data";
+const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL || "https://fairyautomation.io.vn";
+const ADMIN_EMAIL = process.env.GMAIL_USER || "";
+const SUPPORT_ZALO = "0378791667";
 
-const PACKAGE_LABELS: Record<string, { label: string; price: string; scanLimit: string }> = {
-  trial:     { label: '🆓 Dùng Thử (3 ngày)',    price: 'Miễn phí',  scanLimit: '100 lần/ngày' },
-  monthly:   { label: '⭐ Gói Tháng (1 tháng)',   price: '69.000đ',   scanLimit: '1.000 lần/ngày' },
-  quarterly: { label: '🚀 Tiết Kiệm (3 tháng)',   price: '179.000đ',  scanLimit: '3.000 lần/ngày' },
-  yearly:    { label: '💎 Doanh Nghiệp (1 năm)',  price: '629.000đ',  scanLimit: 'Không giới hạn' },
+const PACKAGE_LABELS: Record<
+  string,
+  { label: string; price: string; scanLimit: string }
+> = {
+  trial: {
+    label: "🆓 Dùng Thử (3 ngày)",
+    price: "Miễn phí",
+    scanLimit: "100 lần/ngày",
+  },
+  monthly: {
+    label: "⭐ Gói Tháng (1 tháng)",
+    price: "69.000đ",
+    scanLimit: "1.000 lần/ngày",
+  },
+  quarterly: {
+    label: "🚀 Tiết Kiệm (3 tháng)",
+    price: "179.000đ",
+    scanLimit: "3.000 lần/ngày",
+  },
+  yearly: {
+    label: "💎 Doanh Nghiệp (1 năm)",
+    price: "479.000đ",
+    scanLimit: "Không giới hạn",
+  },
   // Legacy
-  standard:  { label: '⭐ Standard (30 ngày)',    price: 'Liên hệ',   scanLimit: '500 lần/ngày' },
-  pro:       { label: '🚀 Pro (90 ngày)',          price: 'Liên hệ',   scanLimit: 'Không giới hạn' },
-  lifetime:  { label: '💎 Lifetime (Vĩnh viễn)',  price: 'Liên hệ',   scanLimit: 'Không giới hạn' },
+  standard: {
+    label: "⭐ Standard (30 ngày)",
+    price: "Liên hệ",
+    scanLimit: "500 lần/ngày",
+  },
+  pro: {
+    label: "🚀 Pro (90 ngày)",
+    price: "Liên hệ",
+    scanLimit: "Không giới hạn",
+  },
+  lifetime: {
+    label: "💎 Lifetime (Vĩnh viễn)",
+    price: "Liên hệ",
+    scanLimit: "Không giới hạn",
+  },
 };
 
 // ─── Gửi email cho Admin khi có đơn mới ─────────────────────────────────────
@@ -33,12 +67,12 @@ export async function sendAdminNotification(data: {
   purpose: string;
   requestId: string;
 }) {
-  const pkg = PACKAGE_LABELS[data.packageType] || { label: data.packageType, price: '?', scanLimit: '?' };
+  const pkg = await packageLabel(data.packageType);
 
   await transporter.sendMail({
     from: `"${APP_NAME} System" <${ADMIN_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `🔔 [Fairy House Auto Data] Đơn xin key mới từ ${data.fullName} — ${pkg.label}`,
+    subject: `🔔 [Fairy House Auto Data] Đơn xin key mới từ ${escapeHtml(data.fullName)} — ${pkg.label}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -51,17 +85,17 @@ export async function sendAdminNotification(data: {
           </div>
           <div style="padding: 24px;">
             <table style="width: 100%; border-collapse: collapse;">
-              <tr><td style="padding: 8px 0; color: #94a3b8; width: 140px;">👤 Họ tên:</td><td style="padding: 8px 0; color: #f1f5f9; font-weight: bold;">${data.fullName}</td></tr>
-              <tr><td style="padding: 8px 0; color: #94a3b8;">📧 Email:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.email}</td></tr>
-              <tr><td style="padding: 8px 0; color: #94a3b8;">📱 Zalo:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.zalo}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8; width: 140px;">👤 Họ tên:</td><td style="padding: 8px 0; color: #f1f5f9; font-weight: bold;">${escapeHtml(data.fullName)}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">📧 Email:</td><td style="padding: 8px 0; color: #f1f5f9;">${escapeHtml(data.email)}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">📱 Zalo:</td><td style="padding: 8px 0; color: #f1f5f9;">${escapeHtml(data.zalo)}</td></tr>
               <tr><td style="padding: 8px 0; color: #94a3b8;">📦 Gói:</td><td style="padding: 8px 0; color: #a78bfa; font-weight: bold;">${pkg.label}</td></tr>
               <tr><td style="padding: 8px 0; color: #94a3b8;">💰 Giá:</td><td style="padding: 8px 0; color: #10b981; font-weight: bold;">${pkg.price}</td></tr>
               <tr><td style="padding: 8px 0; color: #94a3b8;">🔍 Giới hạn:</td><td style="padding: 8px 0; color: #f1f5f9;">${pkg.scanLimit}</td></tr>
-              <tr><td style="padding: 8px 0; color: #94a3b8;">💬 Mục đích:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.purpose || 'Không ghi'}</td></tr>
-              <tr><td style="padding: 8px 0; color: #94a3b8;">🕐 Thời gian:</td><td style="padding: 8px 0; color: #f1f5f9;">${new Date().toLocaleString('vi-VN')}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">💬 Mục đích:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.purpose || "Không ghi"}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">🕐 Thời gian:</td><td style="padding: 8px 0; color: #f1f5f9;">${new Date().toLocaleString("vi-VN")}</td></tr>
             </table>
             <div style="margin-top: 24px; text-align: center;">
-              <a href="${APP_URL}/admin/requests" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+              <a href="${APP_URL}/admin/orders" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                 👉 Vào Admin Panel Xử Lý
               </a>
             </div>
@@ -79,11 +113,11 @@ export async function sendCustomerConfirmation(data: {
   email: string;
   packageType: string;
 }) {
-  const pkg = PACKAGE_LABELS[data.packageType] || { label: data.packageType, price: '?', scanLimit: '?' };
+  const pkg = await packageLabel(data.packageType);
 
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
-    to: data.email,
+    to: emailAddress(data.email),
     subject: `✅ [Fairy House Auto Data] Chúng tôi đã nhận yêu cầu của bạn`,
     html: `
       <!DOCTYPE html>
@@ -96,7 +130,7 @@ export async function sendCustomerConfirmation(data: {
             <p style="margin: 8px 0 0; color: rgba(255,255,255,0.8);">AI Automation Facebook Extension</p>
           </div>
           <div style="padding: 24px;">
-            <p>Chào <strong>${data.fullName}</strong>,</p>
+            <p>Chào <strong>${escapeHtml(data.fullName)}</strong>,</p>
             <p>Cảm ơn bạn đã đăng ký <strong>${pkg.label}</strong>.</p>
             <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin: 16px 0;">
               <p style="margin: 0; color: #94a3b8; font-size: 14px;">📦 Gói: <strong style="color: #a78bfa;">${pkg.label}</strong></p>
@@ -124,15 +158,19 @@ export async function sendKeyToCustomer(data: {
   packageType: string;
   expiresAt: Date | null;
 }) {
-  const pkg = PACKAGE_LABELS[data.packageType] || { label: data.packageType, price: '?', scanLimit: '?' };
+  const pkg = await packageLabel(data.packageType);
 
   const expiryText = data.expiresAt
-    ? data.expiresAt.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    : 'Không giới hạn ♾️';
+    ? data.expiresAt.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "Không giới hạn ♾️";
 
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
-    to: data.email,
+    to: emailAddress(data.email),
     subject: `🎉 [Fairy House Auto Data] Đơn hàng của bạn đã được duyệt thành công!`,
     html: `
       <!DOCTYPE html>
@@ -145,8 +183,8 @@ export async function sendKeyToCustomer(data: {
             <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9);">Fairy House Auto Data — Hệ thống tự động</p>
           </div>
           <div style="padding: 24px;">
-            <p>Chào <strong>${data.fullName}</strong>,</p>
-            <p>Tin vui! Đơn hàng đăng ký gói <strong>${pkg.label}</strong> của bạn đã được Admin phê duyệt thành công.</p>
+            <p>Chào <strong>${escapeHtml(data.fullName)}</strong>,</p>
+            <p>Tin vui! Đơn hàng đăng ký gói <strong>${pkg.label}</strong> của bạn đã được kích hoạt thành công.</p>
             
             <table style="width: 100%; margin: 20px 0; border-collapse: collapse; background: #0f172a; border-radius: 8px; overflow: hidden;">
               <tr><td style="color: #94a3b8; padding: 12px 16px; border-bottom: 1px solid #334155;">📦 Gói dịch vụ:</td><td style="color: #f1f5f9; font-weight: bold; padding: 12px 16px; border-bottom: 1px solid #334155;">${pkg.label}</td></tr>
@@ -182,7 +220,7 @@ export async function sendNewUserAdminNotification(data: {
   await transporter.sendMail({
     from: `"${APP_NAME} System" <${ADMIN_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `🔔 [Fairy House Auto Data] User mới đăng ký tài khoản: ${data.fullName}`,
+    subject: `🔔 [Fairy House Auto Data] User mới đăng ký tài khoản: ${escapeHtml(data.fullName)}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -194,9 +232,9 @@ export async function sendNewUserAdminNotification(data: {
           </div>
           <div style="padding: 24px;">
             <table style="width: 100%; border-collapse: collapse;">
-              <tr><td style="padding: 8px 0; color: #94a3b8; width: 140px;">👤 Họ tên:</td><td style="padding: 8px 0; color: #f1f5f9; font-weight: bold;">${data.fullName}</td></tr>
-              <tr><td style="padding: 8px 0; color: #94a3b8;">📧 Email:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.email}</td></tr>
-              <tr><td style="padding: 8px 0; color: #94a3b8;">📱 Zalo:</td><td style="padding: 8px 0; color: #f1f5f9;">${data.zalo}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8; width: 140px;">👤 Họ tên:</td><td style="padding: 8px 0; color: #f1f5f9; font-weight: bold;">${escapeHtml(data.fullName)}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">📧 Email:</td><td style="padding: 8px 0; color: #f1f5f9;">${escapeHtml(data.email)}</td></tr>
+              <tr><td style="padding: 8px 0; color: #94a3b8;">📱 Zalo:</td><td style="padding: 8px 0; color: #f1f5f9;">${escapeHtml(data.zalo)}</td></tr>
             </table>
           </div>
         </div>
@@ -213,7 +251,7 @@ export async function sendNewUserWelcome(data: {
 }) {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
-    to: data.email,
+    to: emailAddress(data.email),
     subject: `🎉 Chào mừng bạn đến với Fairy House Auto Data!`,
     html: `
       <!DOCTYPE html>
@@ -225,7 +263,7 @@ export async function sendNewUserWelcome(data: {
             <h1 style="margin: 0; color: white; font-size: 20px;">🎉 Tạo Tài Khoản Thành Công!</h1>
           </div>
           <div style="padding: 24px;">
-            <p>Chào <strong>${data.fullName}</strong>,</p>
+            <p>Chào <strong>${escapeHtml(data.fullName)}</strong>,</p>
             <p>Cảm ơn bạn đã đăng ký tài khoản tại hệ thống <strong>Fairy House Auto Data</strong>.</p>
             <p>Bây giờ bạn đã có thể đăng nhập vào trang quản lý và trải nghiệm tự động đăng ký các gói Dịch Vụ.</p>
             <div style="text-align: center; margin: 24px 0;">
@@ -247,8 +285,8 @@ export async function sendNewUserWelcome(data: {
 export async function sendOTPEmail(email: string, otp: string) {
   await transporter.sendMail({
     from: `"${APP_NAME}" <${ADMIN_EMAIL}>`,
-    to: email,
-    subject: `[Fairy House Auto Data] Mã xác thực của bạn: ${otp}`,
+    to: emailAddress(email),
+    subject: `[Fairy House Auto Data] Mã xác thực của bạn`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -262,7 +300,7 @@ export async function sendOTPEmail(email: string, otp: string) {
             <p>Xin chào,</p>
             <p>Mã xác thực của bạn là:</p>
             <div style="background: #0f172a; border: 2px solid #7c3aed; border-radius: 10px; padding: 20px; margin: 24px 0; text-align: center;">
-              <p style="margin: 0; font-family: monospace; font-size: 24px; font-weight: bold; color: #a78bfa; letter-spacing: 8px;">${otp}</p>
+              <p style="margin: 0; font-family: monospace; font-size: 24px; font-weight: bold; color: #a78bfa; letter-spacing: 8px;">${escapeHtml(otp)}</p>
             </div>
             <p>Mã này sẽ hết hạn sau 5 phút.</p>
             <p>Nếu bạn không yêu cầu mã này, hãy bỏ qua email này.<br/>Không chia sẻ mã này với bất kỳ ai.</p>
@@ -272,4 +310,38 @@ export async function sendOTPEmail(email: string, otp: string) {
       </html>
     `,
   });
+}
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .slice(0, 2000)
+    .replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c]!,
+    );
+}
+async function packageLabel(type: string) {
+  const fallback = PACKAGE_LABELS[type] || {
+    label: escapeHtml(type),
+    price: "Liên hệ",
+    scanLimit: "Liên hệ",
+  };
+  const snap = await db.collection("plans").doc(type).get();
+  if (!snap.exists) return fallback;
+  const data = snap.data()!;
+  return {
+    ...fallback,
+    price: Number.isSafeInteger(data.price)
+      ? data.price.toLocaleString("vi-VN") + "đ"
+      : fallback.price,
+    scanLimit:
+      data.scanLimit === -1 ? "Không giới hạn" : `${data.scanLimit} lần/ngày`,
+  };
 }

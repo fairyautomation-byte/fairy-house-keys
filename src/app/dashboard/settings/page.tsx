@@ -39,9 +39,9 @@ export default function SettingsPage() {
       error('Mật khẩu mới không khớp');
       return;
     }
-    
-    if (form.newPassword.length < 6) {
-      error('Mật khẩu mới phải từ 6 ký tự trở lên');
+
+    if (form.newPassword.length < 8) {
+      error('Mật khẩu mới phải từ 8 ký tự trở lên');
       return;
     }
 
@@ -57,11 +57,12 @@ export default function SettingsPage() {
         })
       });
       const data = await res.json();
-      
+
       if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra');
-      
+
       success(data.message || 'Đổi mật khẩu thành công');
       setForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      window.location.href = '/login';
     } catch (err: any) {
       error(err.message);
     } finally {
@@ -71,13 +72,13 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader 
-        title="Tài Khoản & Bảo Mật" 
+      <PageHeader
+        title="Tài Khoản & Bảo Mật"
         description="Quản lý thông tin tài khoản và đổi mật khẩu"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        
+
         {/* Left Column (5 cols): Security & Account Overview */}
         <div className="lg:col-span-5 space-y-6">
           <Card variant="default">
@@ -101,7 +102,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[var(--fha-success)] shrink-0" />
-                  <span>Xác thực Hardware ID 1 Key / 1 Thiết bị</span>
+                  <span>Kiểm tra trạng thái bản quyền và hạn mức trên máy chủ</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[var(--fha-success)] shrink-0" />
@@ -112,7 +113,7 @@ export default function SettingsPage() {
               <div className="p-3.5 bg-[var(--fha-surface-2)] rounded-fha border border-[var(--fha-border)] text-xs space-y-1">
                 <div className="font-semibold text-[var(--fha-text)]">Cần hỗ trợ chuyển máy?</div>
                 <p className="text-[var(--fha-text-muted)] leading-relaxed">
-                  Chúng tôi hỗ trợ cấp lại định danh phần cứng khi bạn đổi máy tính. Vui lòng liên hệ hotline Zalo 24/7.
+                  Liên hệ hỗ trợ khi cần cài lại tiện ích hoặc khôi phục key. Vui lòng liên hệ hotline Zalo 24/7.
                 </p>
                 <div className="pt-1">
                   <a href="https://zalo.me/0378791667" target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--fha-brand)] hover:underline inline-flex items-center gap-1">
@@ -137,8 +138,8 @@ export default function SettingsPage() {
                   </Button>
                 </Link>
 
-                <Button 
-                  variant="danger" 
+                <Button
+                  variant="danger"
                   onClick={handleLogout}
                   loading={loggingOut}
                   fullWidth
@@ -161,43 +162,43 @@ export default function SettingsPage() {
           <Card variant="default">
             <div className="mb-6">
               <h3 className="text-lg font-bold text-[var(--fha-text)]">Đổi Mật Khẩu Đăng Nhập</h3>
-              <p className="text-xs text-[var(--fha-text-muted)] mt-1">Sử dụng mật khẩu mạnh từ 6 ký tự trở lên để bảo vệ bản quyền Key</p>
+              <p className="text-xs text-[var(--fha-text-muted)] mt-1">Sử dụng mật khẩu mạnh từ 8 ký tự trở lên để bảo vệ bản quyền Key</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <PasswordInput
                 label="Mật khẩu hiện tại"
                 name="oldPassword"
-                required 
-                value={form.oldPassword} 
-                onChange={(e) => handleChange('oldPassword', e.target.value)} 
+                required
+                value={form.oldPassword}
+                onChange={(e) => handleChange('oldPassword', e.target.value)}
                 placeholder="Nhập mật khẩu hiện tại"
               />
-              
+
               <PasswordInput
                 label="Mật khẩu mới"
                 name="newPassword"
-                required 
-                minLength={6} 
-                value={form.newPassword} 
-                onChange={(e) => handleChange('newPassword', e.target.value)} 
-                placeholder="Ít nhất 6 ký tự"
+                required
+                minLength={8}
+                value={form.newPassword}
+                onChange={(e) => handleChange('newPassword', e.target.value)}
+                placeholder="Ít nhất 8 ký tự"
               />
 
               <PasswordInput
                 label="Xác nhận mật khẩu mới"
                 name="confirmPassword"
-                required 
-                minLength={6} 
-                value={form.confirmPassword} 
-                onChange={(e) => handleChange('confirmPassword', e.target.value)} 
+                required
+                minLength={8}
+                value={form.confirmPassword}
+                onChange={(e) => handleChange('confirmPassword', e.target.value)}
                 placeholder="Nhập lại mật khẩu mới"
               />
 
               <div className="pt-2 border-t border-[var(--fha-border)] mt-6">
-                <Button 
-                  variant="primary" 
-                  type="submit" 
+                <Button
+                  variant="primary"
+                  type="submit"
                   disabled={loading || !form.oldPassword || !form.newPassword || !form.confirmPassword}
                   fullWidth
                   loading={loading}

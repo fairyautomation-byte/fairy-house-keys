@@ -1,16 +1,24 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-
-export async function POST(req: Request) {
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { verifyToken } from "@/lib/jwt";
+import { USER_COOKIE_NAME, ADMIN_COOKIE_NAME } from "@/lib/auth";
+import { sameOrigin, failure, ApiError } from "@/lib/security";
+export async function POST(req: NextRequest) {
   try {
-    const cookieStore = cookies();
-    // Delete both user and admin tokens
-    cookieStore.set('fh_user_token', '', { maxAge: 0, path: '/' });
-    cookieStore.set('fh_admin_token', '', { maxAge: 0, path: '/' });
-    
-    return NextResponse.json({ success: true, message: 'Đăng xuất thành công' });
-  } catch (error: any) {
-    console.error('Lỗi khi đăng xuất:', error);
-    return NextResponse.json({ error: 'Lỗi máy chủ' }, { status: 500 });
+    if (!sameOrigin(req)) throw new ApiError(403, "ORIGIN_DENIED");
+    const payload = await verifyToken(
+      req.cookies.get(USER_COOKIE_NAME)?.value || "",
+    );
+    if (payload?.role === "user" && payload.sid)
+      await db
+        .collection("revoked_sessions")
+        .doc(payload.sid)
+        .set({ expires_at: new Date(payload.exp * 1000) });
+    const res = NextResponse.json({ success: true });
+    res.cookies.delete(USER_COOKIE_NAME);
+    res.cookies.delete(ADMIN_COOKIE_NAME);
+    return res;
+  } catch (error) {
+    return failure(error);
   }
 }

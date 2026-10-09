@@ -1,89 +1,66 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { generateKey, KeyType } from '@/lib/key-generator';
-import { isAdminAuthenticated } from '@/lib/auth';
-import { sendKeyToCustomer } from '@/lib/mailer';
-
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+import { queueLicenseEmail, deliverLicenseEmail } from "@/lib/notifications";
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { isAdminAuthenticated } from "@/lib/auth";
+import { generateKey } from "@/lib/key-generator";
+import { validPlan, licenseData } from "@/lib/order-service";
+import { ApiError, failure, activeUser } from "@/lib/security";
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const isAuth = await isAdminAuthenticated(req);
-    if (!isAuth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const orderId = params.id;
-    const orderRef = db.collection('orders').doc(orderId);
-    const orderDoc = await orderRef.get();
-
-    if (!orderDoc.exists) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
-
-    const order = orderDoc.data()!;
-    if (order.status !== 'PENDING_PAYMENT_REVIEW') {
-      return NextResponse.json({ error: 'Order is not pending review' }, { status: 400 });
-    }
-
-    const keyType = order.plan_id as KeyType;
-    
-    // Lấy thông tin gói từ Firebase
-    const planDoc = await db.collection('plans').doc(keyType).get();
-    if (!planDoc.exists) {
-      return NextResponse.json({ error: 'Gói cước không tồn tại hoặc đã bị xóa' }, { status: 400 });
-    }
-    const planData = planDoc.data()!;
-    const durationDays = planData.duration;
-    const scanLimit = planData.scanLimit;
-
-    const licenseKey = generateKey();
-    
-    const expiresAt = new Date();
-    if (durationDays !== null) {
-      expiresAt.setDate(expiresAt.getDate() + durationDays);
-    }
-
-    const newLicense = {
-      license_key: licenseKey,
-      user_id: order.user_id,
-      plan_id: keyType,
-      status: 'ACTIVE',
-      created_at: new Date(),
-      activated_at: new Date(),
-      expires_at: durationDays !== null ? expiresAt : null,
-      daily_limit: scanLimit,
-      daily_used: 0,
-      total_scans: 0,
-      last_reset_date: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' })
-    };
-
-    // Use batch to ensure atomicity
-    const batch = db.batch();
-    const licenseRef = db.collection('licenses').doc();
-    batch.set(licenseRef, newLicense);
-    batch.update(orderRef, { status: 'PAID' });
-    
-    await batch.commit();
-
-    // Fetch user details to send email
-    const userDoc = await db.collection('users').doc(order.user_id).get();
-    if (userDoc.exists) {
-      const userData = userDoc.data()!;
-      try {
-        await sendKeyToCustomer({
-          fullName: userData.full_name || 'Khách hàng',
-          email: userData.email || '',
-          key: licenseKey,
-          packageType: keyType,
-          expiresAt: durationDays !== null ? expiresAt : null
+    if (!(await isAdminAuthenticated(req)))
+      throw new ApiError(401, "Unauthorized");
+    const { id } = await params,
+      ref = db.collection("orders").doc(id),
+      licenseRef = db.collection("licenses").doc(`order_${id}`),
+      key = generateKey();
+    const result = await db.runTransaction(
+      async (tx) => {
+        const snap = await tx.get(ref),
+          order = snap.data();
+        if (!order) throw new ApiError(404, "ORDER_NOT_FOUND");
+        if (order.status === "PAID" && order.license_key)
+          return { licenseKey: order.license_key, duplicate: true };
+        if (order.status !== "PENDING_PAYMENT_REVIEW")
+          throw new ApiError(409, "ORDER_NOT_PENDING");
+        const [user, planSnap] = await Promise.all([
+          tx.get(db.collection("users").doc(order.user_id)),
+          tx.get(db.collection("plans").doc(order.plan_id)),
+        ]);
+        if (
+          !user.exists ||
+          !activeUser(user.data()) ||
+          user.data()!.email_verified !== true
+        )
+          throw new ApiError(403, "ACCOUNT_NOT_VERIFIED");
+        const plan = validPlan(order.plan_snapshot || planSnap.data());
+        if (plan.price !== order.amount)
+          throw new ApiError(409, "PLAN_AMOUNT_MISMATCH");
+        tx.set(
+          licenseRef,
+          licenseData(order.user_id, order.plan_id, plan, key),
+        );
+        queueLicenseEmail(tx, `order_${id}`, order.user_id, licenseRef.id);
+        tx.update(ref, {
+          status: "PAID",
+          paid_at: new Date(),
+          license_key: key,
+          license_id: licenseRef.id,
         });
-      } catch (err) {
-        console.error('Email send failed:', err);
-      }
-    }
-
-    return NextResponse.json({ ok: true, message: 'Approved successfully', licenseKey });
-  } catch (err) {
-    console.error('Approve order error:', err);
-    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
+        tx.set(db.collection("admin_audit").doc(), {
+          action: "APPROVE_ORDER",
+          order_id: id,
+          created_at: new Date(),
+        });
+        return { licenseKey: key, duplicate: false };
+      },
+      { maxAttempts: 20 },
+    );
+    await deliverLicenseEmail(`order_${id}`);
+    return NextResponse.json({ ok: true, ...result });
+  } catch (error) {
+    return failure(error);
   }
 }

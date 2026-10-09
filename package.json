@@ -1,36 +1,43 @@
 {
   "name": "fairy-house-keys",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint src",
+    "test": "tsx --test tests/*.test.ts",
+    "test:extension": "node --test extension/tests/*.test.cjs",
+    "check": "npm run lint && tsc --noEmit --incremental false && npm test && npm run test:extension && npm audit"
   },
   "dependencies": {
     "@payos/node": "^1.0.7",
-    "firebase-admin": "^12.3.0",
+    "firebase-admin": "^14.5.0",
     "jose": "^6.2.12",
-    "jsonwebtoken": "^9.0.2",
-    "next": "14.2.5",
-    "nodemailer": "^6.9.14",
-    "react": "^18",
-    "react-dom": "^18",
-    "uuid": "^10.0.0"
+    "next": "16.4.0",
+    "nodemailer": "^10.0.16",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
-    "@types/nodemailer": "^6.4.15",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/uuid": "^10.0.0",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.5",
+    "@types/nodemailer": "^7",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9.39.5",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5",
+    "tsx": "^4",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@eslint/js": "^9.39.5",
+    "typescript-eslint": "^8"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "overrides": {
+    "source-map-js": "^1.2.2"
   }
 }

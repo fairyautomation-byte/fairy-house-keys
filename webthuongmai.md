@@ -304,7 +304,7 @@ PAYOS_CHECKSUM_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 # 2. GOOGLE CLOUD FIREBASE ADMIN
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD...\n-----END PRIVATE KEY-----\n"
+FIREBASE_PRIVATE_KEY="SET_IN_VERCEL_ENV_ONLY\n"
 
 # 3. AUTH & BẢO MẬT
 JWT_SECRET=your-random-super-secret-jwt-token-key-minimum-32-chars

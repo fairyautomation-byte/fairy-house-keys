@@ -1,4 +1,5 @@
 'use client';
+import { requestId, clearRequest } from '@/lib/client-request';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
@@ -54,7 +55,7 @@ export default function StorePage() {
       const res = await fetch('/api/orders/pay-with-wallet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: selectedPlan.id })
+        body: JSON.stringify({ planId: selectedPlan.id, requestId: requestId('wallet:' + selectedPlan.id) })
       });
       
       const data = await res.json();
@@ -63,6 +64,7 @@ export default function StorePage() {
         throw new Error(data.error || 'Lỗi thanh toán');
       }
 
+      clearRequest('wallet:' + selectedPlan.id);
       setShowConfirmModal(false);
       success(`Đã mua thành công! Key đã được tạo và lưu vào mục License Của Tôi.`);
       setWalletBalance(data.newBalance);

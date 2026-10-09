@@ -201,10 +201,10 @@ export default function ForgotPasswordPage() {
           <PasswordInput
             label="Mật khẩu mới"
             required
-            placeholder="Tối thiểu 6 ký tự"
+            placeholder="Tối thiểu 8 ký tự"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            minLength={6}
+            minLength={8}
           />
 
           <PasswordInput
@@ -213,7 +213,7 @@ export default function ForgotPasswordPage() {
             placeholder="Nhập lại mật khẩu mới"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            minLength={6}
+            minLength={8}
           />
 
           <Button

@@ -1,89 +1,81 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { signUserToken, USER_COOKIE_NAME } from '@/lib/auth';
-import { checkRateLimit } from '@/lib/rate-limit';
-import * as crypto from 'crypto';
-
-function hashPassword(password: string) {
-  return crypto.createHash('sha256').update(password + (process.env.KEY_SECRET_SALT || '')).digest('hex');
-}
-
-function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return 'unknown';
-}
-
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { signUserToken, USER_COOKIE_NAME } from "@/lib/auth";
+import { verifyPassword, hashPassword } from "@/lib/password";
+import {
+  emailAddress,
+  jsonBody,
+  ApiError,
+  failure,
+  activeUser,
+  cookieOptions,
+} from "@/lib/security";
+import { checkRateLimit } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
-
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Thiếu email hoặc mật khẩu' }, { status: 400 });
+    const { email, password } = await jsonBody(req),
+      normalized = emailAddress(email);
+    if (typeof password !== "string" || !password || password.length > 1024)
+      throw new ApiError(400, "INVALID_PASSWORD");
+    const ip =
+      req.headers.get("x-vercel-forwarded-for") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0] ||
+      "unknown";
+    if (
+      !(await checkRateLimit(`login:${ip}`, 10, 60)).allowed ||
+      !(await checkRateLimit(`login-email:${normalized}`, 10, 300)).allowed
+    )
+      throw new ApiError(429, "RATE_LIMIT_EXCEEDED");
+    const query = await db
+        .collection("users")
+        .where("email", "==", normalized)
+        .limit(1)
+        .get(),
+      snap = query.docs[0],
+      user = snap?.data();
+    if (
+      !user ||
+      !activeUser(user) ||
+      !(await verifyPassword(password, user.password))
+    )
+      throw new ApiError(401, "Email hoặc mật khẩu không chính xác");
+    if (user.email_verified !== true)
+      return NextResponse.json(
+        {
+          error: "Tài khoản cần xác thực email.",
+          code: "EMAIL_NOT_VERIFIED",
+          email: normalized,
+        },
+        { status: 403 },
+      );
+    if (!user.password.startsWith("scrypt$")) {
+      const upgraded = await hashPassword(password);
+      await db.runTransaction(
+        async (tx) => {
+          const fresh = await tx.get(snap.ref);
+          if (
+            fresh.data()?.password !== user.password ||
+            (fresh.data()?.auth_version || 0) !== (user.auth_version || 0)
+          )
+            throw new ApiError(401, "SESSION_CHANGED");
+          tx.update(snap.ref, { password: upgraded });
+        },
+        { maxAttempts: 20 },
+      );
     }
-
-    const emailLower = email.toLowerCase().trim();
-
-    // 1. Rate Limit IP (5 requests / min)
-    const ip = getClientIp(req);
-    const rateLimit = await checkRateLimit(`login:${ip}`, 5, 60);
-    if (!rateLimit.allowed) {
-      return NextResponse.json({ 
-        error: `Quá nhiều yêu cầu, vui lòng thử lại sau ${rateLimit.retryAfterSeconds}s` 
-      }, { status: 429 });
-    }
-
-    const hashedPassword = hashPassword(password);
-
-    const usersRef = db.collection('users');
-    const userQueryPromise = usersRef.where('email', '==', emailLower).where('password', '==', hashedPassword).limit(1).get();
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('DATABASE_TIMEOUT')), 8000)
-    );
-
-    const userSnap = await Promise.race([userQueryPromise, timeoutPromise]);
-
-    if (userSnap.empty) {
-      return NextResponse.json({ error: 'Email hoặc mật khẩu không chính xác' }, { status: 401 });
-    }
-
-    const doc = userSnap.docs[0];
-    const userData = doc.data();
-
-    // 2. Check if email is verified
-    if (userData.email_verified === false) {
-      return NextResponse.json({ 
-        error: 'Tài khoản chưa được xác thực email.', 
-        code: 'EMAIL_NOT_VERIFIED',
-        email: emailLower 
-      }, { status: 403 });
-    }
-
-    const token = await signUserToken(doc.id, emailLower);
-    
-    const res = NextResponse.json({ ok: true, uid: doc.id });
-    res.cookies.set(USER_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/',
-    });
-    
+    const token = await signUserToken(
+        snap.id,
+        normalized,
+        user.auth_version || 0,
+      ),
+      res = NextResponse.json({ ok: true, uid: snap.id });
+    res.cookies.set(USER_COOKIE_NAME, token, cookieOptions);
     return res;
-  } catch (err: any) {
-    console.error('Login error:', err);
-    if (err?.message === 'DATABASE_TIMEOUT') {
-      return NextResponse.json({ 
-        error: 'Cơ sở dữ liệu phản hồi chậm hoặc đang tạm ngưng do giới hạn hàng ngày. Vui lòng thử lại sau.' 
-      }, { status: 504 });
-    }
-    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
+  } catch (error) {
+    return failure(error);
   }
 }
-
-export async function DELETE() {
-  const res = NextResponse.json({ ok: true });
-  res.cookies.delete(USER_COOKIE_NAME);
-  return res;
+export async function DELETE(req: NextRequest) {
+  const { POST } = await import("../logout/route");
+  return POST(req);
 }

@@ -120,9 +120,9 @@ function RegisterContent() {
         />
 
         <PasswordInput
-          label="Mật khẩu (Tối thiểu 6 ký tự)"
+          label="Mật khẩu (Tối thiểu 8 ký tự)"
           required
-          minLength={6}
+          minLength={8}
           placeholder="••••••••"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -131,7 +131,7 @@ function RegisterContent() {
         <PasswordInput
           label="Xác nhận lại mật khẩu"
           required
-          minLength={6}
+          minLength={8}
           placeholder="••••••••"
           value={form.confirmPassword}
           onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}

@@ -50,16 +50,16 @@ export default function QRPayment({
 
   React.useEffect(() => {
     if (state !== 'pending' || currentTimeLeft <= 0) return;
-    
+
     const timer = setInterval(() => {
       setCurrentTimeLeft(prev => prev - 1);
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, [state, currentTimeLeft]);
 
   const displayState = (state === 'pending' && currentTimeLeft <= 0) ? 'expired' : state;
-  
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -73,12 +73,12 @@ export default function QRPayment({
 
   return (
     <div className="w-full max-w-[420px] mx-auto bg-white rounded-fha-lg border border-[var(--fha-border)] shadow-fha-md overflow-hidden">
-      
+
       {/* Header */}
       <div className="bg-[var(--fha-surface-2)] p-5 border-b border-[var(--fha-border)] text-center relative">
         <h3 className="text-[17px] font-bold text-[var(--fha-text)]">Thanh Toán Chuyển Khoản</h3>
         <p className="text-[13px] text-[var(--fha-text-muted)] mt-1">Mã đơn: <span className="font-mono text-[var(--fha-brand)] font-semibold">{transactionCode}</span></p>
-        
+
         {displayState === 'pending' && currentTimeLeft > 0 && (
           <div className="absolute top-5 right-5 text-[var(--fha-warning-text)] bg-[var(--fha-warning-bg)] border border-[var(--fha-warning-border)] px-2 py-1 rounded text-xs font-bold font-mono">
             {formatTime(currentTimeLeft)}
@@ -87,16 +87,16 @@ export default function QRPayment({
       </div>
 
       <div className="p-6 sm:p-8 flex flex-col items-center">
-        
+
         {/* State Content */}
         <div className="w-full max-w-[220px] aspect-square rounded-2xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 border-2 border-[var(--fha-border-strong)]">
-          
+
           {displayState === 'loading' && (
             <div className="w-full h-full shimmer" />
           )}
 
           {displayState === 'pending' && qrUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
+
             <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain p-1" />
           )}
 
@@ -157,7 +157,7 @@ export default function QRPayment({
               <span className="text-[var(--fha-text-muted)]">Số tài khoản</span>
               <div className="flex items-center gap-1.5">
                 <span className="font-mono font-semibold text-[var(--fha-text)]">{bankInfo.accountNumber}</span>
-                <button 
+                <button
                   onClick={() => handleCopy(bankInfo.accountNumber)}
                   className="p-1 rounded text-[var(--fha-text-faint)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-brand-soft)] transition-colors"
                   aria-label="Sao chép số tài khoản"
@@ -171,7 +171,7 @@ export default function QRPayment({
               <span className="text-[var(--fha-text-muted)] mt-0.5">Nội dung (Bắt buộc)</span>
               <div className="flex items-center gap-1.5">
                 <span className="font-mono font-bold text-[var(--fha-brand)]">{transactionCode}</span>
-                <button 
+                <button
                   onClick={() => handleCopy(transactionCode)}
                   className="p-1 rounded text-[var(--fha-text-faint)] hover:text-[var(--fha-brand)] hover:bg-[var(--fha-brand-soft)] transition-colors"
                   aria-label="Sao chép nội dung"
@@ -190,7 +190,7 @@ export default function QRPayment({
               Thử lại / Tạo QR Mới
             </Button>
           )}
-          
+
           {(displayState === 'pending' || displayState === 'expired' || displayState === 'failed') && onCancel && (
             <Button variant="ghost" fullWidth onClick={onCancel}>
               Hủy thanh toán
