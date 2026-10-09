@@ -42,7 +42,17 @@ function RegisterContent() {
         body: JSON.stringify(form)
       });
       
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(
+          res.status === 504 || res.status === 502
+            ? 'Máy chủ đang phản hồi chậm hoặc tạm gián đoạn. Vui lòng thử lại sau.'
+            : 'Lỗi phản hồi từ hệ thống máy chủ. Vui lòng thử lại sau.'
+        );
+      }
+
       if (!res.ok) {
         throw new Error(data.error || 'Có lỗi xảy ra');
       }

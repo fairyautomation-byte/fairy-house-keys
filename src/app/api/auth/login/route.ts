@@ -36,7 +36,12 @@ export async function POST(req: NextRequest) {
     const hashedPassword = hashPassword(password);
 
     const usersRef = db.collection('users');
-    const userSnap = await usersRef.where('email', '==', emailLower).where('password', '==', hashedPassword).limit(1).get();
+    const userQueryPromise = usersRef.where('email', '==', emailLower).where('password', '==', hashedPassword).limit(1).get();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('DATABASE_TIMEOUT')), 8000)
+    );
+
+    const userSnap = await Promise.race([userQueryPromise, timeoutPromise]);
 
     if (userSnap.empty) {
       return NextResponse.json({ error: 'Email hoặc mật khẩu không chính xác' }, { status: 401 });
@@ -66,8 +71,13 @@ export async function POST(req: NextRequest) {
     });
     
     return res;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Login error:', err);
+    if (err?.message === 'DATABASE_TIMEOUT') {
+      return NextResponse.json({ 
+        error: 'Cơ sở dữ liệu phản hồi chậm hoặc đang tạm ngưng do giới hạn hàng ngày. Vui lòng thử lại sau.' 
+      }, { status: 504 });
+    }
     return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
   }
 }

@@ -1,18 +1,26 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp, getApps, cert, getApp } from 'firebase-admin/app';
+import { getFirestore, initializeFirestore } from 'firebase-admin/firestore';
 
 let db: any;
 try {
+  let app: any;
   if (!getApps().length) {
-    initializeApp({
+    app = initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       }),
     });
+  } else {
+    app = getApp();
   }
-  db = getFirestore();
+
+  try {
+    db = initializeFirestore(app, { preferRest: true });
+  } catch {
+    db = getFirestore(app);
+  }
 } catch (error: any) {
   console.warn('Firebase Admin init warning:', error.message);
   db = {

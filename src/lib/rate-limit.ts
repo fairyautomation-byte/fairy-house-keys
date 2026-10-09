@@ -1,58 +1,53 @@
-import { db } from './firebase';
-import { Timestamp } from 'firebase-admin/firestore';
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+// In-memory store (0 database reads, 0 database writes, 100% free)
+const memoryStore = new Map<string, RateLimitEntry>();
+
+// Periodically clean up expired entries every 3 minutes
+if (typeof setInterval !== 'undefined') {
+  const timer = setInterval(() => {
+    const now = Date.now();
+    memoryStore.forEach((v, k) => {
+      if (now > v.resetAt) {
+        memoryStore.delete(k);
+      }
+    });
+  }, 3 * 60 * 1000);
+  if (timer && typeof timer === 'object' && 'unref' in timer) {
+    (timer as any).unref();
+  }
+}
 
 export async function checkRateLimit(
   key: string,
   maxCount: number,
   windowSeconds: number
 ): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
-  const docRef = db.collection('rate_limits').doc(key);
-
   try {
-    return await db.runTransaction(async (transaction: any) => {
-      const doc = await transaction.get(docRef);
-      const now = new Date();
+    const now = Date.now();
+    const entry = memoryStore.get(key);
 
-      if (!doc.exists) {
-        // First time seeing this key
-        transaction.set(docRef, {
-          count: 1,
-          window_start: Timestamp.fromDate(now),
-          window_seconds: windowSeconds,
-        });
-        return { allowed: true };
-      }
-
-      const data = doc.data()!;
-      const windowStart = (data.window_start as Timestamp).toDate();
-      const elapsedSeconds = (now.getTime() - windowStart.getTime()) / 1000;
-
-      if (elapsedSeconds > data.window_seconds) {
-        // Window expired, reset counter
-        transaction.set(docRef, {
-          count: 1,
-          window_start: Timestamp.fromDate(now),
-          window_seconds: windowSeconds,
-        });
-        return { allowed: true };
-      }
-
-      if (data.count >= maxCount) {
-        // Rate limit exceeded
-        const retryAfterSeconds = Math.ceil(data.window_seconds - elapsedSeconds);
-        return { allowed: false, retryAfterSeconds };
-      }
-
-      // Increment counter
-      transaction.update(docRef, {
-        count: data.count + 1,
+    if (!entry || now > entry.resetAt) {
+      memoryStore.set(key, {
+        count: 1,
+        resetAt: now + windowSeconds * 1000,
       });
-
       return { allowed: true };
-    });
+    }
+
+    if (entry.count >= maxCount) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
+      return { allowed: false, retryAfterSeconds };
+    }
+
+    entry.count += 1;
+    return { allowed: true };
   } catch (error) {
     console.error(`Rate limit check failed for key ${key}:`, error);
-    // If rate limiting fails (e.g., Firestore issue), fail open to not block valid users
     return { allowed: true };
   }
 }
+

@@ -10,6 +10,9 @@ function getClientIp(req: NextRequest): string {
   return 'unknown';
 }
 
+// In-memory cache for validated licenses (TTL: 45s) to save Firestore reads
+const licenseCache = new Map<string, { data: any; expiry: number }>();
+
 export async function POST(req: NextRequest) {
   try {
     const { licenseKey } = await req.json();
@@ -18,7 +21,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Thiếu License Key' }, { status: 400 });
     }
 
-    // 1. IP Rate limit for validate (60 requests per minute per IP)
+    const trimmedKey = String(licenseKey).trim().toUpperCase();
+
+    // 1. In-memory Rate limit for validate (60 requests per minute per IP)
     const ip = getClientIp(req);
     const rateLimit = await checkRateLimit(`validate_license:${ip}`, 60, 60);
     if (!rateLimit.allowed) {
@@ -28,12 +33,19 @@ export async function POST(req: NextRequest) {
       }, { status: 429 });
     }
 
-    if (!validateKeyFormat(licenseKey).valid) {
+    // 2. Check memory cache first (0 Firestore reads)
+    const now = Date.now();
+    const cached = licenseCache.get(trimmedKey);
+    if (cached && now < cached.expiry) {
+      return NextResponse.json(cached.data);
+    }
+
+    if (!validateKeyFormat(trimmedKey).valid) {
       return NextResponse.json({ error: 'INVALID_LICENSE', valid: false }, { status: 400 });
     }
 
     const licensesRef = db.collection('licenses');
-    const snap = await licensesRef.where('license_key', '==', licenseKey).limit(1).get();
+    const snap = await licensesRef.where('license_key', '==', trimmedKey).limit(1).get();
 
     if (snap.empty) {
       return NextResponse.json({ error: 'LICENSE_NOT_FOUND', valid: false }, { status: 404 });
@@ -49,7 +61,6 @@ export async function POST(req: NextRequest) {
     if (license.expires_at) {
       const expiresAt = license.expires_at.toDate ? license.expires_at.toDate() : new Date(license.expires_at);
       if (expiresAt < new Date()) {
-        await licenseDoc.ref.update({ status: 'EXPIRED' });
         return NextResponse.json({ error: 'LICENSE_EXPIRED', valid: false }, { status: 403 });
       }
     }
@@ -57,18 +68,15 @@ export async function POST(req: NextRequest) {
     let dailyUsed = license.daily_used || 0;
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
     
+    // If new day, count as 0 without performing a costly write in validate
     if (license.last_reset_date !== today) {
       dailyUsed = 0;
-      await licenseDoc.ref.update({
-        daily_used: 0,
-        last_reset_date: today,
-      }).catch((e: any) => console.error('Error updating license daily_used in validate:', e));
     }
 
     const dailyLimit = license.daily_limit;
     const remaining = dailyLimit === -1 || dailyLimit === null ? 'Unlimited' : dailyLimit - dailyUsed;
 
-    return NextResponse.json({
+    const responsePayload = {
       valid: true,
       license_status: 'ACTIVE',
       plan: license.plan_id,
@@ -77,7 +85,15 @@ export async function POST(req: NextRequest) {
       daily_used: dailyUsed,
       remaining: remaining,
       total_scans: license.total_scans || 0,
+    };
+
+    // Cache valid response for 45s
+    licenseCache.set(trimmedKey, {
+      data: responsePayload,
+      expiry: now + 45 * 1000,
     });
+
+    return NextResponse.json(responsePayload);
   } catch (err) {
     console.error('Validate license error:', err);
     return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
