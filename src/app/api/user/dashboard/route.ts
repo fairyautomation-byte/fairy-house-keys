@@ -1,75 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { getAuthenticatedUser } from '@/lib/auth';
-
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { getAuthenticatedUser, USER_COOKIE_NAME } from "@/lib/auth";
+import { publicUser, failure, ApiError } from "@/lib/security";
+import { licenseView } from "@/lib/license-service";
 export async function GET(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const res = NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      res.cookies.delete(USER_COOKIE_NAME);
+      return res;
     }
-
-    // Get user details
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) {
-      const response = NextResponse.json({ error: 'User not found' }, { status: 401 });
-      response.cookies.delete('FairyHouse_Session');
-      return response;
-    }
-    const userData = userDoc.data();
-    if (userData && userData.password) {
-      delete userData.password;
-    }
-
-    // Real-time Vietnam Date YYYY-MM-DD
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
-
-    // Get current licenses
-    const licenseSnap = await db.collection('licenses')
-      .where('user_id', '==', user.uid)
-      .where('status', 'in', ['ACTIVE', 'SUSPENDED'])
-      .get();
-      
-    const activeLicenses = await Promise.all(
-      licenseSnap.docs.map(async (doc: any) => {
-        const data = doc.data();
-        const docId = doc.id;
-
-        // Auto-reset daily quota if it's a new calendar day in Vietnam (00:00 VN)
-        if (data.last_reset_date !== today) {
-          doc.ref.update({
-            daily_used: 0,
-            last_reset_date: today,
-          }).catch((err: any) => console.error('Error auto-resetting quota in dashboard:', err));
-
-          return {
-            id: docId,
-            ...data,
-            daily_used: 0,
-            last_reset_date: today,
-          };
-        }
-
-        return {
-          id: docId,
-          ...data,
-        };
-      })
+    const [account, licenses, orders] = await Promise.all([
+      db.collection("users").doc(user.uid).get(),
+      db.collection("licenses").where("user_id", "==", user.uid).get(),
+      db.collection("orders").where("user_id", "==", user.uid).get(),
+    ]);
+    if (!account.exists) throw new ApiError(401, "Unauthorized");
+    return NextResponse.json(
+      {
+        user: publicUser(account.data()),
+        licenses: licenses.docs.map((doc) => {
+          const data = doc.data(),
+            view = licenseView(data);
+          return { id: doc.id, ...data, ...view, status: view.license_status };
+        }),
+        orders: orders.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+      },
+      { headers: { "Cache-Control": "no-store" } },
     );
-
-    // Get pending orders
-    const orderSnap = await db.collection('orders')
-      .where('user_id', '==', user.uid)
-      .get();
-    
-    const orders = orderSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-
-    return NextResponse.json({
-      user: userData,
-      licenses: activeLicenses,
-      orders: orders
-    });
-  } catch (err) {
-    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
+  } catch (error) {
+    return failure(error);
   }
 }

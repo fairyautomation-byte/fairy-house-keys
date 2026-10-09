@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   description: 'Quy định điều khoản dịch vụ, chính sách bản quyền License Key 1 máy, bảo hành 1 đổi 1 và hoàn tiền trong 24h tại Fairy House AutoData.',
 };
 
-export default function TermsPage() {
-  const cookieStore = cookies();
+export default async function TermsPage() {
+  const cookieStore = await cookies();
   const isLoggedIn = cookieStore.has(USER_COOKIE_NAME);
 
   return (

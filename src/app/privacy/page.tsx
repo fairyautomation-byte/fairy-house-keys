@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   description: 'Chính sách bảo mật thông tin, cam kết 3 KHÔNG về mật khẩu Facebook, bảo mật Local-First và cổng thanh toán PayOS an toàn tại Fairy House AutoData.',
 };
 
-export default function PrivacyPage() {
-  const cookieStore = cookies();
+export default async function PrivacyPage() {
+  const cookieStore = await cookies();
   const isLoggedIn = cookieStore.has(USER_COOKIE_NAME);
 
   return (
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
                 <li>Mọi tác vụ bóc tách danh sách tương tác (like, comment, UID bài viết) diễn ra cục bộ trong trình duyệt Google Chrome trên máy tính của bạn.</li>
-                <li>Dữ liệu khách hàng sau khi quét được lưu trực tiếp vào bộ nhớ tạm của tiện ích và cho phép bạn tải thẳng về máy tính dưới dạng tệp Excel/CSV. Hệ thống máy chủ của chúng tôi không sao chép danh sách khách hàng này.</li>
+                <li>Dữ liệu khách hàng sau khi quét được lưu trực tiếp vào bộ nhớ tạm của tiện ích và cho phép bạn tải thẳng về máy tính dưới dạng tệp Excel/CSV. Khi tra số điện thoại, UID được gửi qua máy chủ để kiểm tra quyền và chuyển đến nhà cung cấp dữ liệu. Kết quả được lưu tạm để xử lý lại yêu cầu mà không trừ lượt lặp.</li>
               </ul>
             </div>
           </section>
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
                 <li><strong className="text-[var(--fha-text)]">Địa chỉ Email:</strong> Dùng để gửi mã OTP xác thực tài khoản, hỗ trợ khôi phục mật khẩu và gửi thông tin License Key đã mua.</li>
                 <li><strong className="text-[var(--fha-text)]">Mật khẩu tài khoản:</strong> Được băm mã hóa một chiều trước khi lưu vào hệ thống cơ sở dữ liệu Firebase. Ban quản trị không thể xem được mật khẩu dạng văn bản gốc của bạn.</li>
-                <li><strong className="text-[var(--fha-text)]">Dấu vân tay thiết bị (Hardware Fingerprint):</strong> Một chuỗi mã băm vô danh đại diện cho máy tính kích hoạt tiện ích, phục vụ việc giới hạn bản quyền 1 Key/1 Thiết bị.</li>
+                <li><strong className="text-[var(--fha-text)]">Thông tin bản quyền và lượt dùng:</strong> Dùng để xác định quyền sử dụng, hạn gói và hạn mức hằng ngày.</li>
               </ul>
             </div>
           </section>

@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || "0ec675d7621e3ece030f46aa7092b7b270d0ebf6e3bcbdbcba8a99ad3f286dda";
+const CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || process.env.PAYOS_CHECKSUM_KEY;
 
 async function simulate() {
   try {

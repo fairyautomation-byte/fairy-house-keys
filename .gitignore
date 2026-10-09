@@ -6,3 +6,13 @@ node_modules/
 .DS_Store
 dist/
 /Fairy House AutoData.zip
+
+*-debug.log
+dependency-audit.json
+*.tsbuildinfo
+
+.env*
+!.env.example
+.vercel/
+service-account*.json
+*.pem

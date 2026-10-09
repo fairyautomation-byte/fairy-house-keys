@@ -1,125 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { FieldValue } from 'firebase-admin/firestore';
-import { validateKeyFormat } from '@/lib/key-generator';
-
-import { checkRateLimit } from '@/lib/rate-limit';
-
-function getClientIp(req: NextRequest): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return 'unknown';
-}
-
+import { NextRequest, NextResponse } from "next/server";
+import { findLicense, consumeQuota, scanInput } from "@/lib/license-service";
+import { jsonBody, failure, ApiError } from "@/lib/security";
+import { checkRateLimit } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
   try {
-    const { licenseKey, action = 'consume', count = 1 } = await req.json();
-
-    if (!licenseKey || !validateKeyFormat(licenseKey).valid) {
-      return NextResponse.json({ success: false, code: 'INVALID_LICENSE' }, { status: 400 });
-    }
-
-    // Prevent abuse by scanning too many at once
-    const numCount = Number(count);
-    if (isNaN(numCount) || numCount <= 0 || numCount > 500) {
-      return NextResponse.json({ success: false, code: 'INVALID_COUNT' }, { status: 400 });
-    }
-
-    // IP Rate limit (120 requests per minute per IP)
-    const ip = getClientIp(req);
-    const rateLimit = await checkRateLimit(`scan_license:${ip}`, 120, 60);
-    if (!rateLimit.allowed) {
-      return NextResponse.json({ 
-        success: false, 
-        code: 'RATE_LIMIT_EXCEEDED'
-      }, { status: 429 });
-    }
-
-    const licensesRef = db.collection('licenses');
-    const snap = await licensesRef.where('license_key', '==', licenseKey).limit(1).get();
-
-    if (snap.empty) {
-      return NextResponse.json({ success: false, code: 'LICENSE_NOT_FOUND' }, { status: 404 });
-    }
-
-    const licenseDoc = snap.docs[0];
-    const licenseRef = licenseDoc.ref;
-    const license = licenseDoc.data();
-
-    if (license.status !== 'ACTIVE') {
-      return NextResponse.json({ success: false, code: `LICENSE_${license.status}` }, { status: 403 });
-    }
-
-    if (license.expires_at) {
-      const expiresAt = license.expires_at.toDate ? license.expires_at.toDate() : new Date(license.expires_at);
-      if (expiresAt < new Date()) {
-        await licenseRef.update({ status: 'EXPIRED' });
-        return NextResponse.json({ success: false, code: 'LICENSE_EXPIRED' }, { status: 403 });
-      }
-    }
-
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
-    const dailyLimit = license.daily_limit;
-    let newDailyUsed = 0;
-
-    try {
-      await db.runTransaction(async (transaction: any) => {
-        const freshDoc = await transaction.get(licenseRef);
-        const freshData = freshDoc.data()!;
-        
-        let currentUsed = freshData.daily_used || 0;
-        
-        if (freshData.last_reset_date !== today) {
-          currentUsed = 0;
-        }
-
-        // Thêm cơ chế grace margin (cho phép vượt quá dưới 10 UID)
-        const GRACE_MARGIN = 10;
-        if (dailyLimit !== -1 && dailyLimit !== null && (currentUsed + count) > (dailyLimit + GRACE_MARGIN)) {
-          throw new Error('DAILY_LIMIT_REACHED');
-        }
-
-        if (action === 'check') {
-          newDailyUsed = currentUsed;
-          if (freshData.last_reset_date !== today) {
-            transaction.update(licenseRef, {
-              daily_used: 0,
-              last_reset_date: today,
-            });
-          }
-        } else {
-          newDailyUsed = currentUsed + count;
-          transaction.update(licenseRef, {
-            daily_used: newDailyUsed,
-            last_reset_date: today,
-            total_scans: FieldValue.increment(count)
-          });
-        }
-      });
-    } catch (e: any) {
-      if (e.message === 'DAILY_LIMIT_REACHED') {
-        return NextResponse.json({
-          success: false,
-          code: 'DAILY_LIMIT_REACHED',
-          daily_limit: dailyLimit,
-          daily_used: dailyLimit,
-          remaining: 0
-        }, { status: 429 });
-      }
-      throw e;
-    }
-
-    return NextResponse.json({
-      success: true,
-      license_status: 'ACTIVE',
-      daily_limit: dailyLimit,
-      daily_used: newDailyUsed,
-      remaining: (dailyLimit === -1 || dailyLimit === null) ? 'Unlimited' : dailyLimit - newDailyUsed,
-      plan: license.plan_id
-    });
-
-  } catch (err) {
-    console.error('Scan error:', err);
-    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
+    const {
+      licenseKey,
+      action = "consume",
+      count = 1,
+      requestId,
+    } = await jsonBody(req);
+    scanInput(action, count, requestId);
+    const ref = await findLicense(licenseKey);
+    if (!(await checkRateLimit(`scan:${ref.id}`, 300, 60)).allowed)
+      throw new ApiError(429, "RATE_LIMIT_EXCEEDED");
+    return NextResponse.json(await consumeQuota(ref, action, count, requestId));
+  } catch (error) {
+    return failure(error);
   }
 }

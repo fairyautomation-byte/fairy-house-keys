@@ -1,75 +1,59 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { isAdminAuthenticated } from '@/lib/auth';
-
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { isAdminAuthenticated } from "@/lib/auth";
+import { ApiError, failure, jsonBody } from "@/lib/security";
 export async function POST(req: NextRequest) {
   try {
-    // 1. Chỉ Admin mới được chạy
-    const isAuth = await isAdminAuthenticated(req);
-    if (!isAuth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // 24 hours ago
-    const yesterday = new Date();
-    yesterday.setHours(yesterday.getHours() - 24);
-
-    let deletedUsers = 0;
-    let deletedSessions = 0;
-
-    // 2. Xóa Users chưa xác thực quá 24h
-    const usersRef = db.collection('users');
-    const oldUnverifiedUsers = await usersRef
-      .where('email_verified', '==', false)
-      .where('created_at', '<', yesterday)
+    if (!(await isAdminAuthenticated(req)))
+      throw new ApiError(401, "Unauthorized");
+    const { dryRun = true } = await jsonBody(req),
+      yesterday = new Date(Date.now() - 86400000);
+    let deletedUsers = 0,
+      deletedSessions = 0;
+    const users = await db
+      .collection("users")
+      .where("email_verified", "==", false)
+      .where("created_at", "<", yesterday)
+      .limit(400)
       .get();
-
-    if (!oldUnverifiedUsers.empty) {
+    for (const doc of users.docs) {
+      const [licenses, orders, payments] = await Promise.all([
+        db.collection("licenses").where("user_id", "==", doc.id).limit(1).get(),
+        db.collection("orders").where("user_id", "==", doc.id).limit(1).get(),
+        db
+          .collection("payos_orders")
+          .where("userId", "==", doc.id)
+          .limit(1)
+          .get(),
+      ]);
+      if (!licenses.empty || !orders.empty || !payments.empty) continue;
+      deletedUsers++;
+      if (!dryRun)
+        await doc.ref.update({
+          status: "DELETED",
+          disabled: true,
+          auth_version: (doc.data().auth_version || 0) + 1,
+        });
+    }
+    const sessions = await db
+      .collection("email_otp_sessions")
+      .where("created_at", "<", yesterday)
+      .limit(400)
+      .get();
+    deletedSessions = sessions.size;
+    if (!dryRun && sessions.size) {
       const batch = db.batch();
-      oldUnverifiedUsers.docs.forEach((doc: any) => {
-        batch.delete(doc.ref);
-        deletedUsers++;
-      });
+      sessions.docs.forEach((doc) => batch.delete(doc.ref));
       await batch.commit();
     }
-
-    // 3. Xóa các phiên OTP cũ (dù used hay chưa) quá 24h
-    const sessionsRef = db.collection('email_otp_sessions');
-    const oldSessions = await sessionsRef
-      .where('created_at', '<', yesterday)
-      .get();
-
-    if (!oldSessions.empty) {
-      // Có thể vượt quá giới hạn 500 của batch nếu nhiều session
-      let batchCount = 0;
-      let batch = db.batch();
-      
-      for (const doc of oldSessions.docs) {
-        batch.delete(doc.ref);
-        deletedSessions++;
-        batchCount++;
-        
-        if (batchCount >= 450) {
-          await batch.commit();
-          batchCount = 0;
-          batch = db.batch();
-        }
-      }
-      
-      if (batchCount > 0) {
-        await batch.commit();
-      }
-    }
-
     return NextResponse.json({
       ok: true,
+      dryRun,
       deletedUsers,
       deletedSessions,
-      message: 'Đã dọn dẹp thành công'
+      hasMore: users.size === 400 || sessions.size === 400,
     });
-
-  } catch (err) {
-    console.error('Cleanup error:', err);
-    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
+  } catch (error) {
+    return failure(error);
   }
 }

@@ -1,22 +1,32 @@
-import { SignJWT, jwtVerify } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || ''
-);
-
-export async function signToken(payload: any, expiresIn: string = '7d'): Promise<string> {
+import { SignJWT, jwtVerify } from "jose";
+function secret() {
+  const value = process.env.JWT_SECRET;
+  if (!value || new TextEncoder().encode(value).length < 32)
+    throw new Error("JWT_CONFIG_MISSING");
+  return new TextEncoder().encode(value);
+}
+export async function signToken(
+  payload: any,
+  expiresIn = "7d",
+): Promise<string> {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer("fairy-house")
+    .setAudience("fairy-house")
     .setIssuedAt()
     .setExpirationTime(expiresIn)
-    .sign(JWT_SECRET);
+    .sign(secret());
 }
-
 export async function verifyToken(token: string): Promise<any> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload;
-  } catch (error) {
+    return (
+      await jwtVerify(token, secret(), {
+        algorithms: ["HS256"],
+        issuer: "fairy-house",
+        audience: "fairy-house",
+      })
+    ).payload;
+  } catch {
     return null;
   }
 }

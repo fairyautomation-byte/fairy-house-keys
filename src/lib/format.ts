@@ -5,10 +5,10 @@
 
 // ── Plan names ──
 const PLAN_NAMES: Record<string, string> = {
-  trial: 'Dùng Thử',
-  monthly: '1 Tháng',
-  quarterly: '3 Tháng',
-  yearly: '1 Năm',
+  trial: "Dùng Thử",
+  monthly: "1 Tháng",
+  quarterly: "3 Tháng",
+  yearly: "1 Năm",
 };
 
 export function formatPlanName(planId: string): string {
@@ -17,29 +17,30 @@ export function formatPlanName(planId: string): string {
 
 // ── Status labels ──
 const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Đang hoạt động',
-  SUSPENDED: 'Tạm khoá',
-  EXPIRED: 'Hết hạn',
-  REVOKED: 'Đã thu hồi',
-  PAID: 'Đã thanh toán',
-  PENDING_PAYMENT_REVIEW: 'Chờ duyệt',
-  PENDING: 'Đang chờ',
-  REJECTED: 'Bị từ chối',
-  CANCELLED: 'Đã huỷ',
+  ACTIVE: "Đang hoạt động",
+  SUSPENDED: "Tạm khoá",
+  EXPIRED: "Hết hạn",
+  REVOKED: "Đã thu hồi",
+  PAID: "Đã thanh toán",
+  PENDING_PAYMENT_REVIEW: "Chờ duyệt",
+  PENDING: "Đang chờ",
+  REJECTED: "Bị từ chối",
+  CANCELLED: "Đã huỷ",
 };
 
-export type StatusVariant = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+export type StatusVariant =
+  "success" | "warning" | "danger" | "info" | "neutral";
 
 const STATUS_VARIANTS: Record<string, StatusVariant> = {
-  ACTIVE: 'success',
-  SUSPENDED: 'warning',
-  EXPIRED: 'neutral',
-  REVOKED: 'neutral',
-  PAID: 'success',
-  PENDING_PAYMENT_REVIEW: 'warning',
-  PENDING: 'warning',
-  REJECTED: 'danger',
-  CANCELLED: 'neutral',
+  ACTIVE: "success",
+  SUSPENDED: "warning",
+  EXPIRED: "neutral",
+  REVOKED: "neutral",
+  PAID: "success",
+  PENDING_PAYMENT_REVIEW: "warning",
+  PENDING: "warning",
+  REJECTED: "danger",
+  CANCELLED: "neutral",
 };
 
 export function formatStatus(status: string): string {
@@ -47,20 +48,22 @@ export function formatStatus(status: string): string {
 }
 
 export function getStatusVariant(status: string): StatusVariant {
-  return STATUS_VARIANTS[status] || 'neutral';
+  return STATUS_VARIANTS[status] || "neutral";
 }
 
 // ── Currency ──
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+  return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
 }
 
 export function formatCurrencyShort(amount: number): string {
   if (amount >= 1_000_000) {
-    return (amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1) + 'tr';
+    return (
+      (amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1) + "tr"
+    );
   }
   if (amount >= 1_000) {
-    return (amount / 1_000).toFixed(amount % 1_000 === 0 ? 0 : 0) + 'k';
+    return (amount / 1_000).toFixed(amount % 1_000 === 0 ? 0 : 0) + "k";
   }
   return formatCurrency(amount);
 }
@@ -72,58 +75,58 @@ export function formatCurrencyShort(amount: number): string {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatDate(value: any, includeTime?: boolean): string {
-  if (!value) return '—';
+  if (!value) return "—";
   if (includeTime) return formatDateTime(value);
-  
+
   let date: Date;
-  
-  if (typeof value === 'object' && '_seconds' in value) {
+
+  if (typeof value === "object" && "_seconds" in value) {
     date = new Date(value._seconds * 1000);
-  } else if (typeof value === 'string') {
+  } else if (typeof value === "string") {
     date = new Date(value);
-  } else if (typeof value === 'number') {
+  } else if (typeof value === "number") {
     date = new Date(value);
   } else if (value instanceof Date) {
     date = value;
   } else {
-    return '—';
+    return "—";
   }
-  
-  if (isNaN(date.getTime())) return '—';
-  
-  return date.toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+
+  if (isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatDateTime(value: any): string {
-  if (!value) return '—';
-  
+  if (!value) return "—";
+
   let date: Date;
-  
-  if (typeof value === 'object' && '_seconds' in value) {
+
+  if (typeof value === "object" && "_seconds" in value) {
     date = new Date(value._seconds * 1000);
-  } else if (typeof value === 'string') {
+  } else if (typeof value === "string") {
     date = new Date(value);
-  } else if (typeof value === 'number') {
+  } else if (typeof value === "number") {
     date = new Date(value);
   } else if (value instanceof Date) {
     date = value;
   } else {
-    return '—';
+    return "—";
   }
-  
-  if (isNaN(date.getTime())) return '—';
-  
-  return date.toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+
+  if (isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -134,52 +137,56 @@ export function formatDateTime(value: any): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function daysRemaining(expiresAt: any): number {
   if (!expiresAt) return 0;
-  
+
   let date: Date;
-  if (typeof expiresAt === 'object' && '_seconds' in expiresAt) {
+  if (typeof expiresAt === "object" && "_seconds" in expiresAt) {
     date = new Date(expiresAt._seconds * 1000);
   } else {
     date = new Date(expiresAt);
   }
-  
+
   if (isNaN(date.getTime())) return 0;
-  
+
   const now = new Date();
   const diff = date.getTime() - now.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
 export function formatDaysRemaining(days: number): string {
-  if (days < 0) return 'Đã hết hạn';
-  if (days === 0) return 'Hết hạn hôm nay';
-  if (days === 1) return 'Còn 1 ngày';
+  if (days < 0) return "Đã hết hạn";
+  if (days === 0) return "Hết hạn hôm nay";
+  if (days === 1) return "Còn 1 ngày";
   return `Còn ${days} ngày`;
 }
 
 // ── Quota ──
-export function formatQuota(used: number, limit: number | null | undefined): string {
-  if (!limit || limit === -1) return `${used.toLocaleString('vi-VN')} / Không giới hạn`;
-  return `${used.toLocaleString('vi-VN')} / ${limit.toLocaleString('vi-VN')}`;
+export function formatQuota(
+  used: number,
+  limit: number | null | undefined,
+): string {
+  if (!limit || limit === -1)
+    return `${used.toLocaleString("vi-VN")} / Không giới hạn`;
+  return `${used.toLocaleString("vi-VN")} / ${limit.toLocaleString("vi-VN")}`;
 }
 
 // ── Payment method ──
 export function formatPaymentMethod(method?: string): string {
-  if (!method) return '—';
+  if (!method) return "—";
   const map: Record<string, string> = {
-    WALLET: 'Ví',
-    BANK_TRANSFER: 'Chuyển khoản',
-    PAYOS: 'PayOS',
+    WALLET: "Ví",
+    BANK_TRANSFER: "Chuyển khoản",
+    PAYOS: "PayOS",
   };
   return map[method] || method;
 }
 
 // ── Transaction type ──
 export function formatTransactionType(type?: string): string {
-  if (!type) return '—';
+  if (!type) return "—";
   const map: Record<string, string> = {
-    DEPOSIT: 'Nạp tiền',
-    PURCHASE: 'Mua key',
-    ORDER: 'Đơn hàng',
+    DEPOSIT: "Nạp tiền",
+    PURCHASE: "Mua key",
+    ORDER: "Đơn hàng",
   };
   return map[type] || type;
 }
@@ -187,7 +194,7 @@ export function formatTransactionType(type?: string): string {
 // ── License key display (group by 4 chars) ──
 export function formatLicenseKey(key: string): string {
   // Already formatted with dashes (FHAD-XXXX-XXXX-XXXX-XXXX)
-  if (key.includes('-')) return key;
+  if (key.includes("-")) return key;
   // Legacy format — just return as-is
   return key;
 }
@@ -195,9 +202,9 @@ export function formatLicenseKey(key: string): string {
 // ── Mask key for display ──
 export function maskKey(key: string): string {
   if (key.length <= 10) return key;
-  const parts = key.split('-');
+  const parts = key.split("-");
   if (parts.length >= 3) {
     return `${parts[0]}-${parts[1]}-****-****-${parts[parts.length - 1]}`;
   }
-  return key.slice(0, 6) + '****' + key.slice(-4);
+  return key.slice(0, 6) + "****" + key.slice(-4);
 }

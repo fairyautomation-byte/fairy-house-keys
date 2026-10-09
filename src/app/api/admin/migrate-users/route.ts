@@ -1,88 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { isAdminAuthenticated } from '@/lib/auth';
-
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { isAdminAuthenticated } from "@/lib/auth";
+import { ApiError, failure, jsonBody } from "@/lib/security";
 export async function POST(req: NextRequest) {
   try {
-    // 1. Chỉ Admin mới được chạy migration
-    const isAuth = await isAdminAuthenticated(req);
-    if (!isAuth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { confirm } = await req.json();
-    if (confirm !== 'I_KNOW_WHAT_I_AM_DOING') {
-      return NextResponse.json({ error: 'Cần xác nhận confirm = I_KNOW_WHAT_I_AM_DOING' }, { status: 400 });
-    }
-
-    const usersRef = db.collection('users');
-    const snapshot = await usersRef.get();
-
-    let total = 0;
-    let verifiedCount = 0;
-    let unverifiedCount = 0;
-
-    const batch = db.batch();
-    let batchCount = 0;
-
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      total++;
-
-      // Nếu đã có cờ email_verified thì bỏ qua
-      if (data.email_verified !== undefined) {
-        continue;
+    if (!(await isAdminAuthenticated(req)))
+      throw new ApiError(401, "Unauthorized");
+    const { confirm, dryRun = true, cursor } = await jsonBody(req);
+    if (!dryRun && confirm !== "I_KNOW_WHAT_I_AM_DOING")
+      throw new ApiError(400, "CONFIRM_REQUIRED");
+    let query = db.collection("users").orderBy("__name__").limit(400);
+    if (cursor) query = query.startAfter(cursor);
+    const snap = await query.get(),
+      batch = db.batch();
+    let changed = 0;
+    for (const doc of snap.docs)
+      if (doc.data().email_verified === undefined) {
+        changed++;
+        if (!dryRun) batch.update(doc.ref, { email_verified: false });
       }
-
-      // Điều kiện 1: Đã dùng trial
-      // Điều kiện 2: Có license
-      // Điều kiện 3: Có order
-      const hasTrial = data.trial_used === true;
-      
-      let hasLicense = false;
-      const licensesSnap = await db.collection('licenses').where('user_id', '==', doc.id).limit(1).get();
-      if (!licensesSnap.empty) hasLicense = true;
-
-      let hasOrder = false;
-      const ordersSnap = await db.collection('orders').where('user_id', '==', doc.id).limit(1).get();
-      if (!ordersSnap.empty) hasOrder = true;
-
-      // Quyết định: 
-      // Nếu user đã có lịch sử tương tác hợp lệ (trial, license, order), ta tin tưởng và đánh dấu verified.
-      // Nếu user chưa làm gì cả (chỉ đăng ký acc rỗng), ta đánh dấu unverified, bắt họ verify lại.
-      const shouldVerify = hasTrial || hasLicense || hasOrder;
-
-      batch.update(doc.ref, {
-        email_verified: shouldVerify
-      });
-      
-      batchCount++;
-      if (shouldVerify) verifiedCount++;
-      else unverifiedCount++;
-
-      // Firestore batch limit is 500
-      if (batchCount >= 450) {
-        await batch.commit();
-        batchCount = 0;
-      }
-    }
-
-    if (batchCount > 0) {
-      await batch.commit();
-    }
-
+    if (!dryRun && changed) await batch.commit();
     return NextResponse.json({
       success: true,
-      message: 'Migration completed',
+      dryRun,
       stats: {
-        total_scanned: total,
-        set_to_verified: verifiedCount,
-        set_to_unverified: unverifiedCount,
-      }
+        total_scanned: snap.size,
+        set_to_verified: 0,
+        set_to_unverified: changed,
+      },
+      nextCursor: snap.size === 400 ? snap.docs[399].id : null,
     });
-
   } catch (error) {
-    console.error('Migration error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return failure(error);
   }
 }

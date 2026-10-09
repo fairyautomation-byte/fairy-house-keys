@@ -1,0 +1,726 @@
+/* ==========================================================================
+   Fairy House AutoData V2.0 — SaaS Workstation Design System (Navigation Rail)
+   Strictly UI/UX Skill & Modern Enterprise SaaS Architecture Compliant
+   ========================================================================== */
+
+:root {
+  --app-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Primary Brand: Teal */
+  --primary: #0d9488;
+  --primary-hover: #0f766e;
+  --primary-foreground: #ffffff;
+  --primary-light: rgba(13, 148, 136, 0.08);
+  --ring-focus: rgba(13, 148, 136, 0.2);
+  --border-focus: #0d9488;
+
+  /* Surfaces & Backgrounds */
+  --background: #f8f9fa;
+  --surface: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-hover: #f4f4f5;
+
+  /* Text & Borders */
+  --foreground: #18181b;
+  --muted: #71717a;
+  --border: #f1f2f4;
+  --border-strong: #e4e4e7;
+
+  /* Semantic status colors */
+  --success: #059669;
+  --success-bg: #ecfdf5;
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --error: #e11d48;
+  --error-bg: #fff1f2;
+  --info: #0284c7;
+  --info-bg: #f0f9ff;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  min-height: 0;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: var(--app-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+svg {
+  max-width: 100%;
+  max-height: 100%;
+  flex-shrink: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Zero-FOUC Protection: Hide unstyled HTML until Tailwind + modal.js are ready
+   ========================================================================== */
+#zt-app {
+  font-family: var(--app-font) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#zt-app.zt-ready {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#zt-app-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+#zt-app-preloader.zt-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   SaaS Navigation Rail (Left Column)
+   ========================================================================== */
+#zt-nav-rail {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  background: #ffffff;
+  border-right: 1px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.zt-header-logo-box {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(228, 228, 231, 0.9) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  flex-shrink: 0 !important;
+}
+
+#zt-header-logo {
+  width: 38px !important;
+  height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.zt-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #52525b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.zt-nav-item:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.zt-nav-item.active {
+  background-color: rgba(13, 148, 136, 0.09) !important;
+  color: #0f766e !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 2px rgba(13, 148, 136, 0.06);
+}
+
+.zt-nav-item.active svg {
+  color: #0d9488 !important;
+}
+
+/* ==========================================================================
+   Main Stage Viewport (Right of Navigation Rail)
+   ========================================================================== */
+#zt-main-viewport {
+  flex: 1 1 0%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--background);
+  position: relative;
+}
+
+/* Top Command Bar */
+#zt-top-bar {
+  height: 56px;
+  min-height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+/* ==========================================================================
+   KPI Metrics Row (SaaS Cards)
+   ========================================================================== */
+#zt-section-scan {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 14px 20px;
+  flex-shrink: 0;
+}
+
+.zt-kpi-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background-color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.zt-kpi-card:hover {
+  border-color: #d4d4d8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.zt-kpi-card--hero {
+  border-color: rgba(13, 148, 136, 0.3) !important;
+  background: linear-gradient(145deg, #ffffff 0%, rgba(13, 148, 136, 0.04) 100%) !important;
+}
+
+/* ==========================================================================
+   Workspace Area (Leads Table + Analytics Dashboard)
+   ========================================================================== */
+#zt-section-workspace {
+  flex: 1 1 0%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background-color: #ffffff;
+}
+
+/* Leads CRM Table View */
+#zt-view-leads {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+#zt-filter-bar {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+#zt-table-scroll {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: auto;
+  width: 100%;
+}
+
+#zt-results-table {
+  width: 100%;
+  min-width: 960px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+  background-color: var(--surface) !important;
+}
+
+#zt-results-table thead {
+  background-color: #f8f9fa !important;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+#zt-results-table th {
+  color: #52525b !important;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  background-color: #f8f9fa !important;
+}
+
+#zt-tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.12s ease;
+}
+
+#zt-tbody tr:hover {
+  background-color: #f4f5f7 !important;
+}
+
+#zt-tbody tr:has(input[type="checkbox"]:checked) {
+  background-color: rgba(13, 148, 136, 0.06) !important;
+}
+
+#zt-results-table td {
+  padding: 10px 12px;
+  color: #18181b !important;
+  vertical-align: middle;
+}
+
+/* Customer Name: High-contrast Dark Zinc */
+#zt-results-table tr td .text-slate-100,
+#zt-results-table tr td [class*="text-slate-100"] {
+  color: #09090b !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+/* Customer UID: Dark Slate Monospace with High Contrast */
+#zt-results-table tr td .text-violet-200\/85,
+#zt-results-table tr td .text-violet-200,
+#zt-results-table tr td [class*="text-violet-"] {
+  color: #334155 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.02em !important;
+}
+
+#zt-results-table .text-slate-400 {
+  color: #52525b !important;
+  font-weight: 600 !important;
+}
+
+#zt-results-table .text-slate-300 {
+  color: #27272a !important;
+  font-weight: 500 !important;
+}
+
+#zt-results-table .text-emerald-400 {
+  color: #0f766e !important;
+  font-weight: 700 !important;
+}
+#zt-results-table .text-amber-100\/90 {
+  color: #3f3f46 !important;
+}
+#zt-results-table .text-indigo-200 {
+  color: #4f46e5 !important;
+  font-weight: 600;
+}
+#zt-results-table .border-slate-600,
+#zt-results-table .border-slate-700\/40 {
+  border-color: #e4e4e7 !important;
+}
+#zt-results-table .bg-slate-800,
+#zt-results-table .bg-slate-800\/75,
+#zt-results-table .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+/* Checkbox container in table */
+#zt-results-table tr td label {
+  background-color: #ffffff !important;
+  border-color: #d4d4d8 !important;
+}
+
+/* Facebook Profile Action Icon Button */
+#zt-results-table tr td a[title="Mở Facebook"] {
+  background-color: #f4f4f5 !important;
+  border-color: #e4e4e7 !important;
+  color: #52525b !important;
+}
+#zt-results-table tr td a[title="Mở Facebook"]:hover {
+  background-color: #e4e4e7 !important;
+  color: #18181b !important;
+  border-color: #0d9488 !important;
+}
+
+/* Action links */
+#zt-results-table a[title="Gọi điện"],
+#zt-results-table a[title*="Call"] {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+  border-color: #a7f3d0 !important;
+}
+#zt-results-table a[title="Gọi điện"]:hover,
+#zt-results-table a[title*="Call"]:hover {
+  background-color: #d1fae5 !important;
+}
+#zt-results-table a[title*="Zalo"] {
+  background-color: #f0f9ff !important;
+  color: #0284c7 !important;
+  border-color: #bae6fd !important;
+}
+#zt-results-table a[title*="Zalo"]:hover {
+  background-color: #e0f2fe !important;
+}
+#zt-results-table a[title*="Facebook"] {
+  background-color: #f4f4f5 !important;
+  color: #52525b !important;
+  border-color: #e4e4e7 !important;
+}
+#zt-results-table a[title*="Facebook"]:hover {
+  background-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+/* ==========================================================================
+   Expansive Analytics Dashboard View (#zt-sidebar)
+   ========================================================================== */
+#zt-sidebar {
+  display: none;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: var(--background);
+  border: none;
+  box-sizing: border-box;
+}
+
+#zt-sidebar.zt-analytics-active {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-content: start;
+}
+
+@media (max-width: 1100px) {
+  #zt-sidebar.zt-analytics-active {
+    grid-template-columns: 1fr;
+  }
+}
+
+.zt-analytics-card {
+  background: #ffffff;
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.zt-analytics-card h3 {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #52525b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Donut chart svg */
+.zt-pie-seg {
+  transition: opacity 0.15s ease-out;
+}
+.zt-pie-seg:hover {
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   Setup & Config View (#zt-section-config)
+   ========================================================================== */
+#zt-section-config {
+  flex: 1 1 0%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  overflow-y: auto;
+  background-color: var(--background);
+}
+
+#zt-config-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+#zt-btn-start {
+  display: inline-flex;
+  min-height: 48px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  background-color: #0d9488;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+#zt-btn-start:hover {
+  background-color: #0f766e;
+  transform: translateY(-1px);
+}
+
+#zt-btn-start:active {
+  transform: translateY(0);
+}
+
+#zt-btn-start svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+#zt-btn-close svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* ==========================================================================
+   Floating Action Dock (Multi-Select Operations)
+   ========================================================================== */
+#zt-floating-dock {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 40;
+}
+
+#zt-floating-dock.dock-visible {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* ==========================================================================
+   Clean Modern Scrollbars & Spinners
+   ========================================================================== */
+.zt-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 transparent;
+}
+.zt-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.zt-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.zt-scrollbar::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+.zt-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+@keyframes zt-spin {
+  to { transform: rotate(360deg); }
+}
+
+.zt-spinner-ring {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 3px solid rgba(13, 148, 136, 0.15);
+  border-top-color: var(--primary);
+  border-radius: 9999px;
+  animation: zt-spin 0.65s linear infinite;
+}
+
+.zt-spinner-ring-sm {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-width: 2px;
+  border-color: rgba(13, 148, 136, 0.2);
+  border-top-color: var(--primary);
+  animation: zt-spin 0.65s linear infinite;
+}
+
+/* Navigation Rail & Brand Header sizing */
+#zt-nav-rail {
+  width: 272px !important;
+  min-width: 272px !important;
+}
+
+#zt-app-heading {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+}
+
+#zt-app-subtitle {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 11px !important;
+  color: #71717a !important;
+}
+
+/* Number input stepper button styling & separation */
+#zt-input-limit::-webkit-inner-spin-button {
+  cursor: pointer;
+  height: 28px;
+  margin-left: 8px;
+}
+
+/* Empty Table State & Analysis Loading indicator */
+#zt-empty-state {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+#zt-empty-state #zt-empty-spinner {
+  margin-bottom: 2px;
+}
+
+#zt-empty-state #zt-empty-spinner .zt-spinner-ring {
+  width: 36px !important;
+  height: 36px !important;
+  border-width: 3px !important;
+  border-color: rgba(13, 148, 136, 0.16) !important;
+  border-top-color: #0d9488 !important;
+}
+
+#zt-empty-phase {
+  font-family: var(--app-font) !important;
+  color: #18181b !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  text-transform: none !important;
+}
+
+#zt-empty-detail {
+  font-family: var(--app-font) !important;
+  color: #71717a !important; /* Zinc-500 standard muted */
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  letter-spacing: normal !important;
+  margin: 3px 0 0 0 !important;
+  max-width: 440px;
+}
+
+#zt-empty-dots {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Auto Kết Bạn (Invite) Floating Progress Panel & Config Modal
+   ========================================================================== */
+#zt-invite-progress-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 60 !important;
+  width: 430px !important;
+  max-width: calc(100vw - 48px) !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+}
+
+#zt-invite-progress-panel.hidden {
+  display: none !important;
+}
+
+#zt-invite-progress-panel * {
+  box-sizing: border-box;
+}
+
+#zt-invite-log-list {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+
+

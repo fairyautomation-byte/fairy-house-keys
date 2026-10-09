@@ -12,8 +12,8 @@ import AnchorPricing from '@/components/landing/AnchorPricing';
 import GroupedFAQ from '@/components/landing/GroupedFAQ';
 import Footer from '@/components/layout/Footer';
 
-export default function Home() {
-  const cookieStore = cookies();
+export default async function Home() {
+  const cookieStore = await cookies();
   const isLoggedIn = cookieStore.has(USER_COOKIE_NAME);
 
   return (

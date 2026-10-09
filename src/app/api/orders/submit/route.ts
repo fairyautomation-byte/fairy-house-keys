@@ -1,165 +1,70 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { generateKey, KeyType } from '@/lib/key-generator';
-import { sendAdminNotification, sendCustomerConfirmation, sendKeyToCustomer } from '@/lib/mailer';
-
+import { deliverLicenseEmail } from "@/lib/notifications";
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { db } from "@/lib/firebase";
+import { buyWithWallet, planIds, validPlan } from "@/lib/order-service";
+import {
+  jsonBody,
+  failure,
+  ApiError,
+  digest,
+  activeUser,
+} from "@/lib/security";
+import { checkRateLimit } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
-    if (!user) {
-      return NextResponse.json({ error: 'Vui lòng đăng nhập' }, { status: 401 });
+    if (!user) throw new ApiError(401, "Unauthorized");
+    if (!(await checkRateLimit(`submit:${user.uid}`, 10, 60)).allowed)
+      throw new ApiError(429, "RATE_LIMIT_EXCEEDED");
+    const { planId } = await jsonBody(req);
+    if (!planIds.includes(planId)) throw new ApiError(400, "INVALID_PLAN");
+    if (planId === "trial") {
+      const id = `trial_${digest(user.uid)}`,
+        result = await buyWithWallet(user.uid, "trial", id);
+      await deliverLicenseEmail(digest(`wallet:${user.uid}:${id}`));
+      return NextResponse.json(result);
     }
-
-    const { planId } = await req.json();
-    if (!['trial', 'monthly', 'quarterly', 'yearly'].includes(planId)) {
-      return NextResponse.json({ error: 'Gói không hợp lệ' }, { status: 400 });
-    }
-    
-    const keyType = planId as KeyType;
-
-    const userRef = db.collection('users').doc(user.uid);
-    const userDoc = await userRef.get();
-    
-    if (!userDoc.exists) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Lấy thông tin gói từ Firebase
-    const planDoc = await db.collection('plans').doc(keyType).get();
-    if (!planDoc.exists) {
-      return NextResponse.json({ error: 'Gói không tồn tại' }, { status: 400 });
-    }
-    const planData = planDoc.data()!;
-    if (planData.active === false) {
-      return NextResponse.json({ error: 'Gói cước đã ngừng bán' }, { status: 400 });
-    }
-    const price = planData.price;
-    const durationDays = planData.duration;
-    const scanLimit = planData.scanLimit;
-
-    const userData = userDoc.data()!;
-
-    if (!userData.email_verified) {
-      return NextResponse.json({ 
-        error: 'Vui lòng xác thực email trước khi đăng ký gói',
-        code: 'EMAIL_NOT_VERIFIED' 
-      }, { status: 403 });
-    }
-
-    if (keyType === 'trial') {
-      if (userData.trial_used) {
-        return NextResponse.json({ error: 'TRIAL_ALREADY_USED' }, { status: 403 });
-      }
-
-      // Auto create trial license
-      const licenseKey = generateKey();
-      const expiresAt = new Date();
-      if (durationDays !== null) {
-        expiresAt.setDate(expiresAt.getDate() + durationDays);
-      }
-
-      const newLicense = {
-        license_key: licenseKey,
-        user_id: user.uid,
-        plan_id: 'trial',
-        status: 'ACTIVE',
-        created_at: new Date(),
-        activated_at: new Date(),
-        expires_at: durationDays !== null ? expiresAt : null,
-        daily_limit: scanLimit,
-        daily_used: 0,
-        total_scans: 0,
-        last_reset_date: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }) // YYYY-MM-DD
-      };
-
-      await db.collection('licenses').add(newLicense);
-      await userRef.update({ trial_used: true });
-
-      // Gửi email cho khách (trial cấp ngay) - await
-      try {
-        await sendKeyToCustomer({
-          fullName: userData.full_name || 'Khách hàng',
-          email: user.email || userData.email || '',
-          key: licenseKey,
-          packageType: 'trial',
-          expiresAt: expiresAt
-        });
-      } catch (err) {
-        console.error('Email send failed:', err);
-      }
-
-      return NextResponse.json({ ok: true, message: 'Kích hoạt Trial thành công' });
-    } else {
-      // Create Order for Paid plan
-      const now = new Date();
-
-      // Check for existing pending order to prevent F5 spam
-      const existingOrders = await db.collection('orders')
-        .where('user_id', '==', user.uid)
-        .where('plan_id', '==', keyType)
-        .where('status', '==', 'PENDING_PAYMENT_REVIEW')
-        .get();
-
-      if (!existingOrders.empty) {
-        const existingDoc = existingOrders.docs[0];
-        const existingData = existingDoc.data();
-        return NextResponse.json({ 
-          ok: true, 
-          orderId: existingDoc.id, 
-          transactionCode: existingData.transaction_code, 
-          amount: existingData.amount 
-        });
-      }
-
-      // Generate transaction code FH20260927XXXX
-      const dateStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).replace(/-/g, '');
-      const random4 = Math.floor(1000 + Math.random() * 9000);
-      const transactionCode = `FH${dateStr}${random4}`;
-
-      const newOrder = {
-        transaction_code: transactionCode,
-        user_id: user.uid,
-        plan_id: keyType,
-        amount: price,
-        status: 'PENDING_PAYMENT_REVIEW',
-        created_at: now,
-      };
-
-      const orderRef = await db.collection('orders').add(newOrder);
-
-      // Gửi email thông báo (await)
-      const emailResults = await Promise.allSettled([
-        sendAdminNotification({
-          fullName: userData.full_name || 'Khách hàng',
-          email: user.email || userData.email || '',
-          zalo: userData.zalo || '',
-          packageType: keyType,
-          purpose: 'Mua từ hệ thống mới',
-          requestId: orderRef.id
-        }),
-        sendCustomerConfirmation({
-          fullName: userData.full_name || 'Khách hàng',
-          email: user.email || userData.email || '',
-          packageType: keyType
-        })
-      ]);
-
-      emailResults.forEach((res, index) => {
-        if (res.status === 'rejected') {
-          console.error(`Order email send failed for index ${index}:`, res.reason);
-        }
-      });
-
-      return NextResponse.json({ 
-        ok: true, 
-        orderId: orderRef.id, 
-        transactionCode, 
-        amount: price 
-      });
-    }
-  } catch (err) {
-    console.error('Order submit error:', err);
-    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
+    const ref = db
+      .collection("orders")
+      .doc(digest(`pending:${user.uid}:${planId}`));
+    const result = await db.runTransaction(
+      async (tx) => {
+        const [old, planSnap, userSnap] = await Promise.all([
+          tx.get(ref),
+          tx.get(db.collection("plans").doc(planId)),
+          tx.get(db.collection("users").doc(user.uid)),
+        ]);
+        if (
+          !activeUser(userSnap.data()) ||
+          userSnap.data()?.email_verified !== true
+        )
+          throw new ApiError(403, "ACCOUNT_NOT_VERIFIED");
+        if (old.exists && old.data()!.status === "PENDING_PAYMENT_REVIEW")
+          return old.data()!;
+        const plan = validPlan(planSnap.data()),
+          data = {
+            user_id: user.uid,
+            plan_id: planId,
+            plan_snapshot: plan,
+            amount: plan.price,
+            status: "PENDING_PAYMENT_REVIEW",
+            transaction_code: `FH${ref.id.slice(0, 16).toUpperCase()}`,
+            created_at: new Date(),
+          };
+        if (old.exists) throw new ApiError(409, "ORDER_ALREADY_PROCESSED");
+        tx.set(ref, data);
+        return data;
+      },
+      { maxAttempts: 20 },
+    );
+    return NextResponse.json({
+      ok: true,
+      orderId: ref.id,
+      transactionCode: result.transaction_code,
+      amount: result.amount,
+    });
+  } catch (error) {
+    return failure(error);
   }
 }
