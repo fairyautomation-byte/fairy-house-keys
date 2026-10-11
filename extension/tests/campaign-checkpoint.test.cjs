@@ -177,4 +177,57 @@ test('R08: FacebookAdapter is connected into api.js friend request flow', async 
   }
 });
 
+test('L2-05: manifest includes facebook-adapter.js and browser VM loads adapter without require', async () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../manifest.json'), 'utf8'));
+  const scripts = manifest.content_scripts.flatMap((entry) => entry.js);
+  assert.equal(scripts.includes('src/core/facebook-adapter.js'), true);
+
+  // Pure browser context without require/module
+  const ctx = vm.createContext({
+    URLSearchParams,
+    Date,
+    console,
+    location: { origin: 'https://www.facebook.com' },
+    window: {},
+    PushGroupAuth: {
+      getAuth: () => ({ fbDtsg: 'mock-token', userId: '10000000001' }),
+      getRequestParams: () => ({ lsd: 'mock_lsd_123', jazoest: '21234' }),
+      generateJazoest: () => '21234'
+    },
+    fetch: async () => ({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ errors: [{ code: 368, message: 'blocked fixture' }] })
+    })
+  });
+
+  // Load scripts in manifest content_scripts order
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/core/facebook-adapter.js'), 'utf8'), ctx);
+  assert.equal(vm.runInContext("typeof window.FacebookAdapter !== 'undefined'", ctx), true);
+
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/core/api.js'), 'utf8'), ctx);
+  assert.equal(vm.runInContext('_fbAdapter !== null', ctx), true);
+
+  const fb = await vm.runInContext("PushGroupAPI.sendFriendInvite('10000000002')", ctx);
+  assert.equal(fb.success, false);
+  assert.equal(fb.errorType, 'CHECKPOINT_OR_BLOCKED');
+});
+
+test('L2-05: ZT_GET_CAPABILITIES live handshake when cache is empty', async () => {
+  const env = setup();
+  env.run(`fetch = async (url) => {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, capabilities: { phones: true, validate: true, invite: true, idempotency: true } })
+    };
+  }`);
+
+  const res = await env.msg({ action: 'ZT_GET_CAPABILITIES' });
+  assert.equal(res.ok, true);
+  assert.equal(res.capabilities.invite, true);
+  const stored = env.read();
+  assert.equal(stored.ztServerCapabilities?.invite, true);
+});
+
 

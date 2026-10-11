@@ -42,6 +42,7 @@
         "*://*.facebook.com/*"
       ],
       "js": [
+        "src/core/facebook-adapter.js",
         "src/core/zt-server-session.js",
         "src/core/phone-display.js",
         "src/core/auth.js",

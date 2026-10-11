@@ -2752,12 +2752,67 @@
     window.open(lastInviteProfileUrl, '_blank', 'noopener');
   }
 
+  async function checkServerCapabilities() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+        const res = await chrome.runtime.sendMessage({ action: 'ZT_GET_CAPABILITIES' });
+        if (res && res.capabilities) return res.capabilities;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  async function checkSavedInviteCheckpoint() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+        const res = await chrome.runtime.sendMessage({ action: 'ZT_CAMPAIGN_CHECKPOINT_GET' });
+        if (res && res.ok && res.checkpoint) return res.checkpoint;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  async function saveInviteCheckpoint(cp) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+        await chrome.runtime.sendMessage({
+          action: 'ZT_CAMPAIGN_CHECKPOINT_SAVE',
+          ...cp
+        });
+      }
+    } catch (_) {}
+  }
+
+  async function clearInviteCheckpoint() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+        await chrome.runtime.sendMessage({
+          action: 'ZT_CAMPAIGN_CHECKPOINT_SAVE',
+          campaignId: null,
+          status: 'completed',
+          scannedCount: 0,
+          cursor: null
+        });
+      }
+    } catch (_) {}
+  }
+
   async function runInviteProcess() {
     const uids = Array.from(selectedUids);
     if (!uids.length) {
       showToast('Danh sách chọn đang trống.', 'info');
       return;
     }
+
+    try {
+      const caps = await checkServerCapabilities();
+      if (caps && caps.invite === false) {
+        showNoticeModal('Máy chủ hiện không hỗ trợ tính năng gửi lời mời kết bạn.', 'Tính năng bị tắt');
+        inviteJobState = 'stopped';
+        updateInviteButtonState();
+        return;
+      }
+    } catch (_) {}
 
     const token = ++inviteRunToken;
     inviteJobState = 'running';
@@ -2816,7 +2871,22 @@
       return;
     }
 
-    for (let i = 0; i < uids.length; i++) {
+    let startIndex = 0;
+    try {
+      const saved = await checkSavedInviteCheckpoint();
+      if (saved && Array.isArray(saved.uids) && Number(saved.scannedCount || 0) > 0 && Number(saved.scannedCount || 0) < uids.length) {
+        const matches = saved.uids.length === uids.length && saved.uids[0] === uids[0];
+        if (matches) {
+          startIndex = Number(saved.scannedCount || 0);
+          inviteStats.done = startIndex;
+          inviteStats.success = Number(saved.phoneFoundCount || 0);
+          updateInviteProgressUi();
+          pushInviteLog('Khôi phục từ checkpoint: tiếp tục từ vị trí ' + (startIndex + 1) + '/' + uids.length, 'normal');
+        }
+      }
+    } catch (_) {}
+
+    for (let i = startIndex; i < uids.length; i++) {
       if (inviteRunToken !== token) return;
       if (inviteStopRequested) break;
       while (invitePaused && !inviteStopRequested) {
@@ -2880,6 +2950,17 @@
 
       inviteStats.done += 1;
       updateInviteProgressUi();
+      await saveInviteCheckpoint({
+        campaignId: 'invite-' + actorUid,
+        targetType: 'friends',
+        targetId: actorUid,
+        targetName: 'Auto Invite',
+        scannedCount: i + 1,
+        phoneFoundCount: inviteStats.success,
+        cursor: null,
+        status: 'in_progress',
+        uids: uids
+      });
       if (inviteStats.done >= inviteStats.total) break;
       if (inviteStopRequested) break;
       const waitMs = randomInviteDelayMs();
@@ -2887,6 +2968,7 @@
     }
 
     if (inviteRunToken !== token) return;
+    await clearInviteCheckpoint();
     if (inviteStopRequested) {
       inviteJobState = 'stopped';
       setInviteCountdown(0);

@@ -22,11 +22,37 @@ async function publicSession(includeLicense = false) {
   return { ok: authed, authed, hasQuota: authed && (details.daily_limit === -1 || details.daily_limit === null || used < details.daily_limit), details: details || null, ...(includeLicense ? { license: data.ztServerToken || null } : {}) };
 }
 async function timedFetch(url, options = {}) { return fetch(url, { ...options, signal: AbortSignal.timeout(20000) }); }
+const ZT_API_BASE = 'https://www.fairyautomation.io.vn';
 
+async function refreshServerCapabilities() {
+  try {
+    const res = await timedFetch(ZT_API_BASE + '/api/capabilities', { method: 'GET' });
+    if (res.ok) {
+      const data = await readBackendJson(res);
+      if (data?.capabilities) {
+        await chrome.storage.local.set({
+          ztServerCapabilities: data.capabilities,
+          ztServerCapabilitiesCheckedAt: Date.now()
+        });
+        return data.capabilities;
+      }
+    }
+  } catch (err) {
+    console.warn('[Zoo Target] Failed to refresh capabilities:', err?.message || err);
+  }
+  return null;
+}
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('[Zoo Target] installed');
+  refreshServerCapabilities().catch(() => {});
 });
+
+if (chrome.runtime.onStartup) {
+  chrome.runtime.onStartup.addListener(() => {
+    refreshServerCapabilities().catch(() => {});
+  });
+}
 
 function detectTokenKind(token) {
   const t = (token || '').trim();
@@ -362,7 +388,6 @@ async function getPhoneMap(uids, explicitRequestId = null) {
   return data?.phoneMap || {};
 }
 
-const ZT_API_BASE = 'https://www.fairyautomation.io.vn';
 const ZT_DEVICE_NAME = 'tien-house-automation';
 
 let sessionGeneration = 0;
@@ -581,20 +606,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     (async () => {
       const cached = await chrome.storage.local.get(['ztServerCapabilities', 'ztServerCapabilitiesCheckedAt']);
       if (!cached.ztServerCapabilities || Date.now() - (cached.ztServerCapabilitiesCheckedAt || 0) > 300000) {
-        try {
-          const res = await timedFetch(ZT_API_BASE + '/api/capabilities', { method: 'GET' });
-          if (res.ok) {
-            const data = await readBackendJson(res);
-            if (data?.capabilities) {
-              await chrome.storage.local.set({
-                ztServerCapabilities: data.capabilities,
-                ztServerCapabilitiesCheckedAt: Date.now()
-              });
-              sendResponse({ ok: true, capabilities: data.capabilities, live: true });
-              return;
-            }
-          }
-        } catch (_) {}
+        const liveCaps = await refreshServerCapabilities();
+        if (liveCaps) {
+          sendResponse({ ok: true, capabilities: liveCaps, live: true });
+          return;
+        }
       }
       sendResponse({ ok: true, capabilities: cached.ztServerCapabilities || null, live: false });
     })().catch((e) => sendResponse({ ok: false, error: e.message || String(e) }));

@@ -7,11 +7,18 @@ const DOC_ID_PROFILE_DIRECTORY_POST_CLICK = '27193145910291507';
 const FB_FRIENDLY_PROFILE_DIRECTORY_POST_CLICK = 'ProfileCometDirectoryPostClickDialogQuery';
 const DOC_ID_FRIEND_REQUEST_SEND = '34373951838917178';
 const FB_FRIENDLY_FRIEND_REQUEST_SEND = 'FriendingCometFriendRequestSendMutation';
-
-const _fbAdapter =
-  typeof require !== 'undefined'
-    ? (function() { try { return require('./facebook-adapter.js'); } catch (_) { return null; } })()
-    : (typeof window !== 'undefined' && window.FacebookAdapter) || (typeof globalThis !== 'undefined' && globalThis.FacebookAdapter) || null;
+function ztGetFacebookAdapter() {
+  if (typeof window !== 'undefined' && window.FacebookAdapter) return window.FacebookAdapter;
+  if (typeof globalThis !== 'undefined' && globalThis.FacebookAdapter) return globalThis.FacebookAdapter;
+  if (typeof require !== 'undefined') {
+    try {
+      const mod = require('./facebook-adapter.js');
+      return mod.FacebookAdapter || mod;
+    } catch (_) {}
+  }
+  return null;
+}
+const _fbAdapter = ztGetFacebookAdapter();
 
 /**
  * Các helper độc lập khỏi `this` để tránh lỗi kiểu
@@ -190,13 +197,15 @@ const PushGroupAPI = {
       credentials: 'include',
       body: params.toString()
     });
-    if (!resp.ok) {
-      throw new Error('HTTP ' + resp.status);
-    }
-    const raw = await resp.text();
-    if (_fbAdapter && typeof _fbAdapter.classifyFacebookResponse === 'function') {
-      const classification = _fbAdapter.classifyFacebookResponse(raw, resp.status);
-      if (classification.type !== _fbAdapter.FB_ERROR_TYPES.SUCCESS) {
+    let raw = '';
+    try {
+      raw = await resp.text();
+    } catch (_) {}
+
+    const fbAdapter = ztGetFacebookAdapter() || _fbAdapter;
+    if (fbAdapter && typeof fbAdapter.classifyFacebookResponse === 'function') {
+      const classification = fbAdapter.classifyFacebookResponse(raw, resp.status);
+      if (classification.type !== fbAdapter.FB_ERROR_TYPES.SUCCESS) {
         return {
           success: false,
           status: 'failed',
@@ -205,13 +214,16 @@ const PushGroupAPI = {
           retryable: classification.retryable
         };
       }
-      const adapted = _fbAdapter.adaptFriendInvite(classification.payload);
+      const adapted = fbAdapter.adaptFriendInvite(classification.payload);
       return {
         success: Boolean(adapted.ok),
         status: adapted.status,
         message: adapted.message,
         friendship_status: adapted.friendship_status || ''
       };
+    }
+    if (!resp.ok) {
+      throw new Error('HTTP ' + resp.status);
     }
     const payload = ztParseGraphqlPayload(raw);
     const errors = Array.isArray(payload && payload.errors) ? payload.errors : [];
@@ -294,20 +306,24 @@ const PushGroupAPI = {
       credentials: 'include',
       body: params.toString()
     });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const text = await resp.text();
-    if (_fbAdapter && typeof _fbAdapter.classifyFacebookResponse === 'function') {
-      const classification = _fbAdapter.classifyFacebookResponse(text, resp.status);
-      if (classification.type === _fbAdapter.FB_ERROR_TYPES.CHECKPOINT_OR_BLOCKED) {
+    let text = '';
+    try {
+      text = await resp.text();
+    } catch (_) {}
+    const fbAdapter = ztGetFacebookAdapter() || _fbAdapter;
+    if (fbAdapter && typeof fbAdapter.classifyFacebookResponse === 'function') {
+      const classification = fbAdapter.classifyFacebookResponse(text, resp.status);
+      if (classification.type === fbAdapter.FB_ERROR_TYPES.CHECKPOINT_OR_BLOCKED) {
         throw new Error('CHECKPOINT_OR_BLOCKED: ' + classification.message);
       }
-      if (classification.type === _fbAdapter.FB_ERROR_TYPES.LOGIN_REQUIRED) {
+      if (classification.type === fbAdapter.FB_ERROR_TYPES.LOGIN_REQUIRED) {
         throw new Error('LOGIN_REQUIRED: ' + classification.message);
       }
-      if (classification.type === _fbAdapter.FB_ERROR_TYPES.RATE_LIMITED) {
+      if (classification.type === fbAdapter.FB_ERROR_TYPES.RATE_LIMITED) {
         throw new Error('RATE_LIMIT_EXCEEDED');
       }
     }
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     console.log('[TienHouse] GraphQL response length:', text.length, '| first 200 chars:', text.substring(0, 200));
     const chunks = this._parseMultiResponse(text);
     for (const chunk of chunks) {

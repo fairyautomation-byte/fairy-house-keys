@@ -172,8 +172,22 @@ function adaptFriendInvite(payload) {
   };
 }
 
+const FacebookAdapter = {
+  FB_ERROR_TYPES,
+  classifyFacebookResponse,
+  adaptGroupMembers,
+  adaptFriendInvite
+};
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.FacebookAdapter = FacebookAdapter;
+}
+if (typeof window !== 'undefined') {
+  window.FacebookAdapter = FacebookAdapter;
+}
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    FacebookAdapter,
     FB_ERROR_TYPES,
     classifyFacebookResponse,
     adaptGroupMembers,
