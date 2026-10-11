@@ -12,11 +12,17 @@ export async function POST(req: NextRequest) {
   try {
     const { licenseKey, requestId, action = "consume" } = await jsonBody(req);
     if (
+      typeof licenseKey !== "string" ||
+      !/^[a-zA-Z0-9_-]{8,80}$/.test(licenseKey.trim())
+    ) {
+      throw new ApiError(400, "INVALID_LICENSE_KEY");
+    }
+    if (
       typeof requestId !== "string" ||
       !/^[a-zA-Z0-9_-]{16,128}$/.test(requestId)
     )
       throw new ApiError(400, "REQUEST_ID_REQUIRED");
-    const ref = await findLicense(licenseKey);
+    const ref = await findLicense(licenseKey.trim());
     const result = await db.runTransaction(
       async (tx) => {
         const license = await tx.get(ref),
@@ -64,6 +70,6 @@ export async function POST(req: NextRequest) {
     );
     return NextResponse.json({ ok: true, data: result });
   } catch (error) {
-    return failure(error);
+    return failure(error, req);
   }
 }
