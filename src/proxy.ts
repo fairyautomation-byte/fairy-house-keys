@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminAuthenticated, getAuthenticatedUser } from "@/lib/auth";
+import { verifyToken } from "@/lib/jwt";
 import { sameOrigin } from "@/lib/security";
+import { ADMIN_COOKIE_NAME, USER_COOKIE_NAME } from "@/lib/auth";
+
+/** Lightweight JWT check for middleware — no Firestore, Edge-safe. */
+async function hasValidToken(req: NextRequest, cookieName: string, role: string) {
+  const value = req.cookies.get(cookieName)?.value;
+  if (!value) return false;
+  const payload = await verifyToken(value);
+  return payload?.role === role;
+}
+
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
   if (path.startsWith("/api/")) {
@@ -22,31 +32,36 @@ export async function proxy(req: NextRequest) {
     if (
       path.startsWith("/admin") &&
       path !== "/admin/login" &&
-      !(await isAdminAuthenticated(req))
+      !(await hasValidToken(req, ADMIN_COOKIE_NAME, "admin"))
     )
       return NextResponse.redirect(new URL("/admin/login", req.url));
-    const user =
+
+    const isUserRoute =
       path.startsWith("/dashboard") ||
       path.startsWith("/checkout") ||
       path === "/login" ||
-      path === "/register"
-        ? await getAuthenticatedUser(req)
-        : null;
-    if (
-      (path.startsWith("/dashboard") || path.startsWith("/checkout")) &&
-      !user
-    )
-      return NextResponse.redirect(new URL("/login", req.url));
-    if ((path === "/login" || path === "/register") && user) {
-      const plan = req.nextUrl.searchParams.get("plan");
-      return NextResponse.redirect(
-        new URL(
-          plan && ["trial", "monthly", "quarterly", "yearly"].includes(plan)
-            ? `/checkout?plan=${plan}`
-            : "/dashboard",
-          req.url,
-        ),
-      );
+      path === "/register";
+
+    if (isUserRoute) {
+      const authenticated = await hasValidToken(req, USER_COOKIE_NAME, "user");
+
+      if (
+        (path.startsWith("/dashboard") || path.startsWith("/checkout")) &&
+        !authenticated
+      )
+        return NextResponse.redirect(new URL("/login", req.url));
+
+      if ((path === "/login" || path === "/register") && authenticated) {
+        const plan = req.nextUrl.searchParams.get("plan");
+        return NextResponse.redirect(
+          new URL(
+            plan && ["trial", "monthly", "quarterly", "yearly"].includes(plan)
+              ? `/checkout?plan=${plan}`
+              : "/dashboard",
+            req.url,
+          ),
+        );
+      }
     }
   } catch {
     return NextResponse.json(
@@ -66,3 +81,4 @@ export const config = {
     "/register",
   ],
 };
+

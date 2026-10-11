@@ -17,8 +17,7 @@ export async function GET(req: NextRequest) {
       db
         .collection("orders")
         .where("user_id", "==", user.uid)
-        .orderBy("created_at", "desc")
-        .limit(20)
+        .limit(50)
         .get(),
     ]);
     if (!account.exists) throw new ApiError(401, "Unauthorized");
@@ -30,7 +29,14 @@ export async function GET(req: NextRequest) {
             view = licenseView(data);
           return { id: doc.id, ...data, ...view, status: view.license_status };
         }),
-        orders: orders.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+        orders: orders.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .sort((a: any, b: any) => {
+            const ta = a.created_at?._seconds ?? (typeof a.created_at === 'number' ? a.created_at / 1000 : 0);
+            const tb = b.created_at?._seconds ?? (typeof b.created_at === 'number' ? b.created_at / 1000 : 0);
+            return tb - ta;
+          })
+          .slice(0, 20),
       },
       { headers: { "Cache-Control": "no-store" } },
     );

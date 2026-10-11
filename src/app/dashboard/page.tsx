@@ -13,20 +13,26 @@ export default function DashboardOverview() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [orderFilter, setOrderFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
 
   useEffect(() => {
     fetch('/api/user/dashboard')
-      .then(res => {
-        if (!res.ok) throw new Error('Unauthorized');
+      .then(async res => {
+        if (res.status === 401 || res.status === 403) {
+          // Thực sự hết phiên → đăng xuất
+          await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+          router.push('/login');
+          return null;
+        }
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || `Lỗi máy chủ (${res.status})`);
+        }
         return res.json();
       })
-      .then(setData)
-      .catch(() => {
-        fetch('/api/auth/login', { method: 'DELETE' }).finally(() => {
-          router.push('/login');
-        });
-      })
+      .then(d => { if (d) setData(d); })
+      .catch(err => setError(err.message || 'Không thể tải dữ liệu'))
       .finally(() => setLoading(false));
   }, [router]);
 
@@ -39,6 +45,25 @@ export default function DashboardOverview() {
           <Skeleton className="lg:col-span-4 h-[260px] w-full rounded-fha-lg" />
         </div>
         <Skeleton className="h-[300px] w-full rounded-fha-lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <div className="text-center">
+          <p className="font-bold text-[var(--fha-text)]">Không thể tải dữ liệu</p>
+          <p className="text-sm text-[var(--fha-text-muted)] mt-1">{error}</p>
+        </div>
+        <Button variant="primary" size="sm" onClick={() => window.location.reload()}>
+          Thử lại
+        </Button>
       </div>
     );
   }
