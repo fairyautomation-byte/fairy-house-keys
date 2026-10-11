@@ -1,5 +1,10 @@
 "use client";
-import { requestId, clearRequest } from "@/lib/client-request";
+import {
+  requestId,
+  clearRequest,
+  paymentIntentId,
+  clearPaymentIntent,
+} from "@/lib/client-request";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -136,14 +141,16 @@ function CheckoutContent() {
 
   // Poll PayOS order status when QR is active
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let active = true;
+    let timerId: NodeJS.Timeout;
 
     if (
       paymentStep === "payos_qr" &&
       payosData?.orderCode &&
       qrState === "pending"
     ) {
-      intervalId = setInterval(async () => {
+      const poll = async () => {
+        if (!active) return;
         try {
           const res = await fetch(
             `/api/payos/check-order?orderCode=${payosData.orderCode}`,
@@ -152,39 +159,45 @@ function CheckoutContent() {
               headers: { "Cache-Control": "no-cache" },
             },
           );
-          if (res.ok) {
+          if (res.ok && active) {
             const data = await res.json();
             if (data.status === "PAID") {
-              clearInterval(intervalId);
               setQrState("checking");
 
               if (data.licenseKey) {
                 setCreatedKey(data.licenseKey);
                 setQrState("success");
                 setPaymentStep("success");
-                clearRequest("payos:" + selectedPlanId);
+                clearPaymentIntent("purchase", selectedPlanId);
                 toastSuccess("Thanh toán thành công. Key đã được kích hoạt.");
+                return;
               } else {
                 setError(
                   "Tiền đã được ghi nhận nhưng chưa cấp key. Vui lòng kiểm tra ví hoặc liên hệ hỗ trợ.",
                 );
                 setQrState("failed");
+                return;
               }
             } else if (
               ["CANCELED", "CANCELLED", "EXPIRED"].includes(data.status)
             ) {
               setQrState("expired");
-              clearInterval(intervalId);
+              return;
             }
           }
         } catch (pollErr) {
-          console.error("Polling error:", pollErr);
+          console.warn("Checkout polling warning:", pollErr);
         }
-      }, 3000);
+        if (active) {
+          timerId = setTimeout(poll, 3000);
+        }
+      };
+      timerId = setTimeout(poll, 3000);
     }
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      active = false;
+      if (timerId) clearTimeout(timerId);
     };
   }, [paymentStep, payosData, qrState, selectedPlanId, toastSuccess]);
 
@@ -249,7 +262,7 @@ function CheckoutContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planId: selectedPlanId,
-          requestId: requestId("payos:" + selectedPlanId),
+          requestId: paymentIntentId("purchase", selectedPlanId),
           description: `FH ${selectedPlanId}`,
         }),
       });
@@ -282,7 +295,7 @@ function CheckoutContent() {
           accountNumber: data.accountNumber,
           accountName: data.accountName,
         },
-        timeLeft: 300,
+        timeLeft: data.timeLeft ?? 300,
         checkoutUrl: data.checkoutUrl,
       });
       setQrState("pending");

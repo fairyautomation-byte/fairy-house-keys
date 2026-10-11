@@ -3,7 +3,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { payos } from "@/lib/payos";
 import { db } from "@/lib/firebase";
 import { getAuthenticatedUser } from "@/lib/auth";
-import { validPlan, planIds } from "@/lib/order-service";
+import { validPlan, planIds, settlePayment } from "@/lib/order-service";
 import {
   jsonBody,
   failure,
@@ -85,41 +85,104 @@ export async function POST(req: NextRequest) {
       },
       { maxAttempts: 20 },
     );
-    if (result.payment) return NextResponse.json(result.payment);
-    // Provider uses the reserved code, so retries can recover the same payment instead of creating another.
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (result.payment) {
+      if (result.payment.expiredAt && result.payment.expiredAt <= nowSec) {
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(ref);
+          if (["CREATING", "PENDING"].includes(snap.data()?.status)) {
+            tx.update(ref, { status: "EXPIRED", expired_at: new Date() });
+          }
+        });
+        throw new ApiError(
+          410,
+          "PAYMENT_LINK_EXPIRED",
+          "Liên kết thanh toán đã hết hạn. Vui lòng tạo yêu cầu mới.",
+          undefined,
+          false,
+        );
+      }
+      return NextResponse.json({
+        ...result.payment,
+        timeLeft: Math.max(
+          0,
+          (result.payment.expiredAt || nowSec + 300) - nowSec,
+        ),
+      });
+    }
+
+    const expirySec = nowSec + 300;
     const paymentData = {
       orderCode: result.payosOrderCode,
       amount: result.amount,
-      description: String(result.payosOrderCode),
+      description: String(result.payosOrderCode).slice(0, 25),
       returnUrl: `${origin}${plan ? "/dashboard/licenses" : "/dashboard/wallet"}`,
       cancelUrl: `${origin}${plan ? "/checkout" : "/dashboard/wallet"}`,
-      expiredAt: Math.floor(Date.now() / 1000) + 300,
+      expiredAt: expirySec,
     };
-    let link;
+    let link: any;
     try {
       link = await payos.createPaymentLink(paymentData);
     } catch {
-      link = await payos.getPaymentLinkInformation(result.payosOrderCode);
-      if (!(link as any).checkoutUrl || !(link as any).qrCode)
-        throw new ApiError(503, "PAYMENT_LINK_RETRY_REQUIRED");
+      try {
+        const info = await payos.getPaymentLinkInformation(
+          result.payosOrderCode,
+        );
+        if (info && info.status === "PAID") {
+          await settlePayment(
+            result.payosOrderCode,
+            result.amount,
+            `create-recovery:${result.payosOrderCode}`,
+          );
+          return NextResponse.json({
+            orderCode: result.payosOrderCode,
+            status: "PAID",
+            amount: result.amount,
+          });
+        }
+        if (info && ((info as any).checkoutUrl || (info as any).qrCode)) {
+          link = info;
+        } else {
+          throw new ApiError(
+            503,
+            "PAYMENT_GATEWAY_UNAVAILABLE",
+            "Không thể tạo liên kết thanh toán. Vui lòng thử lại sau.",
+            3,
+            true,
+          );
+        }
+      } catch (recErr: any) {
+        if (recErr instanceof ApiError) throw recErr;
+        throw new ApiError(
+          503,
+          "PAYMENT_GATEWAY_TIMEOUT",
+          "Cổng thanh toán phản hồi chậm. Vui lòng thử lại sau.",
+          3,
+          true,
+        );
+      }
     }
+
     const payment = {
-      checkoutUrl: (link as any).checkoutUrl,
-      qrCode: (link as any).qrCode,
+      checkoutUrl: link.checkoutUrl || "",
+      qrCode: link.qrCode || "",
       orderCode: result.payosOrderCode,
-      bin: (link as any).bin,
-      accountNumber: (link as any).accountNumber,
-      accountName: (link as any).accountName,
+      bin: link.bin,
+      accountNumber: link.accountNumber,
+      accountName: link.accountName,
       amount: result.amount,
-      description: (link as any).description || String(result.payosOrderCode),
+      description: link.description || String(result.payosOrderCode),
       transactionCode: result.transactionCode,
+      expiredAt: expirySec,
+      timeLeft: Math.max(0, expirySec - Math.floor(Date.now() / 1000)),
     };
     await db.runTransaction(
       async (tx) => {
         const current = await tx.get(ref);
         tx.update(ref, {
           payment,
-          paymentLinkId: (link as any).paymentLinkId || "",
+          paymentLinkId: link.paymentLinkId || "",
+          expires_at: new Date(expirySec * 1000),
           ...(current.data()?.status === "CREATING"
             ? { status: "PENDING" }
             : {}),
@@ -129,6 +192,6 @@ export async function POST(req: NextRequest) {
     );
     return NextResponse.json(payment);
   } catch (error) {
-    return failure(error);
+    return failure(error, req);
   }
 }

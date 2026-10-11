@@ -1,5 +1,10 @@
 "use client";
-import { requestId, clearRequest } from "@/lib/client-request";
+import {
+  requestId,
+  clearRequest,
+  paymentIntentId,
+  clearPaymentIntent,
+} from "@/lib/client-request";
 import { useState, useEffect } from "react";
 import PageHeader from "@/components/layout/PageHeader";
 import Card from "@/components/ui/Card";
@@ -32,12 +37,14 @@ export default function WalletPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Poll for payment status
+  // Poll for payment status sequentially to avoid overlapping requests
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let active = true;
+    let timerId: NodeJS.Timeout;
 
     if (paymentState === "pending" && transactionInfo?.orderCode) {
-      intervalId = setInterval(async () => {
+      const poll = async () => {
+        if (!active) return;
         try {
           const res = await fetch(
             `/api/payos/check-order?orderCode=${transactionInfo.orderCode}`,
@@ -46,32 +53,37 @@ export default function WalletPage() {
               headers: { "Cache-Control": "no-cache" },
             },
           );
-          if (res.ok) {
+          if (res.ok && active) {
             const data = await res.json();
             if (data.status === "PAID") {
               setPaymentState("success");
               const dashboard = await fetch("/api/user/dashboard", {
                 cache: "no-store",
-              }).then((res) => res.json());
+              }).then((r) => r.json());
               setBalance(dashboard.user?.wallet_balance || 0);
-              clearRequest("deposit");
+              clearPaymentIntent("deposit", transactionInfo.amount);
               toastSuccess("Nạp tiền vào ví thành công!");
-              clearInterval(intervalId);
+              return;
             } else if (
               ["CANCELED", "CANCELLED", "EXPIRED"].includes(data.status)
             ) {
               setPaymentState("expired");
-              clearInterval(intervalId);
+              return;
             }
           }
         } catch (error) {
-          console.error("Polling error:", error);
+          console.warn("Polling error:", error);
         }
-      }, 3000);
+        if (active) {
+          timerId = setTimeout(poll, 3000);
+        }
+      };
+      timerId = setTimeout(poll, 3000);
     }
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      active = false;
+      if (timerId) clearTimeout(timerId);
     };
   }, [paymentState, transactionInfo, toastSuccess]);
 
@@ -94,7 +106,7 @@ export default function WalletPage() {
         },
         body: JSON.stringify({
           amount: amount,
-          requestId: requestId("deposit"),
+          requestId: paymentIntentId("deposit", amount),
         }),
       });
 
@@ -127,7 +139,7 @@ export default function WalletPage() {
           accountNumber: data.accountNumber,
           accountName: data.accountName,
         },
-        timeLeft: 300,
+        timeLeft: data.timeLeft ?? 300,
       });
       setPaymentState("pending");
     } catch (err: any) {

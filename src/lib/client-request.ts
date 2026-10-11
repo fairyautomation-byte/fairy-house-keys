@@ -11,3 +11,18 @@ export function requestId(scope: string) {
 export function clearRequest(scope: string) {
   sessionStorage.removeItem(`fh-request:${scope}`);
 }
+
+export function paymentIntentId(
+  type: "deposit" | "purchase",
+  identifier: string | number,
+) {
+  return requestId(`payment:${type}:${identifier}`);
+}
+
+export function clearPaymentIntent(
+  type: "deposit" | "purchase",
+  identifier: string | number,
+) {
+  clearRequest(`payment:${type}:${identifier}`);
+}
+

@@ -1,5 +1,8 @@
 import PayOS from "@payos/node";
 let client: PayOS | undefined;
+export function setPayosClient(mockClient?: PayOS) {
+  client = mockClient;
+}
 export const payos: PayOS = new Proxy({} as PayOS, {
   get(_, property) {
     if (!client) {
