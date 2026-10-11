@@ -108,6 +108,31 @@ function classifyFacebookResponse(rawText, httpStatus = 200) {
       };
     }
 
+    // Lỗi field_exception của Facebook GraphQL khi đối phương khóa kết bạn / đủ 5000 bạn
+    if (msg.includes('field_exception') || msg.includes('field exception') || (msg.includes('server error') && msg.includes('server logs'))) {
+      return {
+        type: FB_ERROR_TYPES.UNKNOWN_ERROR,
+        message: 'Đối phương cài đặt quyền riêng tư không nhận kết bạn từ người lạ (chỉ nhận bạn chung) hoặc đã đủ 5.000 bạn bè.',
+        retryable: false
+      };
+    }
+
+    if (msg.includes('friend limit') || msg.includes('5000')) {
+      return {
+        type: FB_ERROR_TYPES.UNKNOWN_ERROR,
+        message: 'Không thể kết bạn: Đối phương hoặc tài khoản của bạn đã đạt giới hạn tối đa 5.000 bạn bè.',
+        retryable: false
+      };
+    }
+
+    if (msg.includes('cannot_request') || msg.includes('cannot request') || msg.includes('cannot add')) {
+      return {
+        type: FB_ERROR_TYPES.UNKNOWN_ERROR,
+        message: 'Đối phương cài đặt quyền riêng tư không nhận lời mời kết bạn từ người lạ.',
+        retryable: false
+      };
+    }
+
     return {
       type: FB_ERROR_TYPES.UNKNOWN_ERROR,
       message: firstErr.message || 'Lỗi yêu cầu từ Facebook.',
@@ -164,11 +189,15 @@ function adaptFriendInvite(payload) {
   const requestee = Array.isArray(result?.friend_requestees) ? result.friend_requestees[0] : null;
   const status = requestee?.friendship_status || '';
   const ok = status === 'OUTGOING_REQUEST' || status === 'ARE_FRIENDS' || status === 'CAN_REQUEST';
+  let viDesc = '';
+  if (status === 'CANNOT_REQUEST') viDesc = ' (Đối phương chặn kết bạn từ người lạ)';
+  else if (status === 'ARE_FRIENDS') viDesc = ' (Đã là bạn bè)';
+  else if (status === 'OUTGOING_REQUEST') viDesc = ' (Đang chờ đồng ý)';
   return {
     ok,
     status: ok ? 'success' : 'failed',
     friendship_status: status,
-    message: ok ? 'Đã gửi lời mời kết bạn thành công.' : `Trạng thái: ${status || 'Không xác định'}`
+    message: ok ? 'Đã gửi lời mời kết bạn thành công.' : `Trạng thái: ${status || 'Không xác định'}${viDesc}`
   };
 }
 

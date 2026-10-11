@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import { MockFirestore } from "./helpers/mock-firestore";
 import { setDatabaseInstance } from "../src/lib/firebase";
 import { POST as phonesHandler } from "../src/app/api/license/phones/route";
-import { consumeQuota, refundSystemQuota } from "../src/lib/license-service";
+import { consumeQuota, refundSystemQuota, vietnamDay } from "../src/lib/license-service";
 
 const mockDb = new MockFirestore();
 
@@ -29,7 +29,7 @@ test("A04: same requestId with different UIDs rejects with 409 REQUEST_ID_CONFLI
     daily_limit: 100,
     daily_used: 0,
     total_scans: 0,
-    last_reset_date: "2026-10-11",
+    last_reset_date: vietnamDay(),
   });
 
   // Mock global fetch to return success for db1
@@ -93,7 +93,7 @@ test("A04: identical UIDs in different order reuse normalized fingerprint and re
     daily_limit: 100,
     daily_used: 0,
     total_scans: 0,
-    last_reset_date: "2026-10-11",
+    last_reset_date: vietnamDay(),
   });
 
   let fetchCount = 0;
@@ -164,7 +164,7 @@ test("A03 & A04: system failure rolls back quota and marks receipt FAILED", asyn
     daily_limit: 50,
     daily_used: 10,
     total_scans: 10,
-    last_reset_date: "2026-10-11",
+    last_reset_date: vietnamDay(),
   });
 
   const originalFetch = global.fetch;
@@ -213,7 +213,7 @@ test("R02: retry after refund recharges quota atomically instead of returning fr
     daily_limit: 100,
     daily_used: 0,
     total_scans: 0,
-    last_reset_date: "2026-10-11",
+    last_reset_date: vietnamDay(),
   });
 
   const originalFetch = global.fetch;
@@ -326,7 +326,7 @@ test("R04: worker with lost/expired lease is fenced and cannot overwrite active 
     daily_limit: 100,
     daily_used: 1,
     total_scans: 1,
-    last_reset_date: "2026-10-11",
+    last_reset_date: vietnamDay(),
   });
 
   const requestId = "req-r04-fence-12345678";
@@ -378,7 +378,7 @@ test("L2-01: atomic rollbackPhoneFailure prevents refunding subsequent retry and
     daily_limit: 100,
     daily_used: 0,
     total_scans: 0,
-    last_reset_date: "2026-10-11",
+    last_reset_date: vietnamDay(),
   });
 
   const requestId = "req-l2-01-race-12345678";

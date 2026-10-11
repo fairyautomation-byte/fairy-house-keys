@@ -53,20 +53,29 @@ export async function POST(req: NextRequest) {
             : candidate;
         const snap = await tx.get(userRef),
           user = snap.data();
+        const isDeleted = snap.exists && user?.status === "DELETED";
         if (
           snap.exists &&
+          !isDeleted &&
           (user!.email_verified === true ||
             !activeUser(user) ||
-            user!.status === "DELETED" ||
             (user!.wallet_balance || 0) > 0 ||
             user!.trial_used)
         )
-          throw new ApiError(409, "EMAIL_ALREADY_EXISTS");
+          throw new ApiError(
+            409,
+            "EMAIL_ALREADY_EXISTS",
+            "Email này đã được đăng ký tài khoản. Vui lòng đăng nhập hoặc dùng chức năng quên mật khẩu."
+          );
         // A repeated signup must not replace a pending account's password while
         // its original email OTP is still valid.
-        if (snap.exists) {
+        if (snap.exists && !isDeleted) {
           if (!(await verifyPassword(password, user!.password)))
-            throw new ApiError(409, "EMAIL_ALREADY_EXISTS", "Email đã đăng ký. Vui lòng đăng nhập bằng mật khẩu đã tạo.");
+            throw new ApiError(
+              409,
+              "EMAIL_ALREADY_EXISTS",
+              "Email này đang chờ kích hoạt. Vui lòng kiểm tra email để nhập mã OTP hoặc đăng nhập bằng mật khẩu đã tạo."
+            );
           tx.set(reservation, { uid: userRef.id, email: normalized });
           return;
         }
@@ -76,12 +85,13 @@ export async function POST(req: NextRequest) {
           email: normalized,
           zalo: zalo.trim(),
           password: hashed,
+          status: "ACTIVE",
           role: "USER",
           email_verified: false,
           auth_version: (user?.auth_version || 0) + 1,
-          created_at: user?.created_at || new Date(),
-          wallet_balance: user?.wallet_balance || 0,
-          trial_used: user?.trial_used || false,
+          created_at: new Date(),
+          wallet_balance: 0,
+          trial_used: false,
         });
       },
       { maxAttempts: 20 },

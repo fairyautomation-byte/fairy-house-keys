@@ -2797,6 +2797,38 @@
     } catch (_) {}
   }
 
+  function humanizeInviteError(rawMsg) {
+    if (!rawMsg) return 'Facebook từ chối gửi lời mời';
+    const str = String(rawMsg);
+    const lower = str.toLowerCase();
+
+    if (lower.includes('field_exception') || lower.includes('field exception') || (lower.includes('server error') && lower.includes('server logs'))) {
+      return 'Đối phương chặn kết bạn từ người lạ (chỉ nhận bạn chung) hoặc đã đủ 5.000 bạn bè';
+    }
+    if (lower.includes('cannot_request') || lower.includes('cannot request') || lower.includes('cannot add')) {
+      return 'Đối phương cài đặt riêng tư không nhận kết bạn từ người lạ';
+    }
+    if (lower.includes('temporarily blocked') || lower.includes('chặn tạm thời') || lower.includes('368')) {
+      return 'Nick của bạn đang bị Facebook tạm chặn tính năng kết bạn do gửi quá nhanh';
+    }
+    if (lower.includes('rate limit') || lower.includes('1341012') || lower.includes('429')) {
+      return 'Facebook giới hạn tần suất gửi, vui lòng tăng thời gian chờ';
+    }
+    if (lower.includes('friend limit') || lower.includes('5000')) {
+      return 'Đối phương hoặc bạn đã đạt tối đa 5.000 bạn bè';
+    }
+    if (lower.includes('are_friends') || lower.includes('already friends')) {
+      return 'Đã là bạn bè trước đó';
+    }
+    if (lower.includes('outgoing_request') || lower.includes('already sent')) {
+      return 'Đã có lời mời gửi trước đó đang chờ duyệt';
+    }
+    if (lower.includes('session expired') || lower.includes('login_required') || lower.includes('hết phiên')) {
+      return 'Phiên đăng nhập Facebook hết hạn, vui lòng F5 trang Facebook';
+    }
+    return str;
+  }
+
   async function runInviteProcess() {
     const uids = Array.from(selectedUids);
     if (!uids.length) {
@@ -2919,7 +2951,7 @@
           });
         } else {
           inviteStats.failed += 1;
-          const msg = (res && res.message) || 'Facebook từ chối';
+          const msg = humanizeInviteError((res && res.message) || 'Facebook từ chối');
           pushInviteLog('Thất bại: ' + targetName + ' - ' + msg, 'error');
           await ztServerInviteQuota('consume', {
             facebook_uid: actorUid,
@@ -2929,7 +2961,7 @@
           });
         }
       } catch (err) {
-        const msg = err && err.message ? String(err.message) : 'Lỗi không xác định';
+        const msg = humanizeInviteError(err && err.message ? String(err.message) : 'Lỗi không xác định');
         inviteStats.failed += 1;
         pushInviteLog('Thất bại: ' + targetName + ' - ' + msg, 'error');
         try {

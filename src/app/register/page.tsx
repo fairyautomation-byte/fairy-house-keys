@@ -73,11 +73,55 @@ function RegisterContent() {
       title="Tạo Tài Khoản Mới"
       subtitle="Đăng ký tài khoản để nhận Key dùng thử 3 Ngày và trải nghiệm Extension"
     >
-      {error && (
-        <Alert variant="danger">
-          {error}
-        </Alert>
-      )}
+      {error && (() => {
+        const isEmailExisting =
+          error === 'EMAIL_ALREADY_EXISTS' ||
+          error.toLowerCase().includes('email đã đăng ký') ||
+          error.toLowerCase().includes('email này đã') ||
+          error.toLowerCase().includes('đã tồn tại') ||
+          error.toLowerCase().includes('chờ kích hoạt');
+
+        const displayError =
+          error === 'EMAIL_ALREADY_EXISTS'
+            ? 'Địa chỉ email này đã được đăng ký tài khoản trên hệ thống.'
+            : error === 'RATE_LIMIT_EXCEEDED'
+            ? 'Bạn đã thao tác đăng ký quá nhiều lần. Vui lòng đợi ít phút rồi thử lại.'
+            : error;
+
+        return (
+          <div className="p-4 rounded-fha border border-rose-200 bg-rose-50 text-rose-800 text-sm space-y-2.5">
+            <div className="font-semibold flex items-start gap-2.5">
+              <svg className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span className="leading-relaxed">{displayError}</span>
+            </div>
+
+            {isEmailExisting && (
+              <div className="pt-1 flex flex-wrap gap-2 text-xs">
+                <Link
+                  href={`/login?email=${encodeURIComponent(form.email)}${returnPath ? `&next=${encodeURIComponent(returnPath)}` : ''}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-600 text-white rounded font-bold hover:bg-rose-700 transition-colors shadow-sm"
+                >
+                  👉 Đăng Nhập Ngay
+                </Link>
+                <Link
+                  href={`/verify-otp?email=${encodeURIComponent(form.email)}${returnPath ? `&next=${encodeURIComponent(returnPath)}` : ''}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-rose-300 text-rose-800 rounded font-semibold hover:bg-rose-100 transition-colors"
+                >
+                  Nhập mã OTP kích hoạt
+                </Link>
+                <Link
+                  href={`/forgot-password?email=${encodeURIComponent(form.email)}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-rose-300 text-rose-800 rounded font-semibold hover:bg-rose-100 transition-colors"
+                >
+                  Quên mật khẩu?
+                </Link>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input

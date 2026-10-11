@@ -13,28 +13,36 @@ interface ModalProps {
 
 export default function Modal({ open, onClose, title, children, footer, size = 'md' }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current();
     };
     
     if (open) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
-      // Basic focus trap - focus modal on open
-      setTimeout(() => {
-        if (modalRef.current) modalRef.current.focus();
-      }, 10);
+      // Focus modal container once on initial open if an inner child is not already active
+      if (!wasOpenRef.current) {
+        setTimeout(() => {
+          if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+            modalRef.current.focus();
+          }
+        }, 10);
+      }
     } else {
       document.body.style.overflow = '';
     }
+    wasOpenRef.current = open;
     
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

@@ -121,3 +121,19 @@ test('A13: handles malformed JSON response safely as SCHEMA_MISMATCH', () => {
   const result = classifyFacebookResponse(brokenPayload, 200);
   assert.equal(result.type, FB_ERROR_TYPES.SCHEMA_MISMATCH);
 });
+
+test('A13: humanizes Facebook GraphQL field_exception with clear Vietnamese explanation', () => {
+  const fieldExceptionResponse = JSON.stringify({
+    errors: [
+      {
+        message: 'A server error field_exception occured. Check server logs for details.',
+        severity: 'CRITICAL',
+        code: 1404104
+      }
+    ]
+  });
+  const result = classifyFacebookResponse(fieldExceptionResponse, 200);
+  assert.equal(result.type, FB_ERROR_TYPES.UNKNOWN_ERROR);
+  assert.ok(result.message.includes('quyền riêng tư') || result.message.includes('5.000 bạn bè'));
+  assert.equal(result.message.includes('Check server logs'), false);
+});

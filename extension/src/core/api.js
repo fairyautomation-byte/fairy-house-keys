@@ -229,10 +229,19 @@ const PushGroupAPI = {
     const errors = Array.isArray(payload && payload.errors) ? payload.errors : [];
     if (errors.length) {
       const err = errors[0] || {};
+      let msg = String(err.message || 'Facebook từ chối lời mời');
+      const lower = msg.toLowerCase();
+      if (lower.includes('field_exception') || lower.includes('field exception') || (lower.includes('server error') && lower.includes('server logs'))) {
+        msg = 'Đối phương cài đặt quyền riêng tư không nhận kết bạn từ người lạ (chỉ nhận bạn chung) hoặc đã đủ 5.000 bạn bè';
+      } else if (lower.includes('cannot_request') || lower.includes('cannot request') || lower.includes('cannot add')) {
+        msg = 'Đối phương không nhận kết bạn từ người lạ';
+      } else if (lower.includes('friend limit') || lower.includes('5000')) {
+        msg = 'Đối phương hoặc bạn đã đạt tối đa 5.000 bạn bè';
+      }
       return {
         success: false,
         status: 'failed',
-        message: String(err.message || 'Facebook từ chối lời mời'),
+        message: msg,
         code: err.code != null ? Number(err.code) : null
       };
     }
@@ -249,7 +258,15 @@ const PushGroupAPI = {
     return {
       success: !!ok,
       status: ok ? 'success' : 'failed',
-      message: ok ? 'Đã gửi lời mời thành công' : status ? ('Trạng thái: ' + status) : 'Facebook không xác nhận gửi lời mời',
+      message: ok
+        ? 'Đã gửi lời mời thành công'
+        : status === 'CANNOT_REQUEST'
+        ? 'Đối phương cài đặt không nhận lời mời từ người lạ'
+        : status === 'ARE_FRIENDS'
+        ? 'Đã là bạn bè trước đó'
+        : status
+        ? ('Trạng thái: ' + status)
+        : 'Facebook không xác nhận gửi lời mời',
       friendship_status: status || ''
     };
   },
