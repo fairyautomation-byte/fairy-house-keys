@@ -46,7 +46,7 @@ export default async function Home() {
               <h1 className="text-2xl sm:text-3xl lg:text-[28px] xl:text-[36px] 2xl:text-[44px] 3xl:text-5xl font-black tracking-tight text-[var(--fha-text)] leading-[1.18]">
                 Quét Khách Hàng Facebook Tự Động.{' '}
                 <span className="text-[var(--fha-brand)]">
-                  Không Lo Checkpoint.
+                  Giãn Cách An Toàn.
                 </span>
               </h1>
 
@@ -121,7 +121,7 @@ export default async function Home() {
             </div>
             <div className="p-3 3xl:p-4">
               <div className="text-2xl sm:text-3xl 3xl:text-4xl 4xl:text-5xl font-black font-mono text-[var(--fha-success)] tracking-tight">99.8%</div>
-              <div className="text-xs 3xl:text-sm font-semibold uppercase tracking-wider text-[var(--fha-text-muted)] mt-1.5">Không Checkpoint Nick</div>
+              <div className="text-xs 3xl:text-sm font-semibold uppercase tracking-wider text-[var(--fha-text-muted)] mt-1.5">Uptime Máy Chủ Xác Thực</div>
             </div>
             <div className="p-3 3xl:p-4">
               <div className="text-2xl sm:text-3xl 3xl:text-4xl 4xl:text-5xl font-black font-mono text-[var(--fha-brand)] tracking-tight">5 Giây</div>

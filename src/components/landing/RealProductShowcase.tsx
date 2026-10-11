@@ -44,7 +44,7 @@ const SHOWCASE_ITEMS: ShowcaseItem[] = [
     meta: 'Delay thông minh: 23s',
     title: 'Auto Kết Bạn Với Terminal Log & Giãn Cách An Toàn',
     desc: 'Tiến trình tự động gửi lời mời kết bạn có bộ đếm thời gian ngẫu nhiên mô phỏng người dùng thật. Màn hình console đen hiển thị chi tiết từng lượt gửi thành công.',
-    points: ['Mô phỏng hành vi Human-Emulation', 'Nhật ký Terminal log thời gian thực', 'Triệt tiêu nguy cơ Checkpoint nick']
+    points: ['Mô phỏng hành vi Human-Emulation', 'Nhật ký Terminal log thời gian thực', 'Giảm thiểu tối đa nguy cơ Checkpoint nick']
   },
   {
     id: 4,

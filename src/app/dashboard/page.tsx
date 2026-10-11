@@ -294,7 +294,7 @@ export default function DashboardOverview() {
             <span>Cơ chế bảo mật: Cookie nội bộ Chrome • Không thu thập mật khẩu Facebook</span>
             <span className="font-semibold text-[var(--fha-success)] flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--fha-success)] animate-pulse" />
-              Chống checkpoint 2.0 ON
+              Giãn cách an toàn 2.0 ON
             </span>
           </div>
         </div>

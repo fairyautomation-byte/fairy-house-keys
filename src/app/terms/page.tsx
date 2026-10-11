@@ -81,9 +81,9 @@ export default async function TermsPage() {
                 Để bảo vệ quyền lợi người mua chính hãng và chống phân phối lậu, mỗi License Key được tạo theo định dạng chuẩn <code className="px-1.5 py-0.5 rounded bg-[var(--fha-surface-2)] font-mono text-xs text-[var(--fha-text)] border border-[var(--fha-border)]">FHAD-XXXX-XXXX-XXXX-XXXX</code> và tuân theo nguyên tắc:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
-                <li><strong className="text-[var(--fha-text)]">Ràng buộc 1 Key / 1 Thiết bị:</strong> Key sau khi kích hoạt lần đầu trên Chrome Extension sẽ được khóa chặt chẽ với dấu vân tay phần cứng (Hardware Fingerprint) của máy đó.</li>
-                <li><strong className="text-[var(--fha-text)]">Không chia sẻ công khai:</strong> Việc chia sẻ Key cho người khác dẫn đến việc kích hoạt trên máy thứ hai sẽ bị hệ thống tự động khóa bảo vệ vĩnh viễn mà không hoàn tiền.</li>
-                <li><strong className="text-[var(--fha-text)]">Đổi máy (Cài lại Win / Thay máy mới):</strong> Khách hàng được hỗ trợ reset thiết bị 01 lần/tháng qua kênh Zalo CSKH chính thức bằng cách xác minh email đăng ký ban đầu.</li>
+                <li><strong className="text-[var(--fha-text)]">Ràng buộc 1 Key / 1 Thiết bị:</strong> Key sau khi kích hoạt lần đầu trên Chrome Extension sẽ được khóa với phiên cài đặt độc quyền (Installation Session Token) của trình duyệt đó.</li>
+                <li><strong className="text-[var(--fha-text)]">Không chia sẻ công khai:</strong> Việc kích hoạt Key trên trình duyệt khác khi chưa đăng xuất khỏi máy cũ sẽ bị từ chối truy cập.</li>
+                <li><strong className="text-[var(--fha-text)]">Đổi máy (Cài lại Win / Thay máy mới):</strong> Khách hàng có thể đăng xuất trực tiếp trên tiện ích cũ để giải phóng liên kết, hoặc liên hệ qua kênh Zalo CSKH chính thức để được hỗ trợ chuyển đổi thiết bị nhanh chóng.</li>
               </ul>
             </div>
           </section>

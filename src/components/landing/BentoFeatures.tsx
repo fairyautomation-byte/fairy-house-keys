@@ -36,7 +36,7 @@ export default function BentoFeatures() {
                 Mô Phỏng Hành Vi Người Thật (Human-Emulation)
               </h3>
               <p className="text-sm text-[var(--fha-text-muted)] mt-2.5 leading-relaxed max-w-xl">
-                Cơ chế tự động phân bổ độ trễ thông minh (15s – 45s ngẫu nhiên) cùng giả lập chuyển động cuộn trang. Facebook nhận diện đây là thao tác thủ công của người dùng, <strong className="text-[var(--fha-text)]">triệt tiêu nguy cơ checkpoint hoặc khoá tài khoản</strong>.
+                Cơ chế tự động phân bổ độ trễ thông minh (15s – 45s ngẫu nhiên) cùng giả lập chuyển động cuộn trang. Facebook nhận diện đây là thao tác thủ công của người dùng, <strong className="text-[var(--fha-text)]">giúp giảm thiểu tối đa nguy cơ bị hạn chế tính năng hoặc checkpoint tài khoản</strong>.
               </p>
             </div>
 
@@ -44,7 +44,7 @@ export default function BentoFeatures() {
             <div className="mt-8 pt-6 border-t border-[var(--fha-border)] bg-[var(--fha-surface-2)] p-4 rounded-fha border border-[var(--fha-border)] space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-[var(--fha-text)]">Mức độ an toàn tài khoản</span>
-                <span className="font-bold text-[var(--fha-success)] font-mono">99.8% Tối Ưu</span>
+                <span className="font-bold text-[var(--fha-success)] font-mono">Tối Ưu An Toàn</span>
               </div>
               <div className="w-full h-2.5 bg-white rounded-full overflow-hidden border border-[var(--fha-border)]">
                 <div className="h-full bg-gradient-to-r from-[var(--fha-brand)] to-[var(--fha-success)] rounded-full w-[98%]" />

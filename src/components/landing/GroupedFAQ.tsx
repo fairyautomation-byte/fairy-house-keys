@@ -14,12 +14,12 @@ const FAQS: FAQItem[] = [
   {
     category: 'license',
     q: '1 License Key có thể dùng cùng lúc trên nhiều máy tính không?',
-    a: 'Không. Để đảm bảo tính ổn định và bảo mật cao nhất, mỗi License Key được mã hoá gắn liền với mã định danh phần cứng (Hardware ID) của đúng 1 thiết bị. Nếu bạn có nhu cầu cho nhiều nhân viên, vui lòng mua số lượng Key tương ứng.'
+    a: 'Không. Để đảm bảo tính ổn định và bảo mật cao nhất, mỗi License Key được mã hoá gắn liền với phiên cài đặt độc quyền (Installation Session Token) của đúng 1 trình duyệt. Nếu bạn có nhu cầu cho nhiều nhân viên, vui lòng mua số lượng Key tương ứng.'
   },
   {
     category: 'license',
     q: 'Nếu tôi đổi máy tính mới hoặc cài lại Win thì có được chuyển Key không?',
-    a: 'Có. Chúng tôi hỗ trợ reset định danh phần cứng 1 lần/tháng miễn phí. Bạn chỉ cần liên hệ Zalo hỗ trợ kỹ thuật kèm thông tin tài khoản để được kỹ thuật viên hỗ trợ chuyển máy nhanh chóng.'
+    a: 'Có. Bạn có thể đăng xuất trực tiếp trên tiện ích ở thiết bị cũ để giải phóng liên kết, hoặc liên hệ Zalo hỗ trợ kỹ thuật để được hỗ trợ chuyển đổi thiết bị nhanh chóng.'
   },
   {
     category: 'license',
@@ -36,7 +36,7 @@ const FAQS: FAQItem[] = [
   {
     category: 'tech',
     q: 'Cơ chế Human-Emulation 2.0 chống khoá nick Facebook hoạt động như thế nào?',
-    a: 'Hệ thống tự động chèn các khoảng nghỉ ngẫu nhiên (15s - 45s) giữa các lần quét và tự động mô phỏng thao tác cuộn trang của người dùng thật. Điều này khiến thuật toán bảo mật của Facebook xem đây là thao tác thủ công, tránh triệt để tình trạng checkpoint.'
+    a: 'Hệ thống tự động chèn các khoảng nghỉ ngẫu nhiên (15s - 45s) giữa các lần quét và tự động mô phỏng thao tác cuộn trang của người dùng thật. Điều này giúp giảm thiểu tối đa nguy cơ bị thuật toán Facebook hạn chế hành động hoặc hỏi checkpoint do gửi yêu cầu quá nhanh.'
   },
   {
     category: 'tech',

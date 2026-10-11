@@ -14,7 +14,12 @@ export async function GET(req: NextRequest) {
     const [account, licenses, orders] = await Promise.all([
       db.collection("users").doc(user.uid).get(),
       db.collection("licenses").where("user_id", "==", user.uid).get(),
-      db.collection("orders").where("user_id", "==", user.uid).get(),
+      db
+        .collection("orders")
+        .where("user_id", "==", user.uid)
+        .orderBy("created_at", "desc")
+        .limit(20)
+        .get(),
     ]);
     if (!account.exists) throw new ApiError(401, "Unauthorized");
     return NextResponse.json(

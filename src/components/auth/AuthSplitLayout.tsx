@@ -41,10 +41,10 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
               Tiện Ích Số 1 Tiếp Cận Khách Hàng
             </span>
             <h2 className="text-3xl 3xl:text-4xl font-black text-[var(--fha-text)] tracking-tight leading-snug">
-              Tự Động Hóa Quét UID Khách Hàng. Chống Checkpoint Tuyệt Đối.
+              Tự Động Hóa Quét UID Khách Hàng. Cơ Chế Giãn Cách & Bảo Vệ Tài Khoản.
             </h2>
             <p className="text-sm 3xl:text-base text-[var(--fha-text-muted)] leading-relaxed">
-              Hệ thống bản quyền 1 Key / 1 Thiết bị với công nghệ mô phỏng hành vi người thật Human-Emulation 2.0. Kích hoạt tự động tức thì qua PayOS.
+              Hệ thống bản quyền 1 Key / 1 Thiết bị với công nghệ mô phỏng hành vi ngẫu nhiên an toàn. Kích hoạt tự động tức thì qua PayOS.
             </p>
           </div>
 
@@ -55,8 +55,8 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
               <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Xử lý tự động mỗi ngày</div>
             </div>
             <div className="bg-white p-3.5 3xl:p-4 rounded-fha border border-[var(--fha-border)] shadow-fha-sm">
-              <div className="text-lg 3xl:text-xl font-black font-mono text-[var(--fha-success)]">99.8% An toàn</div>
-              <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Không bị checkpoint nick</div>
+              <div className="text-lg 3xl:text-xl font-black font-mono text-[var(--fha-success)]">99.8% Uptime</div>
+              <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Hệ thống máy chủ ổn định</div>
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
             ))}
           </div>
           <p className="text-xs 3xl:text-sm text-[var(--fha-text)] italic leading-relaxed">
-            &ldquo;Extension chạy mượt, trễ ngẫu nhiên thông minh nên nick chính của mình quét cả tháng không hề bị hỏi checkpoint. Tiết kiệm công sức kết bạn thủ công rất nhiều.&rdquo;
+            &ldquo;Extension chạy mượt, trễ ngẫu nhiên thông minh giúp giảm thiểu tối đa nguy cơ bị khóa tính năng. Tiết kiệm công sức tiếp cận khách hàng rất nhiều.&rdquo;
           </p>
           <div className="mt-2 text-[11px] 3xl:text-xs font-bold text-[var(--fha-text-muted)]">
             — Minh Thuận, Chủ Shop Thời Trang Nữ (Hà Nội)

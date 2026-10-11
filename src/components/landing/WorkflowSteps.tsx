@@ -19,7 +19,7 @@ export default function WorkflowSteps() {
       num: '03',
       title: 'Mở Nhóm & Bắt Đầu Quét Data',
       desc: 'Truy cập bất kỳ Hội Nhóm Facebook mục tiêu nào, nhấn nút "Bắt đầu quét". Extension sẽ tự động trích xuất danh sách khách hàng và gửi kết bạn an toàn.',
-      badge: 'Chống checkpoint 2.0'
+      badge: 'Giãn cách an toàn 2.0'
     }
   ];
 

@@ -38,7 +38,7 @@ export default function ActivatePage() {
                   Tải Về Bộ Cài Đặt Extension (.ZIP)
                 </h2>
                 <p className="text-xs text-[var(--fha-text-muted)] mt-1 leading-relaxed">
-                  Tải tệp nén mới nhất (Phiên bản V2.0 tối ưu chống checkpoint Facebook 2026). Sau khi tải về, hãy giải nén tệp zip này ra một thư mục trên máy tính của bạn.
+                  Tải tệp nén mới nhất (Phiên bản V2.1 tối ưu giãn cách an toàn Facebook 2026). Sau khi tải về, hãy giải nén tệp zip này ra một thư mục trên máy tính của bạn.
                 </p>
               </div>
 
