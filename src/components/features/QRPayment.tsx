@@ -71,6 +71,12 @@ export default function QRPayment({
     // Ideally useToast here, but for simplicity we rely on OS visual feedback or just the quick flash
   };
 
+  const [imgLoaded, setImgLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgLoaded(false);
+  }, [qrUrl]);
+
   return (
     <div className="w-full max-w-[420px] mx-auto bg-white rounded-fha-lg border border-[var(--fha-border)] shadow-fha-md overflow-hidden">
 
@@ -92,12 +98,26 @@ export default function QRPayment({
         <div className="w-full max-w-[220px] aspect-square rounded-2xl flex items-center justify-center bg-white p-2 relative overflow-hidden mb-6 border-2 border-[var(--fha-border-strong)]">
 
           {displayState === 'loading' && (
-            <div className="w-full h-full shimmer" />
+            <div className="w-full h-full shimmer flex items-center justify-center">
+              <Spinner size="md" color="brand" />
+            </div>
           )}
 
           {displayState === 'pending' && qrUrl && (
-
-            <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain p-1" />
+            <>
+              {!imgLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-10">
+                  <Spinner size="md" color="brand" />
+                  <span className="text-[11px] text-zinc-400 mt-2">Đang nạp ảnh VietQR...</span>
+                </div>
+              )}
+              <img
+                src={qrUrl}
+                alt="QR Code"
+                onLoad={() => setImgLoaded(true)}
+                className={`w-full h-full object-contain p-1 transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+              />
+            </>
           )}
 
           {displayState === 'checking' && (

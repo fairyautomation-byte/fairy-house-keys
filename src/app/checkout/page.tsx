@@ -567,6 +567,83 @@ function CheckoutContent() {
               </div>
             )}
 
+            {/* PayOS QR Loading Terminal Skeleton */}
+            {paymentStep === "payos_qr" && !payosData && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="w-full max-w-[420px] mx-auto bg-white rounded-fha-lg border border-[var(--fha-border)] shadow-fha-md overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-[var(--fha-surface-2)] p-5 border-b border-[var(--fha-border)] text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--fha-brand-soft)] border border-[var(--fha-brand-soft-border)] text-[var(--fha-brand)] text-xs font-bold mb-2">
+                      <span className="w-2 h-2 rounded-full bg-[var(--fha-brand)] animate-ping" />
+                      Đang kết nối cổng PayOS
+                    </div>
+                    <h3 className="text-[17px] font-bold text-[var(--fha-text)]">
+                      Khởi Tạo Mã VietQR
+                    </h3>
+                    <p className="text-[12px] text-[var(--fha-text-muted)] mt-1">
+                      Hệ thống đang tạo mã QR ngân hàng tự động cho đơn hàng...
+                    </p>
+                  </div>
+
+                  <div className="p-6 sm:p-8 flex flex-col items-center">
+                    {/* Shimmer QR placeholder */}
+                    <div className="w-full max-w-[220px] aspect-square rounded-2xl flex flex-col items-center justify-center bg-[var(--fha-surface-2)] p-4 relative overflow-hidden mb-6 border-2 border-dashed border-[var(--fha-border-strong)]">
+                      <div className="w-12 h-12 rounded-full bg-[var(--fha-brand-soft)] text-[var(--fha-brand)] flex items-center justify-center mb-2.5">
+                        <svg className="w-6 h-6 animate-spin text-[var(--fha-brand)]" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                      <p className="text-xs font-medium text-[var(--fha-text-muted)] text-center animate-pulse">
+                        Đang tạo mã VietQR...
+                      </p>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="text-center mb-6">
+                      <p className="text-[12px] font-medium text-[var(--fha-text-muted)] mb-1">
+                        Số tiền thanh toán
+                      </p>
+                      <div className="text-[28px] font-bold font-mono tracking-tight text-[var(--fha-brand)]">
+                        {formatCurrency(plan.price)}
+                      </div>
+                    </div>
+
+                    {/* Skeleton Bank Details */}
+                    <div className="w-full bg-[var(--fha-surface-2)] border border-[var(--fha-border)] rounded-fha p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-[var(--fha-text-muted)]">Ngân hàng</span>
+                        <div className="h-4 w-24 bg-zinc-200 rounded animate-pulse" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-[var(--fha-text-muted)]">Chủ tài khoản</span>
+                        <div className="h-4 w-28 bg-zinc-200 rounded animate-pulse" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-[var(--fha-text-muted)]">Số tài khoản</span>
+                        <div className="h-4 w-32 bg-zinc-200 rounded animate-pulse" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-[var(--fha-text-muted)]">Nội dung</span>
+                        <div className="h-4 w-24 bg-zinc-200 rounded animate-pulse" />
+                      </div>
+                    </div>
+
+                    <div className="text-center pt-5 w-full">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelPayment}
+                        className="text-xs text-[var(--fha-text-muted)]"
+                      >
+                        &larr; Hủy & Chọn lại gói khác
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* PayOS QR Payment State */}
             {paymentStep === "payos_qr" && payosData && (
               <div className="space-y-4 animate-fade-in">
