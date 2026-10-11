@@ -2854,13 +2854,13 @@
       if (quotaInfo.blocked) {
         inviteJobState = 'stopped';
         setInviteCountdown(0);
-        setInvitePhase('Đã chạm giới hạn 100 lời mời/ngày', false);
+        setInvitePhase('Máy chủ chưa cho phép tiếp tục kết bạn', false);
         pushInviteLog('Đã đạt giới hạn trong 24h. Vui lòng chạy lại vào ngày mai.', 'error');
-        showNoticeModal('Tài khoản của bạn đã đạt giới hạn 100 lời mời trong 24h. Vui lòng thử lại vào ngày mai.', 'Đã chạm giới hạn kết bạn');
+        showNoticeModal('Máy chủ chưa cho phép tiếp tục. Vui lòng kiểm tra trạng thái bản quyền và phiên bản tiện ích.', 'Chưa thể kết bạn');
         updateInviteButtonState();
         return;
       }
-      pushInviteLog('Quota còn lại: ' + (quotaInfo.remaining != null ? quotaInfo.remaining : '—'), 'normal');
+      pushInviteLog(quotaInfo.unlimited ? 'Gói không giới hạn số lời mời kết bạn.' : 'Lượt còn lại: ' + (quotaInfo.remaining != null ? quotaInfo.remaining : '—'), 'normal');
     } catch (err) {
       inviteJobState = 'stopped';
       setInviteCountdown(0);
@@ -2940,7 +2940,7 @@
             error_message: msg
           });
           if (afterFail && afterFail.blocked) {
-            showNoticeModal('Đã chạm giới hạn 100 lời mời/ngày cho tài khoản của bạn.', 'Dừng do chạm quota');
+            showNoticeModal('Máy chủ chưa cho phép tiếp tục. Vui lòng kiểm tra trạng thái bản quyền.', 'Tạm dừng kết bạn');
             inviteStopRequested = true;
           }
         } catch (_) {

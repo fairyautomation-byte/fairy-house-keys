@@ -338,14 +338,67 @@ async function readBackendJson(response) {
   }
 }
 
+async function getInstallationIdFromCookie() {
+  if (typeof chrome === 'undefined' || !chrome.cookies || typeof chrome.cookies.get !== 'function') return null;
+  const urls = [
+    'https://www.fairyautomation.io.vn',
+    'https://fairyautomation.io.vn'
+  ];
+  for (const url of urls) {
+    try {
+      let cookie = null;
+      const res = chrome.cookies.get({ url, name: 'zt_installation_id' }, (c) => {
+        if (!chrome.runtime?.lastError && c) cookie = c;
+      });
+      if (res && typeof res.then === 'function') {
+        cookie = await res;
+      }
+      if (cookie && typeof cookie.value === 'string' && /^[a-zA-Z0-9_-]{8,64}$/.test(cookie.value)) {
+        return cookie.value;
+      }
+    } catch (_) {}
+  }
+  return null;
+}
+
+function persistInstallationIdToCookie(id) {
+  if (!id || typeof chrome === 'undefined' || !chrome.cookies || typeof chrome.cookies.set !== 'function') return;
+  const urls = [
+    'https://www.fairyautomation.io.vn',
+    'https://fairyautomation.io.vn'
+  ];
+  const expirationDate = Math.floor(Date.now() / 1000) + 315360000;
+  for (const url of urls) {
+    try {
+      const res = chrome.cookies.set({
+        url,
+        name: 'zt_installation_id',
+        value: id,
+        path: '/',
+        sameSite: 'lax',
+        secure: true,
+        expirationDate
+      }, () => {});
+      if (res && typeof res.catch === 'function') res.catch(() => {});
+    } catch (_) {}
+  }
+}
+
 async function getOrCreateInstallationId() {
   await storageReady;
   const data = await chrome.storage.local.get(['ztInstallationId']);
-  if (data.ztInstallationId && typeof data.ztInstallationId === 'string') {
+  if (data.ztInstallationId && typeof data.ztInstallationId === 'string' && /^[a-zA-Z0-9_-]{8,64}$/.test(data.ztInstallationId)) {
+    persistInstallationIdToCookie(data.ztInstallationId);
     return data.ztInstallationId;
+  }
+  const cookieId = await getInstallationIdFromCookie();
+  if (cookieId) {
+    await chrome.storage.local.set({ ztInstallationId: cookieId });
+    return cookieId;
   }
   const newId = 'inst_' + (typeof crypto.randomUUID === 'function' ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2) + Date.now().toString(36));
   await chrome.storage.local.set({ ztInstallationId: newId });
+  persistInstallationIdToCookie(newId);
   return newId;
 }
 

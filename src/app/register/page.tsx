@@ -7,11 +7,13 @@ import Input from '@/components/ui/Input';
 import PasswordInput from '@/components/ui/PasswordInput';
 import Alert from '@/components/ui/Alert';
 import AuthSplitLayout from '@/components/auth/AuthSplitLayout';
+import { accountReturnPath } from '@/lib/auth-redirect';
 
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultPlan = searchParams.get('plan') || 'trial';
+  const returnPath = accountReturnPath(searchParams.get('next'));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -58,7 +60,7 @@ function RegisterContent() {
       }
 
       // Success, go to verify OTP
-      router.push(`/verify-otp?email=${encodeURIComponent(data.fullEmail)}&plan=${defaultPlan}`);
+      router.push(`/verify-otp?email=${encodeURIComponent(data.fullEmail)}&plan=${encodeURIComponent(defaultPlan)}${returnPath ? `&next=${encodeURIComponent(returnPath)}` : ''}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -152,7 +154,7 @@ function RegisterContent() {
       <div className="text-center text-xs text-[var(--fha-text-muted)]">
         Đã có tài khoản?{' '}
         <Link 
-          href={`/login${defaultPlan ? `?plan=${defaultPlan}` : ''}`} 
+          href={`/login${returnPath ? `?next=${encodeURIComponent(returnPath)}` : (defaultPlan ? `?plan=${encodeURIComponent(defaultPlan)}` : '')}`} 
           className="font-bold text-[var(--fha-brand)] hover:underline ml-1"
         >
           Đăng nhập ngay &rarr;

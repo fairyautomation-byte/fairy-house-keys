@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import { sameOrigin } from "@/lib/security";
 import { ADMIN_COOKIE_NAME, USER_COOKIE_NAME } from "@/lib/auth";
+import { accountReturnPath } from "@/lib/auth-redirect";
 
 /** Lightweight JWT check for middleware — no Firestore, Edge-safe. */
 async function hasValidToken(req: NextRequest, cookieName: string, role: string) {
@@ -48,16 +49,21 @@ export async function proxy(req: NextRequest) {
       if (
         (path.startsWith("/dashboard") || path.startsWith("/checkout")) &&
         !authenticated
-      )
-        return NextResponse.redirect(new URL("/login", req.url));
+      ) {
+        const login = new URL("/login", req.url);
+        login.searchParams.set("next", path + req.nextUrl.search);
+        return NextResponse.redirect(login);
+      }
 
       if ((path === "/login" || path === "/register") && authenticated) {
+        // Login must remain reachable for a signed JWT whose server-side session was revoked.
+        if (path === "/login") return NextResponse.next();
         const plan = req.nextUrl.searchParams.get("plan");
         return NextResponse.redirect(
           new URL(
-            plan && ["trial", "monthly", "quarterly", "yearly"].includes(plan)
+            accountReturnPath(req.nextUrl.searchParams.get("next")) || (plan && ["trial", "monthly", "quarterly", "yearly"].includes(plan)
               ? `/checkout?plan=${plan}`
-              : "/dashboard",
+              : "/dashboard"),
             req.url,
           ),
         );

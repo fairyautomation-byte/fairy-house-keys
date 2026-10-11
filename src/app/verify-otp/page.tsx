@@ -6,12 +6,14 @@ import Button from '@/components/ui/Button';
 import OTPInput from '@/components/features/OTPInput';
 import Alert from '@/components/ui/Alert';
 import AuthSplitLayout from '@/components/auth/AuthSplitLayout';
+import { accountReturnPath } from '@/lib/auth-redirect';
 
 function VerifyOTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
   const plan = searchParams.get('plan');
+  const returnPath = accountReturnPath(searchParams.get('next'));
 
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -61,7 +63,9 @@ function VerifyOTPContent() {
 
       setSuccess(true);
       setTimeout(() => {
-        if (plan) {
+        if (returnPath) {
+          router.push(returnPath);
+        } else if (plan) {
           router.push(`/checkout?plan=${plan}`);
         } else {
           router.push('/dashboard');

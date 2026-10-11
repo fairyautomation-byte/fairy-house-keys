@@ -7,11 +7,13 @@ import Input from '@/components/ui/Input';
 import PasswordInput from '@/components/ui/PasswordInput';
 import Alert from '@/components/ui/Alert';
 import AuthSplitLayout from '@/components/auth/AuthSplitLayout';
+import { accountReturnPath } from '@/lib/auth-redirect';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultPlan = searchParams.get('plan');
+  const returnPath = accountReturnPath(searchParams.get('next'));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -46,24 +48,21 @@ function LoginContent() {
 
       if (!res.ok) {
         if (data.code === 'EMAIL_NOT_VERIFIED') {
-          throw new Error(data.error + ` [EMAIL:${data.email}]`);
+          router.push(`/verify-otp?email=${encodeURIComponent(data.email || form.email)}${defaultPlan ? `&plan=${encodeURIComponent(defaultPlan)}` : ''}${returnPath ? `&next=${encodeURIComponent(returnPath)}` : ''}`);
+          return;
         }
         throw new Error(data.error || 'Có lỗi xảy ra');
       }
 
-      if (defaultPlan) {
+      if (returnPath) {
+        router.push(returnPath);
+      } else if (defaultPlan) {
         router.push(`/checkout?plan=${defaultPlan}`);
       } else {
         router.push(`/dashboard`);
       }
     } catch (err: any) {
-      if (err.message.includes('EMAIL_NOT_VERIFIED')) {
-        const match = err.message.match(/\[EMAIL:(.*?)\]/);
-        const email = match ? match[1] : form.email;
-        router.push(`/verify-otp?email=${encodeURIComponent(email)}${defaultPlan ? `&plan=${defaultPlan}` : ''}`);
-      } else {
-        setError(err.message.replace(/\[EMAIL:.*?\]/, ''));
-      }
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -128,7 +127,7 @@ function LoginContent() {
       <div className="text-center text-xs text-[var(--fha-text-muted)]">
         Chưa có tài khoản?{' '}
         <Link 
-          href={`/register${defaultPlan ? `?plan=${defaultPlan}` : ''}`} 
+          href={`/register${returnPath ? `?next=${encodeURIComponent(returnPath)}` : (defaultPlan ? `?plan=${encodeURIComponent(defaultPlan)}` : '')}`} 
           className="font-bold text-[var(--fha-brand)] hover:underline ml-1"
         >
           Đăng ký dùng thử 3 ngày (0đ) &rarr;

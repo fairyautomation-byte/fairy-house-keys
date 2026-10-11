@@ -39,6 +39,7 @@ export async function issueOTP(email: string, purpose: Purpose) {
         email,
         purpose,
         generation,
+        auth_version: data!.auth_version || 0,
         otp_hash: hashOTP(code),
         expires_at: new Date(now.getTime() + 300000),
         attempts: 0,
@@ -81,6 +82,7 @@ export async function completeOTP(
         user = userSnap.data();
       if (
         !activeUser(user) ||
+        session.auth_version !== (user?.auth_version || 0) ||
         user!.email !== email ||
         (purpose === "RESET_PASSWORD"
           ? user!.email_verified !== true

@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
       !/^[a-zA-Z0-9_-]{16,128}$/.test(requestId)
     )
       throw new ApiError(400, "REQUEST_ID_REQUIRED");
+    if (!["check", "consume"].includes(action))
+      throw new ApiError(400, "INVALID_ACTION");
     const ref = await findLicense(licenseKey.trim());
     await validateLicense(ref, installationId);
     const result = await db.runTransaction(
@@ -40,6 +42,8 @@ export async function POST(req: NextRequest) {
           data = license.data();
         if (!data || !licenseView(data).valid)
           throw new ApiError(403, "LICENSE_DENIED");
+        if (data.installation_id !== installationId?.trim())
+          throw new ApiError(403, "DEVICE_LIMIT_EXCEEDED");
         const owner = await tx.get(db.collection("users").doc(data.user_id));
         if (!owner.exists || !activeUser(owner.data()))
           throw new ApiError(403, "LICENSE_DENIED");
@@ -54,18 +58,12 @@ export async function POST(req: NextRequest) {
           tx.get(counter),
           tx.get(receipt),
         ]);
-        if (old.exists) return old.data()!.response;
         const used = usage.data()?.used || 0;
-        if (!["check", "consume"].includes(action))
-          throw new ApiError(400, "INVALID_ACTION");
+        const response = { allowed: true, blocked: false, unlimited: true, remaining: null };
         if (action === "check")
-          return {
-            allowed: used < 100,
-            blocked: used >= 100,
-            remaining: Math.max(0, 100 - used),
-          };
-        if (used >= 100) throw new ApiError(429, "INVITE_LIMIT_REACHED");
-        const response = { allowed: true, remaining: 99 - used };
+          return response;
+        // Preserve deduplication, including receipts created under the old limit.
+        if (old.exists) return response;
         tx.set(counter, {
           used: used + 1,
           day,

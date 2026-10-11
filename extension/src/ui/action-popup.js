@@ -47,7 +47,7 @@
 
     var lower = String(msg).toLowerCase();
     var isExpired = lower.includes('hết hạn') || lower.includes('expired');
-    var isBound = lower.includes('thiết bị') || lower.includes('dùng trên') || lower.includes('used');
+    var isBound = lower.includes('thiết bị') || lower.includes('lần cài đặt') || lower.includes('dùng trên') || lower.includes('used');
     var isRevoked = lower.includes('thu hồi') || lower.includes('revoked');
     var isNotFound = lower.includes('không tồn tại') || lower.includes('not found');
     var isFormat = lower.includes('định dạng') || lower.includes('format');
@@ -66,8 +66,8 @@
     } else if (isBound) {
       tone = 'border-amber-200 bg-amber-50 text-amber-900';
       iconSvg = '<svg class="h-4 w-4 shrink-0 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>';
-      title = 'Key đã kích hoạt trên thiết bị khác';
-      desc = msg + '. Mỗi key chỉ dùng trên 1 máy tính. Liên hệ Zalo: 0378791667 để đổi thiết bị.';
+      title = 'Cần khôi phục lần cài đặt';
+      desc = 'Key đang gắn với một lần cài đặt trước. Nếu vừa gỡ và cài lại tiện ích trên máy này, đăng nhập tài khoản chủ key để khôi phục bên dưới.';
     } else if (isRevoked) {
       title = 'Key đã bị thu hồi';
       desc = 'Key bản quyền này đã bị vô hiệu hoá. Vui lòng liên hệ Admin Zalo: 0378791667.';
@@ -90,9 +90,18 @@
       '<div class="min-w-0 flex-1">' +
       '<strong class="block font-semibold">' + escapeHtml(title) + '</strong>' +
       '<p class="mt-0.5 text-[11px] opacity-90">' + escapeHtml(desc) + '</p>' +
-      (isExpired ? '<a href="https://fairyautomation.io.vn" target="_blank" class="mt-1.5 inline-block font-bold underline text-[11px] text-teal-800 hover:text-teal-900">Bấm vào đây để gia hạn</a>' : '') +
-      (isBound || isRevoked ? '<a href="https://zalo.me/0378791667" target="_blank" class="mt-1.5 inline-flex items-center gap-1 font-bold underline text-[11px] text-teal-800 hover:text-teal-900">Liên hệ Zalo Admin: 0378791667 &rarr;</a>' : '') +
+      (isExpired ? '<a href="https://www.fairyautomation.io.vn" target="_blank" class="mt-1.5 inline-block font-bold underline text-[11px] text-teal-800 hover:text-teal-900">Bấm vào đây để gia hạn</a>' : '') +
+      (isBound ? '<a id="zt-restore-installation" href="https://www.fairyautomation.io.vn/dashboard/licenses" target="_blank" rel="noopener noreferrer" class="mt-1.5 inline-block font-bold underline text-[11px] text-teal-800">Khôi phục sau khi cài lại &rarr;</a>' : '') +
+      (isRevoked ? '<a href="https://zalo.me/0378791667" target="_blank" class="mt-1.5 inline-flex items-center gap-1 font-bold underline text-[11px] text-teal-800 hover:text-teal-900">Liên hệ Zalo Admin: 0378791667 &rarr;</a>' : '') +
       '</div>';
+    if (isBound) {
+      chrome.storage.local.get(['ztInstallationId']).then(function (data) {
+        var link = $('zt-restore-installation');
+        if (link && /^[a-zA-Z0-9_-]{8,64}$/.test(data.ztInstallationId || '')) {
+          link.href = 'https://www.fairyautomation.io.vn/dashboard/licenses?installationId=' + encodeURIComponent(data.ztInstallationId);
+        }
+      }).catch(function () {});
+    }
   }
 
   function send(action, payload) {

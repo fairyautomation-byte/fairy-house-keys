@@ -105,7 +105,7 @@ export async function validateLicense(
         throw new ApiError(
           403,
           "DEVICE_LIMIT_EXCEEDED",
-          "License đã được kích hoạt trên một thiết bị khác. Vui lòng đăng xuất trên thiết bị cũ trước khi sử dụng thiết bị mới.",
+          "License đang gắn với lần cài đặt khác. Nếu vừa cài lại tiện ích, hãy chọn Khôi phục sau khi cài lại và đăng nhập tài khoản chủ key.",
         );
       } else {
         tx.update(ref, {

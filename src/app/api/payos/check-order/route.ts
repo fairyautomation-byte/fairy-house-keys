@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       if (info.status === "PAID" && info.amountPaid === data.amount) {
         await settlePayment(code, data.amount, `reconcile:${code}`);
         data = (await ref.get()).data()!;
-      } else if (info.status === "CANCELLED") {
+      } else if (["CANCELLED", "CANCELED"].includes(info.status)) {
         await transitionOrderStatus(ref, "CANCELED", {
           canceled_at: new Date(),
           cancel_reason: "PROVIDER_CANCELLED",

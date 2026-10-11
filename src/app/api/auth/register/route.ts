@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { hashPassword, validPassword } from "@/lib/password";
+import { hashPassword, validPassword, verifyPassword } from "@/lib/password";
 import {
   emailAddress,
   jsonBody,
   ApiError,
   digest,
   failure,
+  activeUser,
 } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { issueOTP } from "@/lib/account-service";
@@ -55,11 +56,20 @@ export async function POST(req: NextRequest) {
         if (
           snap.exists &&
           (user!.email_verified === true ||
+            !activeUser(user) ||
             user!.status === "DELETED" ||
             (user!.wallet_balance || 0) > 0 ||
             user!.trial_used)
         )
           throw new ApiError(409, "EMAIL_ALREADY_EXISTS");
+        // A repeated signup must not replace a pending account's password while
+        // its original email OTP is still valid.
+        if (snap.exists) {
+          if (!(await verifyPassword(password, user!.password)))
+            throw new ApiError(409, "EMAIL_ALREADY_EXISTS", "Email đã đăng ký. Vui lòng đăng nhập bằng mật khẩu đã tạo.");
+          tx.set(reservation, { uid: userRef.id, email: normalized });
+          return;
+        }
         tx.set(reservation, { uid: userRef.id, email: normalized });
         tx.set(userRef, {
           full_name: fullName.trim(),

@@ -11,6 +11,8 @@ import {
   cookieOptions,
 } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { issueOTP } from "@/lib/account-service";
+import { sendOTPEmail } from "@/lib/mailer";
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await jsonBody(req),
@@ -39,15 +41,20 @@ export async function POST(req: NextRequest) {
       !(await verifyPassword(password, user.password))
     )
       throw new ApiError(401, "Email hoặc mật khẩu không chính xác");
-    if (user.email_verified !== true)
+    if (user.email_verified !== true) {
+      try {
+        const issued = await issueOTP(normalized, "VERIFY_EMAIL");
+        await sendOTPEmail(normalized, issued.code);
+      } catch {}
       return NextResponse.json(
         {
-          error: "Tài khoản cần xác thực email.",
+          error: "Tài khoản chưa xác thực email. Mã xác thực đã được gửi vào hòm thư.",
           code: "EMAIL_NOT_VERIFIED",
           email: normalized,
         },
         { status: 403 },
       );
+    }
     if (!user.password.startsWith("scrypt$")) {
       const upgraded = await hashPassword(password);
       await db.runTransaction(

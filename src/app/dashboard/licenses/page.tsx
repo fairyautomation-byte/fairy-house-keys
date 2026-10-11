@@ -9,20 +9,52 @@ import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
 import { formatDate } from '@/lib/format';
+import PasswordInput from '@/components/ui/PasswordInput';
+import { ConfirmModal } from '@/components/ui/Modal';
 
 export default function LicensesPage() {
   const router = useRouter();
   const [licenses, setLicenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [installationId, setInstallationId] = useState('');
+  const [rebindLicense, setRebindLicense] = useState<any>(null);
+  const [password, setPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const [rebindError, setRebindError] = useState('');
+
+  const restoreInstallation = async () => {
+    if (!rebindLicense || saving) return;
+    setSaving(true);
+    setRebindError('');
+    try {
+      const res = await fetch('/api/user/license/rebind', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ licenseId: rebindLicense.id, installationId, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Chưa khôi phục được lần cài đặt này.');
+      setLicenses(items => items.map(item => item.id === rebindLicense.id ? { ...item, bound_to_device: true } : item));
+      setMessage('Đã khôi phục. Mở tiện ích và bấm Kích hoạt License lại. Lần cài đặt cũ đã mất quyền sử dụng key này.');
+      setRebindLicense(null);
+      setPassword('');
+    } catch (error) { setRebindError(error instanceof Error ? error.message : 'Lỗi kết nối.'); }
+    finally { setSaving(false); }
+  };
 
   useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('installationId') || '';
+    if (/^[a-zA-Z0-9_-]{8,64}$/.test(id)) setInstallationId(id);
     fetch('/api/user/dashboard')
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) throw new Error(res.status === 401 ? 'Vui lòng đăng nhập lại.' : 'Chưa tải được danh sách key.');
+        return res.json();
+      })
       .then(data => {
         setLicenses(data.licenses || []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(error => { setMessage(error.message); setLoading(false); });
   }, []);
 
   if (loading) {
@@ -49,7 +81,7 @@ export default function LicensesPage() {
     <div className="space-y-8">
       <PageHeader 
         title="Quản Lý License Bản Quyền" 
-        description="Danh sách mã kích hoạt phần mềm được cấp độc quyền cho từng thiết bị của bạn"
+        description="Quản lý key và khôi phục kích hoạt khi cài lại tiện ích"
         actions={
           <Link href="/dashboard/store" passHref>
             <Button variant="primary" size="sm">
@@ -61,6 +93,13 @@ export default function LicensesPage() {
           </Link>
         }
       />
+
+      {message && <p role="status" className="rounded-fha border p-4">{message}</p>}
+      <p className="text-sm text-[var(--fha-text-muted)]">
+        {installationId
+          ? 'Bạn đang khôi phục cho lần cài tiện ích vừa mở trang này. Chọn đúng key bên dưới và xác nhận mật khẩu tài khoản.'
+          : 'Nếu vừa cài lại tiện ích, mở tiện ích và bấm “Khôi phục sau khi cài lại” để chuyển quyền kích hoạt sang lần cài hiện tại.'}
+      </p>
 
       {licenses.length > 0 ? (
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
@@ -93,10 +132,10 @@ export default function LicensesPage() {
                       <div className="text-xs text-[var(--fha-text-muted)] flex items-center gap-2 mt-0.5">
                         <span className="inline-flex items-center gap-1 font-medium text-[var(--fha-success)]">
                           <span className="w-1.5 h-1.5 rounded-full bg-[var(--fha-success)]" />
-                          1 Thiết Bị Độc Quyền
+                          1 Lần Cài Đặt Đang Hoạt Động
                         </span>
                         <span>•</span>
-                        <span>Hardware Lock Enabled</span>
+                        <span>Có thể khôi phục sau khi cài lại</span>
                       </div>
                     </div>
                   </div>
@@ -118,6 +157,11 @@ export default function LicensesPage() {
                   </div>
 
                   <LicenseKey value={license.license_key} status={license.status} />
+                  {installationId && license.status === 'ACTIVE' && (
+                    <Button variant="secondary" size="sm" onClick={() => { setRebindLicense(license); setPassword(''); setRebindError(''); }}>
+                      Khôi phục key này cho tiện ích vừa cài
+                    </Button>
+                  )}
                 </div>
 
                 {/* Bottom Matrix: Expiration + Daily Quota Gauge + Actions */}
@@ -192,6 +236,14 @@ export default function LicensesPage() {
           }}
         />
       )}
+      <ConfirmModal open={!!rebindLicense} title="Khôi phục kích hoạt" loading={saving}
+        onClose={() => { if (!saving) { setRebindLicense(null); setPassword(''); } }}
+        onConfirm={restoreInstallation} confirmText="Xác nhận khôi phục"
+        message={<div className="space-y-4">
+          <p>Key sẽ chuyển sang lần cài tiện ích vừa mở trang này. Lần cài đặt cũ sẽ mất quyền sử dụng.</p>
+          <PasswordInput label="Mật khẩu tài khoản web" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} />
+          {rebindError && <p role="alert" className="text-red-700">{rebindError}</p>}
+        </div>} />
     </div>
   );
 }
