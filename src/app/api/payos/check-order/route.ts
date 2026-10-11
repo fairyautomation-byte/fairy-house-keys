@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { payos } from "@/lib/payos";
-import { settlePayment } from "@/lib/order-service";
+import { settlePayment, transitionOrderStatus } from "@/lib/order-service";
 import { ApiError, failure } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
 export async function GET(req: NextRequest) {
@@ -31,8 +31,13 @@ export async function GET(req: NextRequest) {
       if (info.status === "PAID" && info.amountPaid === data.amount) {
         await settlePayment(code, data.amount, `reconcile:${code}`);
         data = (await ref.get()).data()!;
-      } else if (info.status === "CANCELLED")
-        await ref.update({ status: "CANCELED" });
+      } else if (info.status === "CANCELLED") {
+        await transitionOrderStatus(ref, "CANCELED", {
+          canceled_at: new Date(),
+          cancel_reason: "PROVIDER_CANCELLED",
+        });
+        data = (await ref.get()).data()!;
+      }
     }
     if (data.status === "PAID") await deliverLicenseEmail(`payos_${code}`);
     return NextResponse.json(
@@ -45,6 +50,6 @@ export async function GET(req: NextRequest) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return failure(error);
+    return failure(error, req);
   }
 }

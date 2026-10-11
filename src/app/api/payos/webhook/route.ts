@@ -28,21 +28,30 @@ export async function POST(req: NextRequest) {
     const event = db
       .collection("payment_events")
       .doc(digest(`${data.orderCode}:${data.reference}:${data.amount}`));
+    const existing = await event.get();
+    if (existing.exists && existing.data()?.status === "PROCESSED") {
+      // Callback was already successfully processed; deliver idempotently
+      await deliverLicenseEmail(`payos_${data.orderCode}`);
+      return NextResponse.json({ success: true, duplicate: true });
+    }
     await event.set(
       {
         order_code: data.orderCode,
         amount: data.amount,
         reference: data.reference || "",
         status: "RECEIVED",
-        created_at: new Date(),
+        created_at: existing.exists
+          ? existing.data()?.created_at || new Date()
+          : new Date(),
+        updated_at: new Date(),
       },
       { merge: true },
     );
     await settlePayment(data.orderCode, data.amount, data.reference || "");
-    await event.update({ status: "PROCESSED" });
+    await event.update({ status: "PROCESSED", processed_at: new Date() });
     await deliverLicenseEmail(`payos_${data.orderCode}`);
     return NextResponse.json({ success: true });
   } catch (error) {
-    return failure(error);
+    return failure(error, req);
   }
 }

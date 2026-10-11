@@ -3,7 +3,7 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { db } from "@/lib/firebase";
 import { payos } from "@/lib/payos";
 import { jsonBody, failure, ApiError } from "@/lib/security";
-import { settlePayment } from "@/lib/order-service";
+import { settlePayment, transitionOrderStatus } from "@/lib/order-service";
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
@@ -34,16 +34,12 @@ export async function POST(req: NextRequest) {
       );
       return NextResponse.json({ ok: true, status: "PAID" });
     }
-    await db.runTransaction(
-      async (tx) => {
-        const fresh = await tx.get(ref);
-        if (fresh.data()?.status !== "PAID")
-          tx.update(ref, { status: "CANCELED", canceled_at: new Date() });
-      },
-      { maxAttempts: 20 },
-    );
-    return NextResponse.json({ ok: true, status: "CANCELED" });
+    const transition = await transitionOrderStatus(ref, "CANCELED", {
+      canceled_at: new Date(),
+      cancel_reason: "USER_REQUESTED",
+    });
+    return NextResponse.json({ ok: true, status: transition.status });
   } catch (error) {
-    return failure(error);
+    return failure(error, req);
   }
 }

@@ -204,3 +204,32 @@ export async function settlePayment(
     { maxAttempts: 20 },
   );
 }
+
+export async function transitionOrderStatus(
+  ref: FirebaseFirestore.DocumentReference,
+  targetStatus: "CANCELED" | "EXPIRED" | "PAID",
+  metadata?: Record<string, any>,
+): Promise<{ status: string; transitioned: boolean }> {
+  return db.runTransaction(
+    async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new ApiError(404, "ORDER_NOT_FOUND");
+      const current = snap.data()!;
+      // PAID is an absorbing terminal state: once PAID, never downgrade to CANCELED/EXPIRED.
+      if (current.status === "PAID") {
+        return { status: "PAID", transitioned: false };
+      }
+      if (current.status === targetStatus) {
+        return { status: targetStatus, transitioned: false };
+      }
+      tx.update(ref, {
+        status: targetStatus,
+        updated_at: new Date(),
+        ...(metadata || {}),
+      });
+      return { status: targetStatus, transitioned: true };
+    },
+    { maxAttempts: 20 },
+  );
+}
+
