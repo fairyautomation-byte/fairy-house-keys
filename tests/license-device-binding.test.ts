@@ -260,3 +260,64 @@ test("R01: POST /api/license/scan rejects missing or foreign installationId when
   assert.equal(resLegit.status, 200);
 });
 
+test("L2-04: unbound license rejects omitted installationId and binds on first valid identification", async () => {
+  const mockDb = new MockFirestore();
+  setDatabaseInstance(mockDb as any);
+
+  mockDb.seed("users", "user_l2_04", {
+    status: "ACTIVE",
+    role: "user",
+  });
+
+  mockDb.seed("licenses", "lic_l2_04_unbound", {
+    license_key: "FHAD-L204-UNBO-UNDT-EST1",
+    user_id: "user_l2_04",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 0,
+    // installation_id is NOT set (unbound license)
+  });
+
+  const licRef = mockDb.collection("licenses").doc("lic_l2_04_unbound");
+
+  // 1. Calling validateLicense on unbound license WITHOUT installationId MUST be rejected
+  await assert.rejects(
+    async () => {
+      await validateLicense(licRef as any);
+    },
+    (err: any) => {
+      assert.equal(err.status, 403);
+      assert.equal(err.code, "INSTALLATION_ID_REQUIRED");
+      return true;
+    },
+  );
+
+  // Database must STILL remain unbound after rejected attempt
+  const docBeforeBind = await licRef.get();
+  assert.equal(docBeforeBind.data().installation_id, undefined);
+
+  // 2. Calling with valid installationId binds the license
+  const bindRes = await validateLicense(licRef as any, "inst_first_legit_device", {
+    deviceName: "Primary PC",
+  });
+  assert.equal(bindRes.valid, true);
+  assert.equal(bindRes.installation_id, "inst_first_legit_device");
+  assert.equal(bindRes.bound_to_device, true);
+
+  // Database is now atomically bound
+  const docAfterBind = await licRef.get();
+  assert.equal(docAfterBind.data().installation_id, "inst_first_legit_device");
+
+  // 3. A second device calling now MUST be rejected with DEVICE_LIMIT_EXCEEDED
+  await assert.rejects(
+    async () => {
+      await validateLicense(licRef as any, "inst_second_foreign_device");
+    },
+    (err: any) => {
+      assert.equal(err.status, 403);
+      assert.equal(err.code, "DEVICE_LIMIT_EXCEEDED");
+      return true;
+    },
+  );
+});
+
