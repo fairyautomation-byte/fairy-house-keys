@@ -125,13 +125,16 @@ export default function WalletPage() {
         toastSuccess("Giao dịch nạp ví đã được xử lý thành công!");
         setPaymentState("success");
         setShowQR(false);
-        loadWallet();
+        fetch("/api/user/dashboard")
+          .then((r) => r.json())
+          .then((d) => setBalance(d.user?.wallet_balance || 0))
+          .catch(() => {});
         return;
       }
 
       if (data.status === "RECOVERING" || (!data.accountNumber && !data.checkoutUrl)) {
         toastError(data.message || "Hệ thống đang đồng bộ liên kết thanh toán. Vui lòng thử lại sau giây lát.");
-        setPaymentState("idle");
+        setPaymentState("failed");
         setShowQR(false);
         return;
       }

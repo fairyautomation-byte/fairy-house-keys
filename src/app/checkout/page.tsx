@@ -280,7 +280,7 @@ function CheckoutContent() {
       if (data.status === "PAID") {
         setQrState("success");
         if (data.licenseKey) {
-          setPurchasedKey(data.licenseKey);
+          setCreatedKey(data.licenseKey);
         }
         setPaymentStep("success");
         toastSuccess("Đơn hàng đã được thanh toán thành công!");
