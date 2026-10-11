@@ -1,7 +1,5 @@
 "use client";
 import {
-  requestId,
-  clearRequest,
   paymentIntentId,
   clearPaymentIntent,
 } from "@/lib/client-request";

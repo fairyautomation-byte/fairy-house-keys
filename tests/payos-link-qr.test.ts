@@ -64,11 +64,11 @@ test("A06 & A07: create-payment-link returns valid timeLeft and rejects expired 
     assert.equal(typeof data.expiredAt, "number");
 
     // Test expiration: artificially set expiredAt to the past in DB
-    const orderDocId = Object.keys(mockDb["store"]["collections"].get("payos_orders")?.entries().next().value[1]);
-    const ordersMap = mockDb["store"]["collections"].get("payos_orders")!;
-    const [orderKey, orderData] = ordersMap.entries().next().value;
+    const ordersSnap = await mockDb.collection("payos_orders").get();
+    const orderDoc = ordersSnap.docs[0];
+    const orderData = orderDoc.data();
     orderData.payment.expiredAt = Math.floor(Date.now() / 1000) - 10;
-    ordersMap.set(orderKey, orderData);
+    await orderDoc.ref.set(orderData);
 
     // Calling again with the same requestId should detect expired payment
     const reqExpired = new NextRequest("http://localhost/api/payos/create-payment-link", {

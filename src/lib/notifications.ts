@@ -50,7 +50,12 @@ export async function deliverLicenseEmail(id: string) {
         status: "SENDING",
         attempts,
       });
-      return { ...data, attempts, maxAttempts };
+      return {
+        user_id: data.user_id as string,
+        license_id: data.license_id as string,
+        attempts,
+        maxAttempts,
+      };
     },
     { maxAttempts: 20 },
   );
