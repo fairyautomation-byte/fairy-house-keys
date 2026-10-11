@@ -49,6 +49,7 @@ test("A04: same requestId with different UIDs rejects with 409 REQUEST_ID_CONFLI
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-LOOK-UPTE-ST01-0001",
+        installationId: "inst-lookup-device",
         uids: ["10000000001"],
         requestId: "req-stable-id-12345678",
       }),
@@ -65,6 +66,7 @@ test("A04: same requestId with different UIDs rejects with 409 REQUEST_ID_CONFLI
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-LOOK-UPTE-ST01-0001",
+        installationId: "inst-lookup-device",
         uids: ["10000000002"],
         requestId: "req-stable-id-12345678",
       }),
@@ -116,6 +118,7 @@ test("A04: identical UIDs in different order reuse normalized fingerprint and re
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-PERM-UTAT-ION0-0001",
+        installationId: "inst-lookup-device",
         uids: ["10000000001", "10000000002"],
         requestId: "req-perm-test-12345678",
       }),
@@ -130,6 +133,7 @@ test("A04: identical UIDs in different order reuse normalized fingerprint and re
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-PERM-UTAT-ION0-0001",
+        installationId: "inst-lookup-device",
         uids: ["10000000002", "10000000001"],
         requestId: "req-perm-test-12345678",
       }),
@@ -177,6 +181,7 @@ test("A03 & A04: system failure rolls back quota and marks receipt FAILED", asyn
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-FAIL-URET-EST0-0001",
+        installationId: "inst-lookup-device",
         uids: ["10000000001", "10000000002"],
         requestId: "req-fail-system-12345678",
       }),
@@ -227,6 +232,7 @@ test("R02: retry after refund recharges quota atomically instead of returning fr
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-R020-TEST-QUOT-A001",
+        installationId: "inst-lookup-device",
         uids: ["10000000001"],
         requestId,
       }),
@@ -252,6 +258,7 @@ test("R02: retry after refund recharges quota atomically instead of returning fr
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-R020-TEST-QUOT-A001",
+        installationId: "inst-lookup-device",
         uids: ["10000000001"],
         requestId,
       }),
@@ -428,6 +435,7 @@ test("L2-01: atomic rollbackPhoneFailure prevents refunding subsequent retry and
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         licenseKey: "FHAD-L201-RACE-TEST-0001",
+        installationId: "inst-lookup-device",
         uids: ["10000000001"],
         requestId,
       }),
