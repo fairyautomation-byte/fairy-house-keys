@@ -91,3 +91,107 @@ test("A06 & A07: create-payment-link returns valid timeLeft and rejects expired 
     setPayosClient(undefined);
   }
 });
+
+test("R06: recovery when create drops response recovers SDK PENDING schema without synthetic checkoutUrl", async () => {
+  const userRef = mockDb.collection("users").doc("user-r06");
+  await userRef.set({
+    email: "user-r06@example.test",
+    email_verified: true,
+    status: "ACTIVE",
+  });
+  const token = await signUserToken("user-r06", "user-r06@example.test", 0);
+
+  // createPaymentLink throws (network timeout/drop); getPaymentLinkInformation returns official SDK schema (no checkoutUrl/qrCode)
+  setPayosClient({
+    createPaymentLink: async () => {
+      throw new Error("ETIMEDOUT: createPaymentLink response dropped");
+    },
+    getPaymentLinkInformation: async (orderCode: number) => ({
+      id: "plink-sdk-real-pending-123",
+      orderCode,
+      amount: 69000,
+      amountPaid: 0,
+      amountRemaining: 69000,
+      status: "PENDING",
+      createdAt: "2026-10-11T00:00:00.000Z",
+      transactions: [],
+      cancellationReason: null,
+      canceledAt: null,
+    }),
+  } as any);
+
+  try {
+    const req = new NextRequest("http://localhost/api/payos/create-payment-link", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        amount: 69000,
+        requestId: "req-r06-pending-recovery-1234",
+      }),
+    });
+
+    const res = await createLinkHandler(req);
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.status, "PENDING");
+    assert.equal(data.amount, 69000);
+    assert.equal(data.recovered, true);
+  } finally {
+    setPayosClient(undefined);
+  }
+});
+
+test("R06: recovery when status is PAID rejects mismatched amountPaid and does not fulfill", async () => {
+  const userRef = mockDb.collection("users").doc("user-r06-underpay");
+  await userRef.set({
+    email: "user-underpay@example.test",
+    email_verified: true,
+    status: "ACTIVE",
+  });
+  const token = await signUserToken("user-r06-underpay", "user-underpay@example.test", 0);
+
+  // createPaymentLink throws; getPaymentLinkInformation reports PAID but with underpaid amount (1000 instead of 69000)
+  setPayosClient({
+    createPaymentLink: async () => {
+      throw new Error("ETIMEDOUT: createPaymentLink response dropped");
+    },
+    getPaymentLinkInformation: async (orderCode: number) => ({
+      id: "plink-sdk-real-paid-123",
+      orderCode,
+      amount: 69000,
+      amountPaid: 1000, // Attacker underpaid!
+      amountRemaining: 68000,
+      status: "PAID",
+      createdAt: "2026-10-11T00:00:00.000Z",
+      transactions: [],
+      cancellationReason: null,
+      canceledAt: null,
+    }),
+  } as any);
+
+  try {
+    const req = new NextRequest("http://localhost/api/payos/create-payment-link", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        amount: 69000,
+        requestId: "req-r06-underpay-1234",
+      }),
+    });
+
+    const res = await createLinkHandler(req);
+    // Must NOT return 200 with PAID fulfilled! Must reject with 400 or 502 error
+    assert.notEqual(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.ok, false);
+  } finally {
+    setPayosClient(undefined);
+  }
+});
+

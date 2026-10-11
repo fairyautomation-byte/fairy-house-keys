@@ -21,16 +21,32 @@ function database(): Firestore {
   } = process.env;
 
   const isTest =
-    process.env.NODE_ENV === "test" ||
+    NODE_ENV === "test" ||
+    APP_ENV === "test" ||
     !!process.env.npm_lifecycle_event?.includes("test") ||
     !!FIRESTORE_EMULATOR_HOST;
+
+  const isPreview =
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" ||
+    APP_ENV === "preview";
+
   const isStaging =
     APP_ENV === "staging" ||
-    (process.env.NODE_ENV as string) === "staging";
+    (NODE_ENV as string) === "staging";
 
-  if ((isTest || isStaging) && projectId === "fairy-house-keys") {
+  const stagingAllowedProject =
+    process.env.FIREBASE_STAGING_PROJECT_ID || "fairy-house-keys-staging";
+
+  if ((isTest || isStaging || isPreview) && projectId === "fairy-house-keys") {
     throw new Error(
-      "SECURITY_GUARD_VIOLATION: Production database 'fairy-house-keys' cannot be accessed in test or staging environment."
+      "SECURITY_GUARD_VIOLATION: Production database 'fairy-house-keys' cannot be accessed in test, staging or preview environment.",
+    );
+  }
+
+  if (isStaging && projectId && projectId !== stagingAllowedProject && !FIRESTORE_EMULATOR_HOST && !projectId.startsWith("demo-")) {
+    throw new Error(
+      `SECURITY_GUARD_VIOLATION: Staging environment must use staging project '${stagingAllowedProject}', got '${projectId}'.`,
     );
   }
 

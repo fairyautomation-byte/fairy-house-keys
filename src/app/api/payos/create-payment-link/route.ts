@@ -128,21 +128,7 @@ export async function POST(req: NextRequest) {
         const info = await payos.getPaymentLinkInformation(
           result.payosOrderCode,
         );
-        if (info && info.status === "PAID") {
-          await settlePayment(
-            result.payosOrderCode,
-            result.amount,
-            `create-recovery:${result.payosOrderCode}`,
-          );
-          return NextResponse.json({
-            orderCode: result.payosOrderCode,
-            status: "PAID",
-            amount: result.amount,
-          });
-        }
-        if (info && ((info as any).checkoutUrl || (info as any).qrCode)) {
-          link = info;
-        } else {
+        if (!info) {
           throw new ApiError(
             503,
             "PAYMENT_GATEWAY_UNAVAILABLE",
@@ -151,6 +137,91 @@ export async function POST(req: NextRequest) {
             true,
           );
         }
+
+        if (info.orderCode !== result.payosOrderCode) {
+          throw new ApiError(502, "PAYMENT_ORDER_MISMATCH", "Mã đơn hàng không khớp.");
+        }
+
+        if (info.status === "PAID") {
+          if (info.amountPaid !== result.amount) {
+            throw new ApiError(
+              400,
+              "PAYMENT_AMOUNT_MISMATCH",
+              `Số tiền thanh toán (${info.amountPaid}) không khớp với giá trị đơn hàng (${result.amount}).`,
+            );
+          }
+          await settlePayment(
+            result.payosOrderCode,
+            info.amountPaid,
+            `create-recovery:${result.payosOrderCode}`,
+          );
+          return NextResponse.json({
+            ok: true,
+            orderCode: result.payosOrderCode,
+            status: "PAID",
+            amount: info.amountPaid,
+          });
+        }
+
+        if (info.status === "PENDING") {
+          if (info.amount !== result.amount) {
+            throw new ApiError(
+              400,
+              "PAYMENT_AMOUNT_MISMATCH",
+              "Giá trị đơn hàng không khớp.",
+            );
+          }
+          const bin = (info as any).bin || process.env.PAYOS_BIN || "970422";
+          const accountNumber = (info as any).accountNumber || process.env.PAYOS_ACCOUNT_NUMBER || "";
+          const accountName = (info as any).accountName || process.env.PAYOS_ACCOUNT_NAME || "FAIRY HOUSE";
+          const payment = {
+            orderCode: result.payosOrderCode,
+            amount: result.amount,
+            status: "PENDING",
+            recovered: true,
+            paymentLinkId: info.id,
+            bin,
+            accountNumber,
+            accountName,
+            description: String(result.payosOrderCode),
+            transactionCode: result.transactionCode,
+            expiredAt: expirySec,
+            timeLeft: Math.max(0, expirySec - Math.floor(Date.now() / 1000)),
+            checkoutUrl: (info as any).checkoutUrl || "",
+            qrCode: (info as any).qrCode || "",
+          };
+
+          await db.runTransaction(async (tx) => {
+            const current = await tx.get(ref);
+            tx.update(ref, {
+              payment,
+              paymentLinkId: info.id,
+              expires_at: new Date(expirySec * 1000),
+              ...(current.data()?.status === "CREATING" ? { status: "PENDING" } : {}),
+            });
+          });
+
+          return NextResponse.json(payment);
+        }
+
+        if (["EXPIRED", "CANCELLED", "CANCELED"].includes(info.status)) {
+          await db.runTransaction(async (tx) => {
+            tx.update(ref, { status: info.status, updated_at: new Date() });
+          });
+          throw new ApiError(
+            410,
+            "PAYMENT_LINK_EXPIRED",
+            "Liên kết thanh toán đã hết hạn hoặc bị hủy.",
+          );
+        }
+
+        throw new ApiError(
+          503,
+          "PAYMENT_GATEWAY_UNAVAILABLE",
+          "Cổng thanh toán chưa sẵn sàng.",
+          3,
+          true,
+        );
       } catch (recErr: any) {
         if (recErr instanceof ApiError) throw recErr;
         throw new ApiError(

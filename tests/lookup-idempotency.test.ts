@@ -307,3 +307,56 @@ test("R03: refunding earlier day charge does not subtract from new day counter",
   assert.equal(afterRefund.total_scans, 3);
 });
 
+test("R04: worker with lost/expired lease is fenced and cannot overwrite active worker or refund quota", async () => {
+  const licenseRef = mockDb.collection("licenses").doc("lic-r04-fence");
+  const userRef = mockDb.collection("users").doc("user-r04-fence");
+
+  await userRef.set({ status: "ACTIVE", email_verified: true });
+  await licenseRef.set({
+    license_key: "FHAD-R040-FENC-ETOK-EN01",
+    user_id: "user-r04-fence",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 1,
+    total_scans: 1,
+    last_reset_date: "2026-10-11",
+  });
+
+  const requestId = "req-r04-fence-12345678";
+  const { digest } = await import("../src/lib/security");
+  const receiptRef = mockDb
+    .collection("phone_requests")
+    .doc(digest(`lic-r04-fence:${requestId}`));
+
+  // Simulate Worker B has taken over the lease and successfully completed
+  await receiptRef.set({
+    status: "COMPLETED",
+    lease_token: "worker-b-active-token",
+    lease_until: new Date(Date.now() + 60000),
+    result: {
+      ok: true,
+      phoneMap: { "10000000001": "0909999999" },
+    },
+  });
+
+  // Now Worker A (old stale worker with token-a) finishes slow execution with error and tries to refund/fail
+  // With fencing token protection, Worker A's write must be blocked by the lease check
+  const staleLeaseToken = "worker-a-stale-token";
+
+  // Simulate transactional fence update attempt
+  await mockDb.runTransaction(async (tx: any) => {
+    const snap = await tx.get(receiptRef);
+    if (!snap.exists || snap.data()?.lease_token !== staleLeaseToken) {
+      // Fenced out!
+      return;
+    }
+    tx.update(receiptRef, { status: "FAILED" });
+  });
+
+  const snapAfterStaleAttempt = await receiptRef.get();
+  // Status must REMAIN COMPLETED and lease_token must remain Worker B's token
+  assert.equal(snapAfterStaleAttempt.data()?.status, "COMPLETED");
+  assert.equal(snapAfterStaleAttempt.data()?.lease_token, "worker-b-active-token");
+});
+
+

@@ -67,6 +67,9 @@ export default function WalletPage() {
               ["CANCELED", "CANCELLED", "EXPIRED"].includes(data.status)
             ) {
               setPaymentState("expired");
+              if (transactionInfo?.amount) {
+                clearPaymentIntent("deposit", transactionInfo.amount);
+              }
               return;
             }
           }
@@ -112,6 +115,9 @@ export default function WalletPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 410 || data.code === "PAYMENT_LINK_EXPIRED") {
+          clearPaymentIntent("deposit", amount);
+        }
         throw new Error(data.error || "Lỗi tạo mã QR");
       }
 
@@ -149,6 +155,7 @@ export default function WalletPage() {
 
   const handleCancelPayment = async () => {
     try {
+      const amountToClear = transactionInfo?.amount || parseInt(depositAmount.replace(/[^0-9]/g, "")) || 0;
       if (transactionInfo) {
         const res = await fetch("/api/payos/cancel", {
           method: "POST",
@@ -161,6 +168,9 @@ export default function WalletPage() {
           toastError("Đơn đã thanh toán. Vui lòng tải lại số dư.");
           return;
         }
+      }
+      if (amountToClear) {
+        clearPaymentIntent("deposit", amountToClear);
       }
       clearRequest("deposit");
       setShowQR(false);

@@ -182,6 +182,7 @@ function CheckoutContent() {
               ["CANCELED", "CANCELLED", "EXPIRED"].includes(data.status)
             ) {
               setQrState("expired");
+              clearPaymentIntent("purchase", selectedPlanId);
               return;
             }
           }
@@ -270,6 +271,9 @@ function CheckoutContent() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 410 || data.code === "PAYMENT_LINK_EXPIRED") {
+          clearPaymentIntent("purchase", selectedPlanId);
+        }
         throw new Error(data.error || "Không thể tạo cổng thanh toán PayOS");
       }
 
@@ -326,6 +330,7 @@ function CheckoutContent() {
           return;
         }
       }
+      clearPaymentIntent("purchase", selectedPlanId);
       clearRequest("payos:" + selectedPlanId);
       setPaymentStep("select");
       setPayosData(null);

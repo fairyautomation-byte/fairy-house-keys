@@ -347,9 +347,13 @@ async function getPhoneMap(uids, explicitRequestId = null) {
       if (data.code === 'DEVICE_LIMIT_EXCEEDED' || data.code === 'DEVICE_MISMATCH') {
         throw new Error(data.error || 'Thiết bị không khớp với License đã kích hoạt.');
       }
-      if (response.status < 500 && data.code !== 'RATE_LIMIT_EXCEEDED') throw new Error(data.error || 'Không có quyền tra dữ liệu.');
+      const isRetryable4xx = response.status === 429 && (data.code === 'RATE_LIMIT_EXCEEDED' || data.code === 'OPERATION_IN_PROGRESS');
+      if (response.status < 500 && !isRetryable4xx) throw new Error(data.error || 'Không có quyền tra dữ liệu.');
       if (attempt === 2) throw new Error(data.error || 'Máy chủ chưa sẵn sàng.');
-    } catch (error) { if (response && response.status < 500 && data?.code !== 'RATE_LIMIT_EXCEEDED' || attempt === 2) throw error; }
+    } catch (error) {
+      const isRetryable4xx = response && response.status === 429 && (data?.code === 'RATE_LIMIT_EXCEEDED' || data?.code === 'OPERATION_IN_PROGRESS');
+      if ((response && response.status < 500 && !isRetryable4xx) || attempt === 2) throw error;
+    }
     await sleepBg(Math.min(10000, Number(response?.headers?.get('Retry-After') || 0) * 1000 || 1000 * (attempt + 1)));
   }
   const current = await chrome.storage.local.get(['ztServerToken']);

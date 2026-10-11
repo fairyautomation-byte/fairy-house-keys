@@ -179,8 +179,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Server-wide deadline budget: 12 seconds total (leaves safety margin for client 20s timeout)
-    const timeoutSignal = AbortSignal.timeout(12000);
+    // Server-wide deadline budget: 12 seconds total covering overall request
+    const elapsed = Date.now() - (req as any)._startTime || 0;
+    const remainingMs = Math.max(1000, 12000 - elapsed);
+    const timeoutSignal = AbortSignal.timeout(remainingMs);
 
     // Consume quota atomically. Note: quota charges requested unique UIDs.
     const quota = await consumeQuota(ref, "consume", uids.length, requestId);
@@ -208,12 +210,26 @@ export async function POST(req: NextRequest) {
 
     // Check system error status: if both providers failed to respond and 0 phones found
     if (!db1Success && !db2Success && Object.keys(map).length === 0) {
-      // System failure: rollback quota and mark receipt failed so retry can succeed cleanly
-      await refundSystemQuota(ref, uids.length, requestId);
-      await receipt.update({
-        status: "FAILED",
-        last_error: resDb1.error || "PHONE_PROVIDERS_UNAVAILABLE",
+      // Transactional fence: only update to FAILED and refund if this worker still holds the lease!
+      let leasePreserved = false;
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(receipt);
+        if (!snap.exists || snap.data()?.lease_token !== myLeaseToken) {
+          // Lost lease to another worker, do not overwrite or refund!
+          return;
+        }
+        leasePreserved = true;
+        tx.update(receipt, {
+          status: "FAILED",
+          last_error: resDb1.error || "PHONE_PROVIDERS_UNAVAILABLE",
+          failed_at: new Date(),
+        });
       });
+
+      if (leasePreserved) {
+        await refundSystemQuota(ref, uids.length, requestId);
+      }
+
       throw new ApiError(
         502,
         "PHONE_PROVIDER_UNAVAILABLE",
@@ -231,13 +247,24 @@ export async function POST(req: NextRequest) {
       partial: missing.length > 0 && Object.keys(map).length > 0,
     };
 
-    await receipt.update({
-      status: "COMPLETED",
-      result,
-      completed_at: new Date(),
+    let finalResult = result;
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(receipt);
+      if (!snap.exists || snap.data()?.lease_token !== myLeaseToken) {
+        // Lost lease! Another worker took over. Preserve their result if present
+        if (snap.exists && snap.data()?.result) {
+          finalResult = snap.data()!.result;
+        }
+        return;
+      }
+      tx.update(receipt, {
+        status: "COMPLETED",
+        result,
+        completed_at: new Date(),
+      });
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(finalResult);
   } catch (error) {
     return failure(error, req);
   }

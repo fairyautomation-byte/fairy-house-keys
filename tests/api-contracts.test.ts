@@ -63,7 +63,6 @@ test("test guard in firebase.ts rejects production project fairy-house-keys in t
     process.env.APP_ENV = "staging";
     assert.throws(
       () => {
-        // Accessing db triggers database()
         db.collection("test");
       },
       /SECURITY_GUARD_VIOLATION/,
@@ -73,3 +72,46 @@ test("test guard in firebase.ts rejects production project fairy-house-keys in t
     process.env.APP_ENV = oldAppEnv;
   }
 });
+
+test("R07: test guard in firebase.ts rejects production project when APP_ENV=test", () => {
+  const oldProject = process.env.FIREBASE_PROJECT_ID;
+  const oldAppEnv = process.env.APP_ENV;
+  const oldNodeEnv = process.env.NODE_ENV;
+  try {
+    process.env.FIREBASE_PROJECT_ID = "fairy-house-keys";
+    process.env.APP_ENV = "test";
+    process.env.NODE_ENV = "production";
+    assert.throws(
+      () => {
+        db.collection("test");
+      },
+      /SECURITY_GUARD_VIOLATION/,
+    );
+  } finally {
+    process.env.FIREBASE_PROJECT_ID = oldProject;
+    process.env.APP_ENV = oldAppEnv;
+    process.env.NODE_ENV = oldNodeEnv;
+  }
+});
+
+test("R07: test guard in firebase.ts rejects production project when VERCEL_ENV=preview", () => {
+  const oldProject = process.env.FIREBASE_PROJECT_ID;
+  const oldVercelEnv = process.env.VERCEL_ENV;
+  const oldNodeEnv = process.env.NODE_ENV;
+  try {
+    process.env.FIREBASE_PROJECT_ID = "fairy-house-keys";
+    process.env.VERCEL_ENV = "preview";
+    process.env.NODE_ENV = "production";
+    assert.throws(
+      () => {
+        db.collection("test");
+      },
+      /SECURITY_GUARD_VIOLATION/,
+    );
+  } finally {
+    process.env.FIREBASE_PROJECT_ID = oldProject;
+    process.env.VERCEL_ENV = oldVercelEnv;
+    process.env.NODE_ENV = oldNodeEnv;
+  }
+});
+
