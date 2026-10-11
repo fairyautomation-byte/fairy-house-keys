@@ -210,7 +210,7 @@ export default function DashboardOverview() {
               <h3 className="text-base font-bold text-[var(--fha-text)]">
                 Bàn Làm Việc Tiện Ích Chrome
               </h3>
-              <span className="text-xs text-[var(--fha-text-muted)] font-mono">Phiên bản 2.0.4 Native</span>
+              <span className="text-xs text-[var(--fha-text-muted)] font-mono">Phiên bản 2.1.2 Native</span>
             </div>
 
             <div className="grid sm:grid-cols-3 gap-3.5">

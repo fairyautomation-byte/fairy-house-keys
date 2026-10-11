@@ -52,7 +52,7 @@ export default function ActivatePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   <span>Tải Bộ Cài (.ZIP) Ngay</span>
-                  <span className="text-[10px] text-[var(--fha-text-muted)] font-mono ml-1">v2.0.4 Native</span>
+                  <span className="text-[10px] text-[var(--fha-text-muted)] font-mono ml-1">v2.1.2 Native</span>
                 </a>
               </div>
             </div>
