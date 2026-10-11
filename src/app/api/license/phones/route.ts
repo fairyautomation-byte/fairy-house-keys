@@ -91,7 +91,8 @@ async function safeLookup(
 
 export async function POST(req: NextRequest) {
   try {
-    const { licenseKey, uids, requestId } = await jsonBody(req);
+    const { licenseKey, uids, requestId, installationId } =
+      await jsonBody(req);
     if (
       !Array.isArray(uids) ||
       !uids.length ||
@@ -107,7 +108,7 @@ export async function POST(req: NextRequest) {
       throw new ApiError(400, "REQUEST_ID_REQUIRED");
 
     const ref = await findLicense(licenseKey);
-    await validateLicense(ref);
+    await validateLicense(ref, installationId);
 
     if (!(await checkRateLimit(`phones:${ref.id}`, 120, 60)).allowed)
       throw new ApiError(429, "RATE_LIMIT_EXCEEDED", undefined, 60, true);

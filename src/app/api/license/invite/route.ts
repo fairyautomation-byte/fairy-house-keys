@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { findLicense, licenseView, vietnamDay } from "@/lib/license-service";
+import {
+  findLicense,
+  licenseView,
+  vietnamDay,
+  validateLicense,
+} from "@/lib/license-service";
 import {
   jsonBody,
   failure,
@@ -10,7 +15,12 @@ import {
 } from "@/lib/security";
 export async function POST(req: NextRequest) {
   try {
-    const { licenseKey, requestId, action = "consume" } = await jsonBody(req);
+    const {
+      licenseKey,
+      requestId,
+      action = "consume",
+      installationId,
+    } = await jsonBody(req);
     if (
       typeof licenseKey !== "string" ||
       !/^[a-zA-Z0-9_-]{8,80}$/.test(licenseKey.trim())
@@ -23,6 +33,7 @@ export async function POST(req: NextRequest) {
     )
       throw new ApiError(400, "REQUEST_ID_REQUIRED");
     const ref = await findLicense(licenseKey.trim());
+    await validateLicense(ref, installationId);
     const result = await db.runTransaction(
       async (tx) => {
         const license = await tx.get(ref),

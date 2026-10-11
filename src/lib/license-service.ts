@@ -32,6 +32,9 @@ export function licenseView(data: any, now = new Date()) {
     last_reset_date: today,
     server_date: today,
     entitlements: ["scan", "phone", "export", "gender", "fanpage"],
+    installation_id: data.installation_id || null,
+    installation_name: data.installation_name || null,
+    bound_to_device: !!data.installation_id,
   };
 }
 export async function findLicense(key: unknown) {
@@ -54,16 +57,87 @@ export async function findLicense(key: unknown) {
 }
 export async function validateLicense(
   ref: FirebaseFirestore.DocumentReference,
+  installationId?: string | null,
+  clientMeta?: { deviceName?: string; clientVersion?: string },
 ) {
-  const snap = await ref.get();
-  if (!snap.exists) throw new ApiError(404, "LICENSE_NOT_FOUND");
-  const data = snap.data()!,
-    owner = await db.collection("users").doc(data.user_id).get();
-  if (!owner.exists || !activeUser(owner.data()))
-    throw new ApiError(403, "LICENSE_REVOKED");
-  const view = licenseView(data);
-  if (!view.valid) throw new ApiError(403, `LICENSE_${view.license_status}`);
-  return view;
+  return db.runTransaction(
+    async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new ApiError(404, "LICENSE_NOT_FOUND");
+      const data = snap.data()!;
+      const owner = await tx.get(db.collection("users").doc(data.user_id));
+      if (!owner.exists || !activeUser(owner.data()))
+        throw new ApiError(403, "LICENSE_REVOKED");
+      const view = licenseView(data);
+      if (!view.valid) throw new ApiError(403, `LICENSE_${view.license_status}`);
+
+      if (installationId) {
+        if (
+          typeof installationId !== "string" ||
+          !/^[a-zA-Z0-9_-]{8,64}$/.test(installationId.trim())
+        ) {
+          throw new ApiError(400, "INVALID_INSTALLATION_ID");
+        }
+        const cleanInstallation = installationId.trim();
+        const currentBound = data.installation_id;
+        if (!currentBound) {
+          tx.update(ref, {
+            installation_id: cleanInstallation,
+            installation_name: clientMeta?.deviceName || "Chrome Extension",
+            installation_bound_at: new Date(),
+            installation_last_seen: new Date(),
+          });
+          return {
+            ...view,
+            installation_id: cleanInstallation,
+            bound_to_device: true,
+          };
+        } else if (currentBound !== cleanInstallation) {
+          throw new ApiError(
+            403,
+            "DEVICE_LIMIT_EXCEEDED",
+            "License đã được kích hoạt trên một thiết bị khác. Vui lòng đăng xuất trên thiết bị cũ trước khi sử dụng thiết bị mới.",
+          );
+        } else {
+          tx.update(ref, {
+            installation_last_seen: new Date(),
+          });
+        }
+      }
+
+      return view;
+    },
+    { maxAttempts: 10 },
+  );
+}
+
+export async function unbindLicenseInstallation(
+  ref: FirebaseFirestore.DocumentReference,
+  callerInstallationId?: string | null,
+  userId?: string | null,
+) {
+  return db.runTransaction(
+    async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) throw new ApiError(404, "LICENSE_NOT_FOUND");
+      const data = snap.data()!;
+      const isOwner = Boolean(userId && data.user_id === userId);
+      const isBoundInstallation = Boolean(
+        callerInstallationId && data.installation_id === callerInstallationId.trim(),
+      );
+      if (!isOwner && !isBoundInstallation) {
+        throw new ApiError(403, "UNAUTHORIZED_UNBIND");
+      }
+      tx.update(ref, {
+        installation_id: null,
+        installation_name: null,
+        installation_bound_at: null,
+        last_unbound_at: new Date(),
+      });
+      return { success: true, unbound: true };
+    },
+    { maxAttempts: 10 },
+  );
 }
 export function scanInput(action: unknown, count: unknown, requestId: unknown) {
   if (!["check", "consume"].includes(String(action)))

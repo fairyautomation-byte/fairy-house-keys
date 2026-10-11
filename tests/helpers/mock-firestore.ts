@@ -52,6 +52,7 @@ export class MockQuery {
     private readonly store: MockFirestoreStore,
     private readonly filters: Array<{ field: string; op: string; val: any }> = [],
     private readonly limitCount?: number,
+    private readonly order?: { field: string; direction: "asc" | "desc" },
   ) {}
 
   where(field: string, op: string, val: any) {
@@ -60,6 +61,17 @@ export class MockQuery {
       this.store,
       [...this.filters, { field, op, val }],
       this.limitCount,
+      this.order,
+    );
+  }
+
+  orderBy(field: string, direction: "asc" | "desc" = "asc") {
+    return new MockQuery(
+      this.collectionName,
+      this.store,
+      this.filters,
+      this.limitCount,
+      { field, direction },
     );
   }
 
@@ -69,6 +81,7 @@ export class MockQuery {
       this.store,
       this.filters,
       count,
+      this.order,
     );
   }
 
@@ -80,6 +93,17 @@ export class MockQuery {
         if (f.op === "==") return docVal === f.val;
         if (f.op === "in") return Array.isArray(f.val) && f.val.includes(docVal);
         return true;
+      });
+    }
+    if (this.order) {
+      docs.sort((a, b) => {
+        const valA = a.data[this.order!.field];
+        const valB = b.data[this.order!.field];
+        const tA = valA?.getTime ? valA.getTime() : valA;
+        const tB = valB?.getTime ? valB.getTime() : valB;
+        if (tA < tB) return this.order!.direction === "asc" ? -1 : 1;
+        if (tA > tB) return this.order!.direction === "asc" ? 1 : -1;
+        return 0;
       });
     }
     if (this.limitCount !== undefined) {
@@ -97,6 +121,7 @@ export class MockQuery {
       docs: snapshots,
       size: snapshots.length,
       empty: snapshots.length === 0,
+      forEach: (fn: (doc: any) => void) => snapshots.forEach(fn),
     };
   }
 }
@@ -212,6 +237,10 @@ export class MockFirestore {
     const result = await updateFunction(tx);
     tx.commit();
     return result;
+  }
+
+  seed(col: string, id: string, data: any) {
+    this.store.set(col, id, data);
   }
 
   clear() {

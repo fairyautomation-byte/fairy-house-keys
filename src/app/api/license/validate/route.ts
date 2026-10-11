@@ -4,7 +4,8 @@ import { jsonBody, failure, ApiError } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
   try {
-    const { licenseKey } = await jsonBody(req);
+    const { licenseKey, installationId, deviceName, clientVersion } =
+      await jsonBody(req);
     if (
       typeof licenseKey !== "string" ||
       !/^[a-zA-Z0-9_-]{8,80}$/.test(licenseKey.trim())
@@ -28,10 +29,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      await validateLicense(await findLicense(cleanKey)),
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    const ref = await findLicense(cleanKey);
+    const view = await validateLicense(ref, installationId, {
+      deviceName: typeof deviceName === "string" ? deviceName.slice(0, 100) : undefined,
+      clientVersion: typeof clientVersion === "string" ? clientVersion.slice(0, 30) : undefined,
+    });
+
+    return NextResponse.json(view, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (error) {
     const res = failure(error, req);
     const data = await res.json();
