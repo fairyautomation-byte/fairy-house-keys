@@ -48,11 +48,12 @@ export class MockDocumentSnapshot {
 
 export class MockQuery {
   constructor(
-    private readonly collectionName: string,
-    private readonly store: MockFirestoreStore,
-    private readonly filters: Array<{ field: string; op: string; val: any }> = [],
-    private readonly limitCount?: number,
-    private readonly order?: { field: string; direction: "asc" | "desc" },
+    protected readonly collectionName: string,
+    protected readonly store: MockFirestoreStore,
+    protected readonly filters: Array<{ field: string; op: string; val: any }> = [],
+    protected readonly limitCount?: number,
+    protected readonly order?: { field: string; direction: "asc" | "desc" },
+    protected readonly afterId?: string,
   ) {}
 
   where(field: string, op: string, val: any) {
@@ -62,6 +63,7 @@ export class MockQuery {
       [...this.filters, { field, op, val }],
       this.limitCount,
       this.order,
+      this.afterId,
     );
   }
 
@@ -72,6 +74,19 @@ export class MockQuery {
       this.filters,
       this.limitCount,
       { field, direction },
+      this.afterId,
+    );
+  }
+
+  startAfter(docOrId: any) {
+    const afterId = typeof docOrId === "string" ? docOrId : docOrId?.id;
+    return new MockQuery(
+      this.collectionName,
+      this.store,
+      this.filters,
+      this.limitCount,
+      this.order,
+      afterId,
     );
   }
 
@@ -82,7 +97,27 @@ export class MockQuery {
       this.filters,
       count,
       this.order,
+      this.afterId,
     );
+  }
+
+  count() {
+    return {
+      get: async () => {
+        let docs = this.store.getAll(this.collectionName);
+        for (const f of this.filters) {
+          docs = docs.filter((d) => {
+            const docVal = d.data[f.field];
+            if (f.op === "==") return docVal === f.val;
+            if (f.op === "in") return Array.isArray(f.val) && f.val.includes(docVal);
+            return true;
+          });
+        }
+        return {
+          data: () => ({ count: docs.length }),
+        };
+      },
+    };
   }
 
   async get() {
@@ -105,6 +140,12 @@ export class MockQuery {
         if (tA > tB) return this.order!.direction === "asc" ? 1 : -1;
         return 0;
       });
+    }
+    if (this.afterId) {
+      const idx = docs.findIndex((d) => d.id === this.afterId);
+      if (idx !== -1) {
+        docs = docs.slice(idx + 1);
+      }
     }
     if (this.limitCount !== undefined) {
       docs = docs.slice(0, this.limitCount);

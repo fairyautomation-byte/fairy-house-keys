@@ -17,6 +17,38 @@ export async function GET(req: NextRequest) {
       Math.max(1, limitParam ? parseInt(limitParam, 10) || 50 : 50),
     );
 
+    const search = req.nextUrl.searchParams.get("search")?.toLowerCase().trim();
+
+    if (search) {
+      let query: any = db.collection("users").orderBy("created_at", "desc");
+      if (cursor) {
+        const cursorDoc = await db.collection("users").doc(cursor).get();
+        if (cursorDoc.exists) {
+          query = query.startAfter(cursorDoc);
+        }
+      }
+      const snapshot = await query.limit(200).get();
+      const allUsers = snapshot.docs.map((doc: any) => {
+        const data = publicUser(doc.data());
+        if (data.password) delete data.password;
+        return { id: doc.id, ...data };
+      });
+      const matched = allUsers.filter((u: any) =>
+        u.email?.toLowerCase().includes(search) ||
+        u.full_name?.toLowerCase().includes(search) ||
+        u.zalo?.includes(search)
+      );
+      const nextCursor =
+        snapshot.docs.length === 200 ? snapshot.docs[snapshot.docs.length - 1].id : null;
+      const res = NextResponse.json(matched.slice(0, limit));
+      res.headers.set("Access-Control-Expose-Headers", "x-next-cursor, x-has-more");
+      if (nextCursor) {
+        res.headers.set("x-next-cursor", nextCursor);
+        res.headers.set("x-has-more", "true");
+      }
+      return res;
+    }
+
     let query: any = db
       .collection("users")
       .orderBy("created_at", "desc")
@@ -43,6 +75,7 @@ export async function GET(req: NextRequest) {
       snapshot.docs.length === limit ? snapshot.docs[snapshot.docs.length - 1].id : null;
 
     const res = NextResponse.json(users);
+    res.headers.set("Access-Control-Expose-Headers", "x-next-cursor, x-has-more");
     if (nextCursor) {
       res.headers.set("x-next-cursor", nextCursor);
       res.headers.set("x-has-more", "true");

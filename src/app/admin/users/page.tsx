@@ -21,12 +21,50 @@ export default function AdminUsersPage() {
   
   const { success, error } = useToast();
 
-  const fetchUsers = () => {
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [pageHistory, setPageHistory] = useState<Array<string | null>>([null]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchUsers = async (targetCursor?: string | null, pageNum: number = 1) => {
     setLoading(true);
-    fetch('/api/admin/users')
-      .then(res => res.json())
-      .then(setUsers)
-      .finally(() => setLoading(false));
+    try {
+      const params = new URLSearchParams({ limit: '50' });
+      if (targetCursor) params.set('cursor', targetCursor);
+      if (searchQuery.trim()) params.set('search', searchQuery.trim());
+      const res = await fetch(`/api/admin/users?${params.toString()}`);
+      const nextCursor = res.headers.get('x-next-cursor');
+      const more = res.headers.get('x-has-more') === 'true';
+      const data = await res.json();
+      setUsers(Array.isArray(data) ? data : []);
+      setCursor(nextCursor);
+      setHasMore(more);
+      setCurrentPage(pageNum);
+    } catch (_) {
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (!cursor) return;
+    const nextPage = currentPage + 1;
+    setPageHistory(prev => [...prev.slice(0, currentPage), cursor]);
+    fetchUsers(cursor, nextPage);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage <= 1) return;
+    const prevPage = currentPage - 1;
+    const prevCursor = pageHistory[prevPage - 1] || null;
+    fetchUsers(prevCursor, prevPage);
+  };
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setPageHistory([null]);
+    fetchUsers(null, 1);
   };
 
   useEffect(() => {
@@ -147,17 +185,22 @@ export default function AdminUsersPage() {
       />
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="w-full sm:w-[400px]">
-          <Input 
-            placeholder="Tìm kiếm người dùng, email, zalo..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            leftIcon={
-              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            }
-          />
-        </div>
-        <Button variant="secondary" onClick={fetchUsers} size="sm" className="bg-white">
+        <form onSubmit={handleSearchSubmit} className="flex gap-2 w-full sm:w-auto">
+          <div className="w-full sm:w-[400px]">
+            <Input 
+              placeholder="Tìm kiếm người dùng, email, zalo..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              leftIcon={
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              }
+            />
+          </div>
+          <Button type="submit" variant="secondary" size="sm" className="bg-white">
+            Tìm
+          </Button>
+        </form>
+        <Button variant="secondary" onClick={() => { setSearchQuery(''); setPageHistory([null]); fetchUsers(null, 1); }} size="sm" className="bg-white">
           Làm Mới
         </Button>
       </div>
@@ -189,6 +232,32 @@ export default function AdminUsersPage() {
             <div className="py-12 text-center text-[var(--fha-text-muted)] text-[14px]">Không tìm thấy người dùng nào</div>
           }
         />
+
+        {/* Keyset / Cursor Pagination Controls */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--fha-border)] bg-gray-50/50">
+          <div className="text-sm text-[var(--fha-text-muted)]">
+            Trang <span className="font-semibold text-[var(--fha-text)]">{currentPage}</span>
+            {users.length > 0 && <span> ({users.length} người dùng hiển thị)</span>}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1 || loading}
+            >
+              ← Trang trước
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={!hasMore || !cursor || loading}
+            >
+              Trang tiếp →
+            </Button>
+          </div>
+        </div>
       </div>
 
       <ConfirmModal

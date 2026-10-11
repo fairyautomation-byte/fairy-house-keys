@@ -20,28 +20,61 @@ export async function POST(req: NextRequest) {
       throw new ApiError(401, "Unauthorized");
 
     const now = Date.now();
-    // Anti-starvation: query broader window of candidates and prioritize due orders
-    const orderCandidates = await db
-      .collection("payos_orders")
-      .where("status", "in", [
-        "PENDING",
-        "CREATING",
-        "CANCELED",
-        "EXPIRED",
-        "CREATE_FAILED",
-      ])
-      .limit(200)
-      .get();
+    const MAX_DUE_ORDERS = 50;
+    const TIME_BUDGET_MS = 25000;
+    const scanStart = Date.now();
 
-    const dueOrders = orderCandidates.docs
-      .map((doc: any) => ({
-        doc,
-        data: doc.data(),
-        nextAt: toMillis(doc.data().next_reconcile_at),
-      }))
-      .filter((item: any) => !item.nextAt || item.nextAt <= now)
-      .sort((a: any, b: any) => (a.nextAt || 0) - (b.nextAt || 0))
-      .slice(0, 50);
+    // Starvation-free: cursor-based scan through payos_orders backlog until due orders are collected or exhausted
+    const dueOrders: Array<{ doc: any; data: any; nextAt: number }> = [];
+    let lastOrderDoc: any = null;
+
+    while (dueOrders.length < MAX_DUE_ORDERS && Date.now() - scanStart < TIME_BUDGET_MS) {
+      let q: any = db
+        .collection("payos_orders")
+        .where("status", "in", [
+          "PENDING",
+          "CREATING",
+          "CANCELED",
+          "EXPIRED",
+          "CREATE_FAILED",
+        ]);
+
+      if (lastOrderDoc && typeof q.startAfter === "function") {
+        q = q.startAfter(lastOrderDoc);
+      } else if (lastOrderDoc) {
+        break;
+      }
+
+      if (typeof q.startAfter !== "function") {
+        const snap = await q.get();
+        for (const doc of snap.docs) {
+          const data = doc.data();
+          const nextAt = toMillis(data.next_reconcile_at);
+          if (!nextAt || nextAt <= now) {
+            dueOrders.push({ doc, data, nextAt });
+            if (dueOrders.length >= MAX_DUE_ORDERS) break;
+          }
+        }
+        break;
+      }
+
+      const snap = await q.limit(200).get();
+      if (!snap || snap.empty || snap.docs.length === 0) break;
+
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        const nextAt = toMillis(data.next_reconcile_at);
+        if (!nextAt || nextAt <= now) {
+          dueOrders.push({ doc, data, nextAt });
+          if (dueOrders.length >= MAX_DUE_ORDERS) break;
+        }
+      }
+
+      if (snap.docs.length < 200) break;
+      lastOrderDoc = snap.docs[snap.docs.length - 1];
+    }
+
+    dueOrders.sort((a, b) => (a.nextAt || 0) - (b.nextAt || 0));
 
     let settled = 0,
       failed = 0;
@@ -79,26 +112,52 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Anti-starvation: query broader window for emails, filter out dead-letters and future backoffs
-    const emailCandidates = await db
-      .collection("email_outbox")
-      .where("status", "in", ["PENDING", "SENDING"])
-      .limit(100)
-      .get();
+    // Starvation-free: cursor-based scan through email_outbox backlog
+    const dueEmails: Array<{ doc: any; data: any; nextAt: number }> = [];
+    const MAX_DUE_EMAILS = 20;
+    let lastEmailDoc: any = null;
 
-    const dueEmails = emailCandidates.docs
-      .map((doc: any) => ({
-        doc,
-        data: doc.data(),
-        nextAt: toMillis(doc.data().next_attempt_at),
-      }))
-      .filter(
-        (item: any) =>
-          item.data.status !== "DEAD_LETTER" &&
-          (!item.nextAt || item.nextAt <= now),
-      )
-      .sort((a: any, b: any) => (a.nextAt || 0) - (b.nextAt || 0))
-      .slice(0, 20);
+    while (dueEmails.length < MAX_DUE_EMAILS && Date.now() - scanStart < TIME_BUDGET_MS) {
+      let eq: any = db
+        .collection("email_outbox")
+        .where("status", "in", ["PENDING", "SENDING"]);
+
+      if (lastEmailDoc && typeof eq.startAfter === "function") {
+        eq = eq.startAfter(lastEmailDoc);
+      } else if (lastEmailDoc) {
+        break;
+      }
+
+      if (typeof eq.startAfter !== "function") {
+        const snap = await eq.get();
+        for (const doc of snap.docs) {
+          const data = doc.data();
+          const nextAt = toMillis(data.next_attempt_at);
+          if (data.status !== "DEAD_LETTER" && (!nextAt || nextAt <= now)) {
+            dueEmails.push({ doc, data, nextAt });
+            if (dueEmails.length >= MAX_DUE_EMAILS) break;
+          }
+        }
+        break;
+      }
+
+      const snap = await eq.limit(100).get();
+      if (!snap || snap.empty || snap.docs.length === 0) break;
+
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        const nextAt = toMillis(data.next_attempt_at);
+        if (data.status !== "DEAD_LETTER" && (!nextAt || nextAt <= now)) {
+          dueEmails.push({ doc, data, nextAt });
+          if (dueEmails.length >= MAX_DUE_EMAILS) break;
+        }
+      }
+
+      if (snap.docs.length < 100) break;
+      lastEmailDoc = snap.docs[snap.docs.length - 1];
+    }
+
+    dueEmails.sort((a, b) => (a.nextAt || 0) - (b.nextAt || 0));
 
     for (const item of dueEmails) {
       await deliverLicenseEmail(item.doc.id);

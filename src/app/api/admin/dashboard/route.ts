@@ -10,41 +10,92 @@ export async function GET(req: NextRequest) {
     }
 
     const now = new Date();
-    // Use Firestore count() aggregation if supported by instance, fallback to bounded snapshot
-    const usersCountPromise = typeof (db.collection("users") as any).count === "function"
-      ? (db.collection("users") as any).count().get().then((s: any) => s.data().count).catch(() => null)
-      : Promise.resolve(null);
 
-    const pendingCountPromise = typeof (db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW") as any).count === "function"
-      ? (db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW") as any).count().get().then((s: any) => s.data().count).catch(() => null)
-      : Promise.resolve(null);
+    // 1. Users count aggregation (conditional fallback only on failure)
+    let usersCount: number | null = null;
+    if (typeof (db.collection("users") as any).count === "function") {
+      try {
+        const s = await (db.collection("users") as any).count().get();
+        usersCount = s.data().count;
+      } catch (_) {}
+    }
+    if (usersCount === null) {
+      const snap = await db.collection("users").get();
+      usersCount = snap.size;
+    }
 
-    const [aggUsers, aggPending, fallbackUsersSnap, fallbackPendingSnap, licensesSnap, recentOrdersSnap] =
-      await Promise.all([
-        usersCountPromise,
-        pendingCountPromise,
-        db.collection("users").limit(1000).get(),
-        db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW").limit(1000).get(),
-        db.collection("licenses").limit(1000).get(),
-        db.collection("orders").orderBy("created_at", "desc").limit(20).get(),
-      ]);
+    // 2. Pending orders count aggregation (conditional fallback only on failure)
+    let pendingOrders: number | null = null;
+    const pendingQuery = db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW");
+    if (typeof (pendingQuery as any).count === "function") {
+      try {
+        const s = await (pendingQuery as any).count().get();
+        pendingOrders = s.data().count;
+      } catch (_) {}
+    }
+    if (pendingOrders === null) {
+      const snap = await pendingQuery.get();
+      pendingOrders = snap.size;
+    }
 
-    const usersCount = aggUsers !== null ? aggUsers : fallbackUsersSnap.size;
+    // 3. Licenses aggregation without arbitrary 1000 truncation cap
     let totalScans = 0;
     let activeLicenses = 0;
+    let lastLicDoc: any = null;
 
-    licensesSnap.docs.forEach((doc: any) => {
-      const data = doc.data();
-      totalScans += data.total_scans || 0;
-      const expired =
-        data.expires_at?.toDate ? data.expires_at.toDate() : data.expires_at ? new Date(data.expires_at) : null;
-      const isExpired = expired && expired.getTime() <= now.getTime();
-      if (data.status === "ACTIVE" && !isExpired) {
-        activeLicenses++;
+    while (true) {
+      let lq: any = db.collection("licenses");
+      if (lastLicDoc && typeof lq.startAfter === "function") {
+        lq = lq.startAfter(lastLicDoc);
+      } else if (lastLicDoc) {
+        break;
       }
-    });
 
-    const pendingOrders = aggPending !== null ? aggPending : fallbackPendingSnap.size;
+      if (typeof lq.startAfter !== "function") {
+        const snap = await lq.get();
+        snap.docs.forEach((doc: any) => {
+          const data = doc.data();
+          totalScans += Number(data.total_scans || 0);
+          const expired = data.expires_at?.toDate
+            ? data.expires_at.toDate()
+            : data.expires_at
+              ? new Date(data.expires_at)
+              : null;
+          const isExpired = expired && expired.getTime() <= now.getTime();
+          if (data.status === "ACTIVE" && !isExpired) {
+            activeLicenses++;
+          }
+        });
+        break;
+      }
+
+      const snap = await lq.limit(1000).get();
+      if (!snap || snap.empty || snap.docs.length === 0) break;
+
+      snap.docs.forEach((doc: any) => {
+        const data = doc.data();
+        totalScans += Number(data.total_scans || 0);
+        const expired = data.expires_at?.toDate
+          ? data.expires_at.toDate()
+          : data.expires_at
+            ? new Date(data.expires_at)
+            : null;
+        const isExpired = expired && expired.getTime() <= now.getTime();
+        if (data.status === "ACTIVE" && !isExpired) {
+          activeLicenses++;
+        }
+      });
+
+      if (snap.docs.length < 1000) break;
+      lastLicDoc = snap.docs[snap.docs.length - 1];
+    }
+
+    // 4. Recent orders
+    const recentOrdersSnap = await db
+      .collection("orders")
+      .orderBy("created_at", "desc")
+      .limit(20)
+      .get();
     const recentOrders = recentOrdersSnap.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
