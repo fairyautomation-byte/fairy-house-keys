@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await validateLicense(ref);
+    await validateLicense(ref, installationId);
     const result = {
       ok: true,
       phoneMap: map,

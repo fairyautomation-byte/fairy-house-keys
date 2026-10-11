@@ -32,8 +32,8 @@ export function licenseView(data: any, now = new Date()) {
     last_reset_date: today,
     server_date: today,
     entitlements: ["scan", "phone", "export", "gender", "fanpage"],
-    installation_id: data.installation_id || null,
-    installation_name: data.installation_name || null,
+    installation_id: null,
+    installation_name: null,
     bound_to_device: !!data.installation_id,
   };
 }
@@ -102,10 +102,22 @@ export async function validateLicense(
           tx.update(ref, {
             installation_last_seen: new Date(),
           });
+          return {
+            ...view,
+            installation_id: cleanInstallation,
+            bound_to_device: true,
+          };
         }
+      } else {
+        if (data.installation_id) {
+          throw new ApiError(
+            403,
+            "DEVICE_LIMIT_EXCEEDED",
+            "License đã được kích hoạt trên một thiết bị. Vui lòng cung cấp mã cài đặt hợp lệ để xác thực.",
+          );
+        }
+        return view;
       }
-
-      return view;
     },
     { maxAttempts: 10 },
   );

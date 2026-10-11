@@ -158,3 +158,105 @@ test("A09: POST /api/license/phones rejects foreign installation when license is
   const data = await res.json();
   assert.equal(data.code, "DEVICE_LIMIT_EXCEEDED");
 });
+
+test("R01: validateLicense rejects missing installationId on bound license and does not disclose bound ID", async () => {
+  const mockDb = new MockFirestore();
+  setDatabaseInstance(mockDb as any);
+
+  mockDb.seed("users", "user_r01", {
+    status: "ACTIVE",
+    role: "user",
+  });
+
+  mockDb.seed("licenses", "lic_r01", {
+    license_key: "FHAD-9999-8888-7777-6666",
+    user_id: "user_r01",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 0,
+    installation_id: "inst_legit_owner",
+  });
+
+  const licRef = mockDb.collection("licenses").doc("lic_r01");
+
+  // Missing installationId on bound license must be rejected, not return valid or disclose installation_id
+  await assert.rejects(
+    async () => {
+      await validateLicense(licRef as any);
+    },
+    (err: any) => {
+      assert.equal(err.code, "DEVICE_LIMIT_EXCEEDED");
+      assert.equal(err.status, 403);
+      return true;
+    },
+  );
+});
+
+test("R01: POST /api/license/scan rejects missing or foreign installationId when license is bound", async () => {
+  const { POST: scanHandler } = await import("../src/app/api/license/scan/route");
+  const mockDb = new MockFirestore();
+  setDatabaseInstance(mockDb as any);
+
+  mockDb.seed("users", "user_r01_scan", {
+    status: "ACTIVE",
+    role: "user",
+  });
+
+  mockDb.seed("licenses", "lic_r01_scan", {
+    license_key: "FHAD-7777-6666-5555-4444",
+    user_id: "user_r01_scan",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 0,
+    installation_id: "inst_legit_scanner",
+  });
+
+  // 1. Missing installationId -> must reject with 403 DEVICE_LIMIT_EXCEEDED
+  const reqNoId = new NextRequest("http://localhost/api/license/scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      licenseKey: "FHAD-7777-6666-5555-4444",
+      action: "consume",
+      count: 1,
+      requestId: "scan-req-no-id-12345",
+    }),
+  });
+  const resNoId = await scanHandler(reqNoId);
+  assert.equal(resNoId.status, 403);
+  const dataNoId = await resNoId.json();
+  assert.equal(dataNoId.code, "DEVICE_LIMIT_EXCEEDED");
+
+  // 2. Foreign installationId -> must reject with 403 DEVICE_LIMIT_EXCEEDED
+  const reqForeign = new NextRequest("http://localhost/api/license/scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      licenseKey: "FHAD-7777-6666-5555-4444",
+      action: "consume",
+      count: 1,
+      requestId: "scan-req-foreign-12345",
+      installationId: "inst_attacker_device",
+    }),
+  });
+  const resForeign = await scanHandler(reqForeign);
+  assert.equal(resForeign.status, 403);
+  const dataForeign = await resForeign.json();
+  assert.equal(dataForeign.code, "DEVICE_LIMIT_EXCEEDED");
+
+  // 3. Legitimate installationId -> succeeds
+  const reqLegit = new NextRequest("http://localhost/api/license/scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      licenseKey: "FHAD-7777-6666-5555-4444",
+      action: "consume",
+      count: 1,
+      requestId: "scan-req-legit-12345",
+      installationId: "inst_legit_scanner",
+    }),
+  });
+  const resLegit = await scanHandler(reqLegit);
+  assert.equal(resLegit.status, 200);
+});
+
