@@ -191,9 +191,13 @@ export async function consumeQuota(
         throw new ApiError(403, `LICENSE_${view.license_status}`);
       const previous = action === "consume" ? await tx.get(receipt) : null;
       if (previous?.exists) {
-        if (previous.data()!.count !== count)
+        const prevData = previous.data()!;
+        if (prevData.count !== count)
           throw new ApiError(409, "REQUEST_ID_CONFLICT");
-        return previous.data()!.response;
+        if (!prevData.refunded) {
+          return prevData.response;
+        }
+        // If previously refunded, continue below to atomically re-charge quota on retry
       }
       if (
         data.daily_limit !== -1 &&
@@ -228,7 +232,11 @@ export async function consumeQuota(
         license_id: ref.id,
         count,
         response,
-        created_at: new Date(),
+        usage_date: view.server_date,
+        refunded: false,
+        refunded_at: null,
+        created_at: previous?.exists ? (previous.data()!.created_at || new Date()) : new Date(),
+        updated_at: new Date(),
         expires_at: new Date(Date.now() + 7 * 86400000),
       });
       return response;
@@ -253,12 +261,28 @@ export async function refundSystemQuota(
       const recData = recSnap.data()!;
       if (recData.refunded) return;
       const data = snap.data()!;
-      const newUsed = Math.max(0, (data.daily_used || 0) - count);
-      const newTotal = Math.max(0, (data.total_scans || 0) - count);
-      tx.update(ref, {
-        daily_used: newUsed,
-        total_scans: newTotal,
-      });
+      const today = vietnamDay();
+      const usageDate =
+        recData.usage_date ||
+        (recData.created_at
+          ? typeof recData.created_at.toDate === "function"
+            ? vietnamDay(recData.created_at.toDate())
+            : vietnamDay(new Date(recData.created_at))
+          : null);
+
+      const isSameDay = Boolean(
+        usageDate &&
+          data.last_reset_date === usageDate &&
+          usageDate === today,
+      );
+
+      const updates: any = {
+        total_scans: Math.max(0, (data.total_scans || 0) - count),
+      };
+      if (isSameDay) {
+        updates.daily_used = Math.max(0, (data.daily_used || 0) - count);
+      }
+      tx.update(ref, updates);
       tx.update(receipt, {
         refunded: true,
         refunded_at: new Date(),
@@ -267,4 +291,5 @@ export async function refundSystemQuota(
     { maxAttempts: 20 },
   );
 }
+
 

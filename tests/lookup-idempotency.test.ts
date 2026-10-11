@@ -195,3 +195,115 @@ test("A03 & A04: system failure rolls back quota and marks receipt FAILED", asyn
     global.fetch = originalFetch;
   }
 });
+
+test("R02: retry after refund recharges quota atomically instead of returning free lookup", async () => {
+  const licenseRef = mockDb.collection("licenses").doc("lic-r02");
+  const userRef = mockDb.collection("users").doc("user-r02");
+
+  await userRef.set({ status: "ACTIVE", email_verified: true });
+  await licenseRef.set({
+    license_key: "FHAD-R020-TEST-QUOT-A001",
+    user_id: "user-r02",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 0,
+    total_scans: 0,
+    last_reset_date: "2026-10-11",
+  });
+
+  const originalFetch = global.fetch;
+  const requestId = "req-r02-retry-12345678";
+
+  try {
+    // 1. First call fails (502 HTML)
+    global.fetch = async () =>
+      new Response("<html>Bad Gateway 502</html>", {
+        status: 502,
+        headers: { "Content-Type": "text/html" },
+      });
+
+    const req1 = new NextRequest("http://localhost/api/license/phones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        licenseKey: "FHAD-R020-TEST-QUOT-A001",
+        uids: ["10000000001"],
+        requestId,
+      }),
+    });
+
+    const res1 = await phonesHandler(req1);
+    assert.equal(res1.status, 502);
+
+    const snapAfterFail = await licenseRef.get();
+    assert.equal(snapAfterFail.data()?.daily_used, 0);
+
+    // 2. Retry with same requestId succeeds
+    global.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          data: [{ uid: "10000000001", phone: "0908888888" }],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+
+    const req2 = new NextRequest("http://localhost/api/license/phones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        licenseKey: "FHAD-R020-TEST-QUOT-A001",
+        uids: ["10000000001"],
+        requestId,
+      }),
+    });
+
+    const res2 = await phonesHandler(req2);
+    assert.equal(res2.status, 200);
+    const data2 = await res2.json();
+    assert.equal(data2.ok, true);
+    assert.equal(data2.phoneMap["10000000001"], "0908888888");
+
+    // The retry MUST recharge quota in the database so daily_used is 1, NOT 0!
+    const snapAfterRetry = await licenseRef.get();
+    assert.equal(snapAfterRetry.data()?.daily_used, 1);
+    assert.equal(snapAfterRetry.data()?.total_scans, 1);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("R03: refunding earlier day charge does not subtract from new day counter", async () => {
+  const licenseRef = mockDb.collection("licenses").doc("lic-r03");
+  const userRef = mockDb.collection("users").doc("user-r03");
+
+  await userRef.set({ status: "ACTIVE", email_verified: true });
+  await licenseRef.set({
+    license_key: "FHAD-R030-MIDN-IGHT-0001",
+    user_id: "user-r03",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 0,
+    total_scans: 0,
+    last_reset_date: "2026-10-10",
+  });
+
+  const oldOperation = "req-yesterday-12345678";
+  await consumeQuota(licenseRef as any, "consume", 5, oldOperation);
+
+  // Simulate that a newer day's legitimate consumption has reset the daily counter to 3
+  await licenseRef.update({
+    daily_used: 3,
+    last_reset_date: "2099-01-02",
+    total_scans: 8,
+  });
+
+  // Now process refund for the old operation (which happened on yesterday's date)
+  await refundSystemQuota(licenseRef as any, 5, oldOperation);
+
+  const afterRefund = (await licenseRef.get()).data()!;
+  // Today's counter MUST NOT be wiped out (should stay 3, NOT 0)
+  assert.equal(afterRefund.daily_used, 3);
+  // Total scans should be adjusted: 8 - 5 = 3
+  assert.equal(afterRefund.total_scans, 3);
+});
+

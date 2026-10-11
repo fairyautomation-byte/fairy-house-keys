@@ -135,8 +135,13 @@ export async function POST(req: NextRequest) {
           if (data.status === "COMPLETED" && data.result) {
             return { action: "COMPLETED", result: data.result };
           }
-          // If currently processing and lease has not expired, fence concurrent execution
-          const leaseUntil = data.lease_until ? data.lease_until.toMillis() : 0;
+          const leaseUntil = data.lease_until
+            ? typeof data.lease_until.toMillis === "function"
+              ? data.lease_until.toMillis()
+              : typeof data.lease_until.getTime === "function"
+                ? data.lease_until.getTime()
+                : Number(new Date(data.lease_until)) || 0
+            : 0;
           if (data.status === "PROCESSING" && leaseUntil > now) {
             return { action: "IN_PROGRESS", retryAfter: 3 };
           }
