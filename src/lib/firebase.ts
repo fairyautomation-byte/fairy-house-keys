@@ -5,16 +5,38 @@ import {
   Firestore,
 } from "firebase-admin/firestore";
 let instance: Firestore | undefined;
+export function setDatabaseInstance(customDb?: Firestore) {
+  instance = customDb;
+}
+
 function database(): Firestore {
   if (instance) return instance;
   const {
     FIREBASE_PROJECT_ID: projectId,
     FIREBASE_CLIENT_EMAIL: clientEmail,
     FIREBASE_PRIVATE_KEY: privateKey,
+    NODE_ENV,
+    APP_ENV,
+    FIRESTORE_EMULATOR_HOST,
   } = process.env;
+
+  const isTest =
+    process.env.NODE_ENV === "test" ||
+    !!process.env.npm_lifecycle_event?.includes("test") ||
+    !!FIRESTORE_EMULATOR_HOST;
+  const isStaging =
+    APP_ENV === "staging" ||
+    (process.env.NODE_ENV as string) === "staging";
+
+  if ((isTest || isStaging) && projectId === "fairy-house-keys") {
+    throw new Error(
+      "SECURITY_GUARD_VIOLATION: Production database 'fairy-house-keys' cannot be accessed in test or staging environment."
+    );
+  }
+
   const emulator =
-    process.env.NODE_ENV !== "production" &&
-    process.env.FIRESTORE_EMULATOR_HOST;
+    NODE_ENV !== "production" &&
+    FIRESTORE_EMULATOR_HOST;
   if (!projectId || (!emulator && (!clientEmail || !privateKey)))
     throw new Error("FIREBASE_CONFIG_MISSING");
   const app = getApps().length
@@ -45,3 +67,4 @@ export const db: Firestore = new Proxy({} as Firestore, {
     return typeof value === "function" ? value.bind(target) : value;
   },
 });
+

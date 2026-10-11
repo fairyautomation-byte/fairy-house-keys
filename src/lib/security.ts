@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
+    public messageOverride?: string,
+    public retryAfter?: number,
+    public retryable?: boolean,
   ) {
-    super(code);
+    super(messageOverride || code);
   }
 }
 export const digest = (value: string) =>
@@ -26,19 +29,54 @@ export const cookieOptions = {
   maxAge: 604800,
   path: "/",
 };
-export function failure(error: unknown) {
-  if (error instanceof ApiError)
+export function failure(
+  error: unknown,
+  reqOrCorrelationId?: NextRequest | string,
+) {
+  const correlationId =
+    typeof reqOrCorrelationId === "string"
+      ? reqOrCorrelationId
+      : reqOrCorrelationId?.headers?.get("x-correlation-id") ||
+        reqOrCorrelationId?.headers?.get("x-request-id") ||
+        randomUUID();
+
+  if (error instanceof ApiError) {
+    const headers: Record<string, string> = {
+      "x-correlation-id": correlationId,
+    };
+    if (error.retryAfter) {
+      headers["Retry-After"] = String(error.retryAfter);
+    }
     return NextResponse.json(
-      { error: error.code, code: error.code, success: false },
-      { status: error.status },
+      {
+        error: error.messageOverride || error.code,
+        code: error.code,
+        success: false,
+        ok: false,
+        retryable:
+          error.retryable ?? (error.status >= 500 || error.status === 429),
+        correlationId,
+      },
+      { status: error.status, headers },
     );
+  }
   console.error(
-    "API operation failed",
+    `[${correlationId}] API operation failed:`,
     error instanceof Error ? error.name : "UnknownError",
   );
   return NextResponse.json(
-    { error: "Lỗi hệ thống. Vui lòng thử lại sau.", success: false },
-    { status: 503 },
+    {
+      error: "Lỗi hệ thống. Vui lòng thử lại sau.",
+      code: "INTERNAL_SERVER_ERROR",
+      success: false,
+      ok: false,
+      retryable: true,
+      correlationId,
+    },
+    {
+      status: 503,
+      headers: { "x-correlation-id": correlationId },
+    },
   );
 }
 export async function jsonBody(req: NextRequest): Promise<any> {
