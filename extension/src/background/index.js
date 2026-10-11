@@ -312,13 +312,16 @@ async function readBackendJson(response) {
   }
 }
 
-async function getPhoneMap(uids) {
+async function getPhoneMap(uids, explicitRequestId = null) {
   const session = await chrome.storage.local.get(['ztServerToken']);
   if (!session.ztServerToken) throw new Error('Vui lòng nhập License Key.');
   const generation = sessionGeneration, key = session.ztServerToken;
   const list = [...new Set(uids.map(String))];
   if (!list.length || list.length > 500 || list.some(uid => !/^\d{5,20}$/.test(uid))) throw new Error('UID không hợp lệ');
-  const requestId = crypto.randomUUID(); let response, data;
+  const requestId = explicitRequestId && typeof explicitRequestId === 'string'
+    ? explicitRequestId
+    : crypto.randomUUID();
+  let response, data;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       response = await timedFetch(ZT_API_BASE + '/api/license/phones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ licenseKey: key, uids: list, requestId }) });
@@ -648,7 +651,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         return;
       }
       try {
-        const phoneMap = await getPhoneMap(uids.map((u) => String(u)));
+        const phoneMap = await getPhoneMap(uids.map((u) => String(u)), msg.requestId);
         sendResponse({ ok: true, phoneMap });
       } catch (e) {
         sendResponse({ ok: false, error: e.message || String(e) });

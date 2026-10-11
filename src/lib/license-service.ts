@@ -150,3 +150,35 @@ export async function consumeQuota(
     { maxAttempts: 20 },
   );
 }
+
+export async function refundSystemQuota(
+  ref: FirebaseFirestore.DocumentReference,
+  count: number,
+  requestId: string,
+) {
+  const receipt = db
+    .collection("usage_requests")
+    .doc(digest(`${ref.id}:${requestId}`));
+  return db.runTransaction(
+    async (tx) => {
+      const snap = await tx.get(ref);
+      const recSnap = await tx.get(receipt);
+      if (!snap.exists || !recSnap.exists) return;
+      const recData = recSnap.data()!;
+      if (recData.refunded) return;
+      const data = snap.data()!;
+      const newUsed = Math.max(0, (data.daily_used || 0) - count);
+      const newTotal = Math.max(0, (data.total_scans || 0) - count);
+      tx.update(ref, {
+        daily_used: newUsed,
+        total_scans: newTotal,
+      });
+      tx.update(receipt, {
+        refunded: true,
+        refunded_at: new Date(),
+      });
+    },
+    { maxAttempts: 20 },
+  );
+}
+
