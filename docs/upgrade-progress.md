@@ -66,4 +66,12 @@ Theo dõi lộ trình sửa lỗi và nâng cấp theo `PLAN_NANG_CAP_TOAN_DIEN_
   - **Commit `9803137`** [R02, R03]: Trừ quota nguyên tử khi retry sau refund; cách ly hạn mức ngày qua đêm (midnight boundary).
   - **Commit `d4c596e`** [R04, R05, R06, R07]: Lease fencing token, client retry 429, vòng đời payment intent, tương thích PayOS SDK v1, fail-closed test isolation.
   - **Commit `[Group 4]`** [R08, R09, R10, R11]: Tích hợp FacebookAdapter vào luồng extension, capabilities handshake, chống starvation outbox reconcile, keyset cursor pagination cho admin users, dashboard count aggregation, nâng Extension v2.1.2 và chuẩn hóa cam kết trung thực.
-
+- **2026-10-11 (Giai đoạn hoàn thiện thực tế):**
+  - **Commit `9f6b1fe`**:
+    - Nhận diện thiết bị bền vững qua cookie `zt_installation_id` trên domain `fairyautomation.io.vn` (không bị mất ID khi gỡ tiện ích cài lại trên cùng máy).
+    - Hỗ trợ luồng dự phòng khôi phục cài lại cho chủ key tại `/api/user/license/rebind` và `/dashboard/licenses`.
+    - Gỡ bỏ hạn mức kết bạn 100 lời mời/ngày tại `/api/license/invite` và trên Extension modal; chuyển sang gói không giới hạn.
+    - Sửa luồng Đăng ký & Đăng nhập: bảo toàn query `next`/`returnPath` và `plan` xuyên suốt `/login` -> `/register` -> `/verify-otp`.
+    - Tự động phát mã OTP khi người dùng chưa xác thực bấm đăng nhập.
+    - Hỗ trợ đối soát trạng thái `CANCELED` (1 chữ L) và `CANCELLED` (2 chữ L) từ PayOS.
+    - Đồng bộ trọn vẹn thư mục tiện ích gốc `zoo-target-pro` và đóng gói lại `public/fairy-house-extension-v2.zip` (SHA-256: `7c12f82b3b1bc081d49ef9e7e0a0b4b46345a3535301422fe036a933a8e70a63`).
