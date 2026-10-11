@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
       throw new ApiError(401, "Unauthorized");
 
     const now = Date.now();
-    const query = await db
+    // Anti-starvation: query broader window of candidates and prioritize due orders
+    const orderCandidates = await db
       .collection("payos_orders")
       .where("status", "in", [
         "PENDING",
@@ -29,18 +30,25 @@ export async function POST(req: NextRequest) {
         "EXPIRED",
         "CREATE_FAILED",
       ])
-      .limit(50)
+      .limit(200)
       .get();
+
+    const dueOrders = orderCandidates.docs
+      .map((doc: any) => ({
+        doc,
+        data: doc.data(),
+        nextAt: toMillis(doc.data().next_reconcile_at),
+      }))
+      .filter((item: any) => !item.nextAt || item.nextAt <= now)
+      .sort((a: any, b: any) => (a.nextAt || 0) - (b.nextAt || 0))
+      .slice(0, 50);
 
     let settled = 0,
       failed = 0;
 
-    for (const doc of query.docs) {
-      const data = doc.data();
-      // Anti-starvation: skip orders that have been recently attempted and backed off
-      if (data.next_reconcile_at && toMillis(data.next_reconcile_at) > now) {
-        continue;
-      }
+    for (const item of dueOrders) {
+      const doc = item.doc;
+      const data = item.data;
 
       try {
         const info = await payos.getPaymentLinkInformation(data.payosOrderCode);
@@ -71,24 +79,29 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const emails = await db
+    // Anti-starvation: query broader window for emails, filter out dead-letters and future backoffs
+    const emailCandidates = await db
       .collection("email_outbox")
       .where("status", "in", ["PENDING", "SENDING"])
-      .limit(20)
+      .limit(100)
       .get();
 
-    for (const doc of emails.docs) {
-      const emailData = doc.data();
-      if (
-        emailData.next_attempt_at &&
-        toMillis(emailData.next_attempt_at) > now
-      ) {
-        continue;
-      }
-      if (emailData.status === "DEAD_LETTER") {
-        continue;
-      }
-      await deliverLicenseEmail(doc.id);
+    const dueEmails = emailCandidates.docs
+      .map((doc: any) => ({
+        doc,
+        data: doc.data(),
+        nextAt: toMillis(doc.data().next_attempt_at),
+      }))
+      .filter(
+        (item: any) =>
+          item.data.status !== "DEAD_LETTER" &&
+          (!item.nextAt || item.nextAt <= now),
+      )
+      .sort((a: any, b: any) => (a.nextAt || 0) - (b.nextAt || 0))
+      .slice(0, 20);
+
+    for (const item of dueEmails) {
+      await deliverLicenseEmail(item.doc.id);
     }
 
     await db.collection("admin_audit").add({

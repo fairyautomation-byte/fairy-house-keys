@@ -116,3 +116,65 @@ test('A14: ZT_EXTENSION_UID_DEMO_BATCH deduplicates UIDs correctly', async () =>
   assert.equal(res.count, 3);
   assert.equal(res.localOnly, true);
 });
+
+test('R08: ZT_GET_CAPABILITIES fetches and caches server capabilities', async () => {
+  const env = setup({
+    ztServerCapabilities: { phones: true, validate: true, invite: true, idempotency: true },
+    ztServerCapabilitiesCheckedAt: Date.now()
+  });
+
+  const res = await env.msg({ action: 'ZT_GET_CAPABILITIES' });
+  assert.equal(res.ok, true);
+  assert.equal(res.capabilities.phones, true);
+  assert.equal(res.capabilities.validate, true);
+});
+
+test('R08: FacebookAdapter is connected into api.js friend request flow', async () => {
+  const { PushGroupAPI } = require('../src/core/api.js');
+  const originalFetch = global.fetch;
+  const originalAuth = global.PushGroupAuth;
+
+  global.PushGroupAuth = {
+    getAuth: () => ({ fbDtsg: 'mock_dtsg_123', userId: '10000000001' }),
+    getRequestParams: () => ({ lsd: 'mock_lsd_123', jazoest: '21234' }),
+    generateJazoest: () => '21234'
+  };
+
+  try {
+    // 1. Mock Facebook returning checkpoint error (code 368)
+    global.fetch = async () => ({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({
+        errors: [{ code: 368, message: 'Your account is temporarily blocked' }]
+      })
+    });
+
+    const resCheckpoint = await PushGroupAPI.sendFriendRequest('10000000002');
+    assert.equal(resCheckpoint.success, false);
+    assert.equal(resCheckpoint.errorType, 'CHECKPOINT_OR_BLOCKED');
+
+    // 2. Mock Facebook returning successful friend request OUTGOING_REQUEST
+    global.fetch = async () => ({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({
+        data: {
+          friend_request_send: {
+            friend_requestees: [{ friendship_status: 'OUTGOING_REQUEST' }]
+          }
+        }
+      })
+    });
+
+    const resSuccess = await PushGroupAPI.sendFriendRequest('10000000003');
+    assert.equal(resSuccess.success, true);
+    assert.equal(resSuccess.status, 'success');
+    assert.equal(resSuccess.friendship_status, 'OUTGOING_REQUEST');
+  } finally {
+    global.fetch = originalFetch;
+    global.PushGroupAuth = originalAuth;
+  }
+});
+
+

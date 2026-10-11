@@ -80,7 +80,7 @@ test("R07: test guard in firebase.ts rejects production project when APP_ENV=tes
   try {
     process.env.FIREBASE_PROJECT_ID = "fairy-house-keys";
     process.env.APP_ENV = "test";
-    process.env.NODE_ENV = "production";
+    (process.env as any).NODE_ENV = "production";
     assert.throws(
       () => {
         db.collection("test");
@@ -90,7 +90,7 @@ test("R07: test guard in firebase.ts rejects production project when APP_ENV=tes
   } finally {
     process.env.FIREBASE_PROJECT_ID = oldProject;
     process.env.APP_ENV = oldAppEnv;
-    process.env.NODE_ENV = oldNodeEnv;
+    (process.env as any).NODE_ENV = oldNodeEnv;
   }
 });
 
@@ -101,7 +101,7 @@ test("R07: test guard in firebase.ts rejects production project when VERCEL_ENV=
   try {
     process.env.FIREBASE_PROJECT_ID = "fairy-house-keys";
     process.env.VERCEL_ENV = "preview";
-    process.env.NODE_ENV = "production";
+    (process.env as any).NODE_ENV = "production";
     assert.throws(
       () => {
         db.collection("test");
@@ -111,7 +111,7 @@ test("R07: test guard in firebase.ts rejects production project when VERCEL_ENV=
   } finally {
     process.env.FIREBASE_PROJECT_ID = oldProject;
     process.env.VERCEL_ENV = oldVercelEnv;
-    process.env.NODE_ENV = oldNodeEnv;
+    (process.env as any).NODE_ENV = oldNodeEnv;
   }
 });
 

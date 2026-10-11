@@ -14,7 +14,7 @@ const FAQS: FAQItem[] = [
   {
     category: 'license',
     q: '1 License Key có thể dùng cùng lúc trên nhiều máy tính không?',
-    a: 'Không. Để đảm bảo tính ổn định và bảo mật cao nhất, mỗi License Key được mã hoá gắn liền với phiên cài đặt độc quyền (Installation Session Token) của đúng 1 trình duyệt. Nếu bạn có nhu cầu cho nhiều nhân viên, vui lòng mua số lượng Key tương ứng.'
+    a: 'Không. Để đảm bảo tính ổn định và bảo mật cao nhất, mỗi License Key được gắn liền với mã cài đặt (Installation ID) của đúng 1 trình duyệt. Nếu bạn có nhu cầu cho nhiều nhân viên, vui lòng mua số lượng Key tương ứng.'
   },
   {
     category: 'license',

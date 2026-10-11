@@ -8,6 +8,11 @@ const FB_FRIENDLY_PROFILE_DIRECTORY_POST_CLICK = 'ProfileCometDirectoryPostClick
 const DOC_ID_FRIEND_REQUEST_SEND = '34373951838917178';
 const FB_FRIENDLY_FRIEND_REQUEST_SEND = 'FriendingCometFriendRequestSendMutation';
 
+const _fbAdapter =
+  typeof require !== 'undefined'
+    ? (function() { try { return require('./facebook-adapter.js'); } catch (_) { return null; } })()
+    : (typeof window !== 'undefined' && window.FacebookAdapter) || (typeof globalThis !== 'undefined' && globalThis.FacebookAdapter) || null;
+
 /**
  * Các helper độc lập khỏi `this` để tránh lỗi kiểu
  * `this._getFacebookGraphqlUrl is not a function` nếu ngữ cảnh bị mất.
@@ -114,6 +119,10 @@ const PushGroupAPI = {
     }
   },
 
+  sendFriendRequest(targetUid, opts) {
+    return this.sendFriendInvite(targetUid, opts);
+  },
+
   async sendFriendInvite(targetUid, opts) {
     const uid = String(targetUid || '').replace(/\D/g, '');
     if (!uid || uid.length < 6) {
@@ -185,6 +194,25 @@ const PushGroupAPI = {
       throw new Error('HTTP ' + resp.status);
     }
     const raw = await resp.text();
+    if (_fbAdapter && typeof _fbAdapter.classifyFacebookResponse === 'function') {
+      const classification = _fbAdapter.classifyFacebookResponse(raw, resp.status);
+      if (classification.type !== _fbAdapter.FB_ERROR_TYPES.SUCCESS) {
+        return {
+          success: false,
+          status: 'failed',
+          message: classification.message,
+          errorType: classification.type,
+          retryable: classification.retryable
+        };
+      }
+      const adapted = _fbAdapter.adaptFriendInvite(classification.payload);
+      return {
+        success: Boolean(adapted.ok),
+        status: adapted.status,
+        message: adapted.message,
+        friendship_status: adapted.friendship_status || ''
+      };
+    }
     const payload = ztParseGraphqlPayload(raw);
     const errors = Array.isArray(payload && payload.errors) ? payload.errors : [];
     if (errors.length) {
@@ -268,6 +296,18 @@ const PushGroupAPI = {
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const text = await resp.text();
+    if (_fbAdapter && typeof _fbAdapter.classifyFacebookResponse === 'function') {
+      const classification = _fbAdapter.classifyFacebookResponse(text, resp.status);
+      if (classification.type === _fbAdapter.FB_ERROR_TYPES.CHECKPOINT_OR_BLOCKED) {
+        throw new Error('CHECKPOINT_OR_BLOCKED: ' + classification.message);
+      }
+      if (classification.type === _fbAdapter.FB_ERROR_TYPES.LOGIN_REQUIRED) {
+        throw new Error('LOGIN_REQUIRED: ' + classification.message);
+      }
+      if (classification.type === _fbAdapter.FB_ERROR_TYPES.RATE_LIMITED) {
+        throw new Error('RATE_LIMIT_EXCEEDED');
+      }
+    }
     console.log('[TienHouse] GraphQL response length:', text.length, '| first 200 chars:', text.substring(0, 200));
     const chunks = this._parseMultiResponse(text);
     for (const chunk of chunks) {
@@ -1650,3 +1690,8 @@ const PushGroupAPI = {
     return r;
   }
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { PushGroupAPI, ztParseGraphqlPayload };
+}
+

@@ -10,20 +10,26 @@ export async function GET(req: NextRequest) {
     }
 
     const now = new Date();
-    // Parallel bounded queries for dashboard stats
-    const [usersSnap, licensesSnap, recentOrdersSnap, pendingOrdersSnap] =
+    // Use Firestore count() aggregation if supported by instance, fallback to bounded snapshot
+    const usersCountPromise = typeof (db.collection("users") as any).count === "function"
+      ? (db.collection("users") as any).count().get().then((s: any) => s.data().count).catch(() => null)
+      : Promise.resolve(null);
+
+    const pendingCountPromise = typeof (db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW") as any).count === "function"
+      ? (db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW") as any).count().get().then((s: any) => s.data().count).catch(() => null)
+      : Promise.resolve(null);
+
+    const [aggUsers, aggPending, fallbackUsersSnap, fallbackPendingSnap, licensesSnap, recentOrdersSnap] =
       await Promise.all([
-        db.collection("users").get(),
-        db.collection("licenses").get(),
+        usersCountPromise,
+        pendingCountPromise,
+        db.collection("users").limit(1000).get(),
+        db.collection("orders").where("status", "==", "PENDING_PAYMENT_REVIEW").limit(1000).get(),
+        db.collection("licenses").limit(1000).get(),
         db.collection("orders").orderBy("created_at", "desc").limit(20).get(),
-        db
-          .collection("orders")
-          .where("status", "==", "PENDING_PAYMENT_REVIEW")
-          .limit(100)
-          .get(),
       ]);
 
-    const usersCount = usersSnap.size;
+    const usersCount = aggUsers !== null ? aggUsers : fallbackUsersSnap.size;
     let totalScans = 0;
     let activeLicenses = 0;
 
@@ -38,7 +44,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const pendingOrders = pendingOrdersSnap.size;
+    const pendingOrders = aggPending !== null ? aggPending : fallbackPendingSnap.size;
     const recentOrders = recentOrdersSnap.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),

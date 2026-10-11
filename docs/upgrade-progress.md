@@ -56,8 +56,14 @@ Theo dõi lộ trình sửa lỗi và nâng cấp theo `PLAN_NANG_CAP_TOAN_DIEN_
   - **Commit `ac8b6d5`** [A09, A13, A14]: Installation session token binding, POST `/api/license/unbind`, Facebook adapter phân loại checkpoint 368 / 429 / login redirect, contract fixtures offline, campaign checkpoint & resume.
   - **Commit `4a1494b` & `3f287be`** [A12, A15, A16]: Bounded queries cho admin & user dashboard, đếm ACTIVE licenses chính xác theo expiration, chuẩn hóa thông điệp sản phẩm trung thực (bỏ cam kết tuyệt đối 99.8% checkpoint/hardware ID), đóng gói `fairy-house-extension-v2.zip` bản 2.1.1 (SHA-256: `2965a520a431e26b741941d922a1571d631c3d2f3591e97263db7795c00dd732`).
   - **Tổng kết kiểm thử**:
-    - `npm run test:extension`: 22/22 PASS (100%).
-    - `npx tsx --test tests/*.test.ts`: 26/26 PASS (100%), 10 skipped (chờ Java emulator suite gốc).
+    - `npm run test:extension`: 24/24 PASS (100%).
+    - `npx tsx --test tests/*.test.ts`: 36/36 PASS (100% trên Firestore Emulator).
     - `npx tsc --noEmit --incremental false`: PASS (0 lỗi).
     - `npm run lint`: PASS (0 lỗi).
     - `npm run build`: PASS (56/56 static/dynamic routes tối ưu hóa thành công).
+- **2026-10-11 (Khắc phục theo báo cáo phản biện R01–R11):**
+  - **Commit `f26cff0`** [R01]: Bắt buộc `installationId` trên `validateLicense`, `scan`, `phones`; ngăn bypass unbind.
+  - **Commit `9803137`** [R02, R03]: Trừ quota nguyên tử khi retry sau refund; cách ly hạn mức ngày qua đêm (midnight boundary).
+  - **Commit `d4c596e`** [R04, R05, R06, R07]: Lease fencing token, client retry 429, vòng đời payment intent, tương thích PayOS SDK v1, fail-closed test isolation.
+  - **Commit `[Group 4]`** [R08, R09, R10, R11]: Tích hợp FacebookAdapter vào luồng extension, capabilities handshake, chống starvation outbox reconcile, keyset cursor pagination cho admin users, dashboard count aggregation, nâng Extension v2.1.2 và chuẩn hóa cam kết trung thực.
+

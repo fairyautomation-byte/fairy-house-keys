@@ -2,7 +2,7 @@
   "update_url": "https://clients2.google.com/service/update2/crx",
   "manifest_version": 3,
   "name": "Fairy House AutoData",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Giáº£i phÃ¡p AI Automation Ä‘á»‰nh cao - Fairy House Team",
   "permissions": [
     "scripting",

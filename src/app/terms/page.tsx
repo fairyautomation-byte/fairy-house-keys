@@ -81,7 +81,7 @@ export default async function TermsPage() {
                 Để bảo vệ quyền lợi người mua chính hãng và chống phân phối lậu, mỗi License Key được tạo theo định dạng chuẩn <code className="px-1.5 py-0.5 rounded bg-[var(--fha-surface-2)] font-mono text-xs text-[var(--fha-text)] border border-[var(--fha-border)]">FHAD-XXXX-XXXX-XXXX-XXXX</code> và tuân theo nguyên tắc:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
-                <li><strong className="text-[var(--fha-text)]">Ràng buộc 1 Key / 1 Thiết bị:</strong> Key sau khi kích hoạt lần đầu trên Chrome Extension sẽ được khóa với phiên cài đặt độc quyền (Installation Session Token) của trình duyệt đó.</li>
+                <li><strong className="text-[var(--fha-text)]">Ràng buộc 1 Key / 1 Thiết bị:</strong> Key sau khi kích hoạt lần đầu trên Chrome Extension sẽ được khóa với mã cài đặt (Installation ID) của trình duyệt đó.</li>
                 <li><strong className="text-[var(--fha-text)]">Không chia sẻ công khai:</strong> Việc kích hoạt Key trên trình duyệt khác khi chưa đăng xuất khỏi máy cũ sẽ bị từ chối truy cập.</li>
                 <li><strong className="text-[var(--fha-text)]">Đổi máy (Cài lại Win / Thay máy mới):</strong> Khách hàng có thể đăng xuất trực tiếp trên tiện ích cũ để giải phóng liên kết, hoặc liên hệ qua kênh Zalo CSKH chính thức để được hỗ trợ chuyển đổi thiết bị nhanh chóng.</li>
               </ul>
@@ -122,7 +122,7 @@ export default async function TermsPage() {
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
                 <li><strong className="text-[var(--fha-text)]">Dùng thử 3 ngày miễn phí (0đ):</strong> Mỗi tài khoản đăng ký mới đều được cấp 100 lượt scan/ngày trong 3 ngày để kiểm tra độ tương thích trước khi trả phí.</li>
                 <li><strong className="text-[var(--fha-text)]">Hoàn tiền 100% trong 24 giờ:</strong> Nếu sau khi thanh toán mua Key mà tiện ích không thể kích hoạt trên máy bạn do lỗi từ hệ thống Fairy House AutoData, bạn sẽ được hoàn tiền 100% không phát sinh phí.</li>
-                <li><strong className="text-[var(--fha-text)]">Bảo hành suốt thời gian gói cước:</strong> Đảm bảo hệ thống máy chủ xác thực hoạt động liên tục (Uptime 99.8%). Mọi sự cố máy chủ gián đoạn quá 12h sẽ được tự động cộng thêm số ngày bù tương ứng vào hạn dùng của Key.</li>
+                <li><strong className="text-[var(--fha-text)]">Hỗ trợ kỹ thuật & Chính sách bù thời gian:</strong> Hệ thống được giám sát và duy trì tính sẵn sàng liên tục 24/7. Trong trường hợp xảy ra sự cố kỹ thuật từ hệ thống máy chủ xác thực kéo dài trên 12 giờ, quản trị viên sẽ tiếp nhận và cộng bù ngày sử dụng tương ứng vào thời hạn của Key sau khi đối soát nhật ký vận hành.</li>
               </ul>
             </div>
           </section>

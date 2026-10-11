@@ -381,7 +381,7 @@ async function ztServerLoginFlow(licenseKey, isRefresh = false) {
     const response = await timedFetch(ZT_API_BASE + '/api/license/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ licenseKey: key, installationId, clientVersion: '2.1.1' })
+      body: JSON.stringify({ licenseKey: key, installationId, clientVersion: '2.1.2' })
     });
     const data = await readBackendJson(response);
     return await writeSession(async () => {
@@ -573,6 +573,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     (async () => {
       const data = await chrome.storage.local.get(['ztCampaignCheckpoint']);
       sendResponse({ ok: true, checkpoint: data.ztCampaignCheckpoint || null });
+    })().catch((e) => sendResponse({ ok: false, error: e.message || String(e) }));
+    return true;
+  }
+
+  if (msg?.action === 'ZT_GET_CAPABILITIES') {
+    (async () => {
+      const cached = await chrome.storage.local.get(['ztServerCapabilities', 'ztServerCapabilitiesCheckedAt']);
+      if (!cached.ztServerCapabilities || Date.now() - (cached.ztServerCapabilitiesCheckedAt || 0) > 300000) {
+        try {
+          const res = await timedFetch(ZT_API_BASE + '/api/capabilities', { method: 'GET' });
+          if (res.ok) {
+            const data = await readBackendJson(res);
+            if (data?.capabilities) {
+              await chrome.storage.local.set({
+                ztServerCapabilities: data.capabilities,
+                ztServerCapabilitiesCheckedAt: Date.now()
+              });
+              sendResponse({ ok: true, capabilities: data.capabilities, live: true });
+              return;
+            }
+          }
+        } catch (_) {}
+      }
+      sendResponse({ ok: true, capabilities: cached.ztServerCapabilities || null, live: false });
     })().catch((e) => sendResponse({ ok: false, error: e.message || String(e) }));
     return true;
   }

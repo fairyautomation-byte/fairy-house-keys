@@ -55,8 +55,8 @@ export default function AuthSplitLayout({ children, title, subtitle }: AuthSplit
               <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Xử lý tự động mỗi ngày</div>
             </div>
             <div className="bg-white p-3.5 3xl:p-4 rounded-fha border border-[var(--fha-border)] shadow-fha-sm">
-              <div className="text-lg 3xl:text-xl font-black font-mono text-[var(--fha-success)]">99.8% Uptime</div>
-              <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Hệ thống máy chủ ổn định</div>
+              <div className="text-lg 3xl:text-xl font-black font-mono text-[var(--fha-success)]">24/7 Sẵn sàng</div>
+              <div className="text-[11px] 3xl:text-xs text-[var(--fha-text-muted)] mt-0.5">Giám sát tính khả dụng</div>
             </div>
           </div>
         </div>

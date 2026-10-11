@@ -120,8 +120,8 @@ export default async function Home() {
               <div className="text-xs 3xl:text-sm font-semibold uppercase tracking-wider text-[var(--fha-text-muted)] mt-1.5">UID Đã Quét Mỗi Ngày</div>
             </div>
             <div className="p-3 3xl:p-4">
-              <div className="text-2xl sm:text-3xl 3xl:text-4xl 4xl:text-5xl font-black font-mono text-[var(--fha-success)] tracking-tight">99.8%</div>
-              <div className="text-xs 3xl:text-sm font-semibold uppercase tracking-wider text-[var(--fha-text-muted)] mt-1.5">Uptime Máy Chủ Xác Thực</div>
+              <div className="text-2xl sm:text-3xl 3xl:text-4xl 4xl:text-5xl font-black font-mono text-[var(--fha-success)] tracking-tight">24/7</div>
+              <div className="text-xs 3xl:text-sm font-semibold uppercase tracking-wider text-[var(--fha-text-muted)] mt-1.5">Giám Sát Tính Sẵn Sàng</div>
             </div>
             <div className="p-3 3xl:p-4">
               <div className="text-2xl sm:text-3xl 3xl:text-4xl 4xl:text-5xl font-black font-mono text-[var(--fha-brand)] tracking-tight">5 Giây</div>
