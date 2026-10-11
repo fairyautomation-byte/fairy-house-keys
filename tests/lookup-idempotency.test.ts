@@ -359,4 +359,93 @@ test("R04: worker with lost/expired lease is fenced and cannot overwrite active 
   assert.equal(snapAfterStaleAttempt.data()?.lease_token, "worker-b-active-token");
 });
 
+test("L2-01: atomic rollbackPhoneFailure prevents refunding subsequent retry and guarantees exactly one charge", async () => {
+  const licenseRef = mockDb.collection("licenses").doc("lic-l2-01");
+  const userRef = mockDb.collection("users").doc("user-l2-01");
+
+  await userRef.set({ status: "ACTIVE", email_verified: true });
+  await licenseRef.set({
+    license_key: "FHAD-L201-RACE-TEST-0001",
+    user_id: "user-l2-01",
+    status: "ACTIVE",
+    daily_limit: 100,
+    daily_used: 0,
+    total_scans: 0,
+    last_reset_date: "2026-10-11",
+  });
+
+  const requestId = "req-l2-01-race-12345678";
+  const { rollbackPhoneFailure } = await import("../src/lib/license-service");
+  const { digest } = await import("../src/lib/security");
+  const phoneReceiptRef = mockDb
+    .collection("phone_requests")
+    .doc(digest(`lic-l2-01:${requestId}`));
+
+  // 1. Worker A claims lease
+  const leaseTokenA = "worker-a-lease-token";
+  const fingerprint = digest(JSON.stringify(["10000000001"]));
+  await phoneReceiptRef.set({
+    fingerprint,
+    status: "PROCESSING",
+    lease_token: leaseTokenA,
+    lease_until: new Date(Date.now() + 14000),
+    created_at: new Date(),
+  });
+  // Worker A consumes quota
+  await consumeQuota(licenseRef as any, "consume", 1, requestId);
+  assert.equal((await licenseRef.get()).data()?.daily_used, 1);
+
+  // 2. Worker A experiences provider failure and calls rollbackPhoneFailure
+  const rollbackResult = await rollbackPhoneFailure(
+    licenseRef as any,
+    phoneReceiptRef as any,
+    1,
+    requestId,
+    leaseTokenA,
+    "UPSTREAM_502",
+  );
+  assert.equal(rollbackResult.rolledBack, true);
+
+  // Assert atomic state: phone_requests is FAILED and daily_used is 0
+  const afterA = (await licenseRef.get()).data()!;
+  assert.equal(afterA.daily_used, 0);
+  assert.equal((await phoneReceiptRef.get()).data()?.status, "FAILED");
+
+  // 3. Worker B retries with same requestId
+  const originalFetch = global.fetch;
+  global.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        ok: true,
+        data: [{ uid: "10000000001", phone: "0908888888" }],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  try {
+    const reqB = new NextRequest("http://localhost/api/license/phones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        licenseKey: "FHAD-L201-RACE-TEST-0001",
+        uids: ["10000000001"],
+        requestId,
+      }),
+    });
+
+    const resB = await phonesHandler(reqB);
+    assert.equal(resB.status, 200);
+    const bodyB = await resB.json();
+    assert.equal(bodyB.phoneMap["10000000001"], "0908888888");
+
+    // Worker B MUST be charged exactly 1 (not 0!)
+    const finalLicense = (await licenseRef.get()).data()!;
+    assert.equal(finalLicense.daily_used, 1);
+    assert.equal(finalLicense.total_scans, 1);
+    assert.equal((await phoneReceiptRef.get()).data()?.status, "COMPLETED");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
 

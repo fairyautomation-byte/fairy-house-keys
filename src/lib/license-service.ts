@@ -292,4 +292,76 @@ export async function refundSystemQuota(
   );
 }
 
+export async function rollbackPhoneFailure(
+  licenseRef: FirebaseFirestore.DocumentReference,
+  phoneReceiptRef: FirebaseFirestore.DocumentReference,
+  count: number,
+  requestId: string,
+  myLeaseToken: string,
+  errorReason: string,
+): Promise<{ rolledBack: boolean; reason?: string }> {
+  const usageReceiptRef = db
+    .collection("usage_requests")
+    .doc(digest(`${licenseRef.id}:${requestId}`));
+
+  return db.runTransaction(
+    async (tx) => {
+      const [phoneSnap, licenseSnap, usageSnap] = await Promise.all([
+        tx.get(phoneReceiptRef),
+        tx.get(licenseRef),
+        tx.get(usageReceiptRef),
+      ]);
+
+      if (!phoneSnap.exists || phoneSnap.data()?.lease_token !== myLeaseToken) {
+        // Lost lease! Another worker took over or already updated it. Do nothing!
+        return { rolledBack: false, reason: "LEASE_LOST" };
+      }
+
+      // Rollback quota accounting atomically if usage receipt exists and was not already refunded
+      if (licenseSnap.exists && usageSnap.exists) {
+        const usageData = usageSnap.data()!;
+        if (!usageData.refunded) {
+          const licenseData = licenseSnap.data()!;
+          const today = vietnamDay();
+          const usageDate =
+            usageData.usage_date ||
+            (usageData.created_at
+              ? typeof usageData.created_at.toDate === "function"
+                ? vietnamDay(usageData.created_at.toDate())
+                : vietnamDay(new Date(usageData.created_at))
+              : null);
+
+          const isSameDay = Boolean(
+            usageDate &&
+              licenseData.last_reset_date === usageDate &&
+              usageDate === today,
+          );
+
+          const updates: any = {
+            total_scans: Math.max(0, (licenseData.total_scans || 0) - count),
+          };
+          if (isSameDay) {
+            updates.daily_used = Math.max(0, (licenseData.daily_used || 0) - count);
+          }
+          tx.update(licenseRef, updates);
+          tx.update(usageReceiptRef, {
+            refunded: true,
+            refunded_at: new Date(),
+          });
+        }
+      }
+
+      // Mark phone receipt FAILED atomically in the same transaction
+      tx.update(phoneReceiptRef, {
+        status: "FAILED",
+        last_error: errorReason,
+        failed_at: new Date(),
+      });
+
+      return { rolledBack: true };
+    },
+    { maxAttempts: 20 },
+  );
+}
+
 

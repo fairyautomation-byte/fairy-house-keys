@@ -5,7 +5,7 @@ import {
   findLicense,
   consumeQuota,
   validateLicense,
-  refundSystemQuota,
+  rollbackPhoneFailure,
 } from "@/lib/license-service";
 import { jsonBody, ApiError, failure, digest } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -90,6 +90,7 @@ async function safeLookup(
 }
 
 export async function POST(req: NextRequest) {
+  const handlerStart = Date.now();
   try {
     const { licenseKey, uids, requestId, installationId } =
       await jsonBody(req);
@@ -180,7 +181,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Server-wide deadline budget: 12 seconds total covering overall request
-    const elapsed = Date.now() - (req as any)._startTime || 0;
+    const elapsed = Date.now() - handlerStart;
     const remainingMs = Math.max(1000, 12000 - elapsed);
     const timeoutSignal = AbortSignal.timeout(remainingMs);
 
@@ -199,36 +200,27 @@ export async function POST(req: NextRequest) {
     }
 
     // If UIDs are missing, or if db1 failed completely, try DB2 with remaining budget
-    const missing = uids.filter((uid) => !map[uid]);
-    if (missing.length && !timeoutSignal.aborted) {
-      const resDb2 = await safeLookup(missing, "db2", timeoutSignal);
+    const missingAfterDb1 = uids.filter((uid) => !map[uid]);
+    if (missingAfterDb1.length && !timeoutSignal.aborted) {
+      const resDb2 = await safeLookup(missingAfterDb1, "db2", timeoutSignal);
       if (resDb2.ok && resDb2.data) {
         db2Success = true;
-        merge(map, resDb2.data, missing);
+        merge(map, resDb2.data, missingAfterDb1);
       }
     }
 
     // Check system error status: if both providers failed to respond and 0 phones found
     if (!db1Success && !db2Success && Object.keys(map).length === 0) {
-      // Transactional fence: only update to FAILED and refund if this worker still holds the lease!
-      let leasePreserved = false;
-      await db.runTransaction(async (tx) => {
-        const snap = await tx.get(receipt);
-        if (!snap.exists || snap.data()?.lease_token !== myLeaseToken) {
-          // Lost lease to another worker, do not overwrite or refund!
-          return;
-        }
-        leasePreserved = true;
-        tx.update(receipt, {
-          status: "FAILED",
-          last_error: resDb1.error || "PHONE_PROVIDERS_UNAVAILABLE",
-          failed_at: new Date(),
-        });
-      });
-
-      if (leasePreserved) {
-        await refundSystemQuota(ref, uids.length, requestId);
-      }
+      // Transactional fence & atomic refund:
+      // Combines lease check, quota rollback in licenses + usage_requests, and marking receipt FAILED in ONE transaction!
+      await rollbackPhoneFailure(
+        ref,
+        receipt,
+        uids.length,
+        requestId,
+        myLeaseToken,
+        resDb1.error || "PHONE_PROVIDERS_UNAVAILABLE",
+      );
 
       throw new ApiError(
         502,
@@ -240,11 +232,21 @@ export async function POST(req: NextRequest) {
     }
 
     await validateLicense(ref, installationId);
+
+    // Recalculate remaining missing UIDs after all provider responses merged
+    const finalMissing = uids.filter((uid) => !map[uid]);
+    const foundCount = Object.keys(map).length;
+    const isPartial = finalMissing.length > 0 && foundCount > 0;
+
     const result = {
       ok: true,
       phoneMap: map,
       quota,
-      partial: missing.length > 0 && Object.keys(map).length > 0,
+      partial: isPartial,
+      totalRequested: uids.length,
+      foundCount,
+      missingCount: finalMissing.length,
+      missingUids: finalMissing,
     };
 
     let finalResult = result;
