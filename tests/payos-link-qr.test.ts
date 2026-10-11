@@ -92,7 +92,7 @@ test("A06 & A07: create-payment-link returns valid timeLeft and rejects expired 
   }
 });
 
-test("R06: recovery when create drops response recovers SDK PENDING schema without synthetic checkoutUrl", async () => {
+test("L2-03 / R06: recovery without authentic account credentials returns RECOVERING status", async () => {
   const userRef = mockDb.collection("users").doc("user-r06");
   await userRef.set({
     email: "user-r06@example.test",
@@ -101,7 +101,10 @@ test("R06: recovery when create drops response recovers SDK PENDING schema witho
   });
   const token = await signUserToken("user-r06", "user-r06@example.test", 0);
 
-  // createPaymentLink throws (network timeout/drop); getPaymentLinkInformation returns official SDK schema (no checkoutUrl/qrCode)
+  delete process.env.PAYOS_ACCOUNT_NUMBER;
+  delete process.env.PAYOS_BIN;
+
+  // createPaymentLink throws; getPaymentLinkInformation returns SDK schema without account/QR fields
   setPayosClient({
     createPaymentLink: async () => {
       throw new Error("ETIMEDOUT: createPaymentLink response dropped");
@@ -136,9 +139,76 @@ test("R06: recovery when create drops response recovers SDK PENDING schema witho
     const res = await createLinkHandler(req);
     assert.equal(res.status, 200);
     const data = await res.json();
-    assert.equal(data.status, "PENDING");
+    assert.equal(data.status, "RECOVERING");
     assert.equal(data.amount, 69000);
-    assert.equal(data.recovered, true);
+    assert.equal(data.recovered, false);
+  } finally {
+    setPayosClient(undefined);
+  }
+});
+
+test("L2-02 / R06: recovery when provider reports CANCELLED preserves database PAID state committed during await", async () => {
+  const userRef = mockDb.collection("users").doc("user-l2-02");
+  await userRef.set({
+    email: "user-l2-02@example.test",
+    email_verified: true,
+    status: "ACTIVE",
+  });
+  const token = await signUserToken("user-l2-02", "user-l2-02@example.test", 0);
+
+  let webhookSimulated = false;
+  const requestId = "req-l2-02-race-12345678";
+
+  setPayosClient({
+    createPaymentLink: async () => {
+      throw new Error("Simulated dropped create response");
+    },
+    getPaymentLinkInformation: async (orderCode: number) => {
+      // Simulate webhook committing PAID while recovery is awaiting provider
+      if (!webhookSimulated) {
+        webhookSimulated = true;
+        const query = await mockDb.collection("payos_orders").get();
+        for (const doc of query.docs) {
+          if (doc.data().payosOrderCode === orderCode) {
+            await doc.ref.update({ status: "PAID", paid_at: new Date() });
+          }
+        }
+      }
+      return {
+        id: "plink-sdk-cancelled-race",
+        orderCode,
+        amount: 69000,
+        amountPaid: 0,
+        amountRemaining: 69000,
+        status: "CANCELLED", // Provider says CANCELLED
+        createdAt: "2026-10-11T00:00:00.000Z",
+        transactions: [],
+      };
+    },
+  } as any);
+
+  try {
+    const req = new NextRequest("http://localhost/api/payos/create-payment-link", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        amount: 69000,
+        requestId,
+      }),
+    });
+
+    const res = await createLinkHandler(req);
+    // Must NOT downgrade to CANCELLED or return 410!
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.status, "PAID");
+
+    const orders = await mockDb.collection("payos_orders").get();
+    const orderDoc = orders.docs.find((d) => d.data().amount === 69000);
+    assert.equal(orderDoc?.data().status, "PAID");
   } finally {
     setPayosClient(undefined);
   }

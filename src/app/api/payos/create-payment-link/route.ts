@@ -3,7 +3,12 @@ import { randomInt, randomUUID } from "node:crypto";
 import { payos } from "@/lib/payos";
 import { db } from "@/lib/firebase";
 import { getAuthenticatedUser } from "@/lib/auth";
-import { validPlan, planIds, settlePayment } from "@/lib/order-service";
+import {
+  validPlan,
+  planIds,
+  settlePayment,
+  transitionOrderStatus,
+} from "@/lib/order-service";
 import {
   jsonBody,
   failure,
@@ -12,6 +17,7 @@ import {
   activeUser,
 } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
@@ -42,6 +48,7 @@ export async function POST(req: NextRequest) {
     for (const url of [body.returnUrl, body.cancelUrl])
       if (url && new URL(url).origin !== origin)
         throw new ApiError(400, "INVALID_REDIRECT");
+
     const ref = db
         .collection("payos_orders")
         .doc(digest(`${user.uid}:${requestId}`)),
@@ -50,6 +57,10 @@ export async function POST(req: NextRequest) {
     const reservation = db
       .collection("payos_order_codes")
       .doc(String(orderCode));
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    const expirySec = nowSec + 300;
+
     const result: FirebaseFirestore.DocumentData = await db.runTransaction(
       async (tx) => {
         const [existing, reserved, owner] = await Promise.all([
@@ -78,6 +89,8 @@ export async function POST(req: NextRequest) {
           plan_id: planId || null,
           plan_snapshot: plan,
           created_at: new Date(),
+          expired_at: new Date(expirySec * 1000),
+          expiredAt: expirySec,
         };
         tx.set(ref, data);
         tx.set(reservation, { order_id: ref.id });
@@ -85,14 +98,31 @@ export async function POST(req: NextRequest) {
       },
       { maxAttempts: 20 },
     );
-    const nowSec = Math.floor(Date.now() / 1000);
+
+    // If order was already fulfilled/paid (e.g. concurrent webhook/polling completed)
+    if (result.status === "PAID") {
+      return NextResponse.json({
+        ok: true,
+        orderCode: result.payosOrderCode,
+        status: "PAID",
+        amount: result.amount,
+        licenseKey: result.license_key || null,
+      });
+    }
+
+    const originalExpirySec =
+      result.payment?.expiredAt ||
+      result.expiredAt ||
+      (result.expired_at
+        ? typeof result.expired_at.toMillis === "function"
+          ? Math.floor(result.expired_at.toMillis() / 1000)
+          : Math.floor(new Date(result.expired_at).getTime() / 1000)
+        : expirySec);
+
     if (result.payment) {
-      if (result.payment.expiredAt && result.payment.expiredAt <= nowSec) {
-        await db.runTransaction(async (tx) => {
-          const snap = await tx.get(ref);
-          if (["CREATING", "PENDING"].includes(snap.data()?.status)) {
-            tx.update(ref, { status: "EXPIRED", expired_at: new Date() });
-          }
+      if (originalExpirySec <= nowSec) {
+        await transitionOrderStatus(ref, "EXPIRED", {
+          expired_at: new Date(),
         });
         throw new ApiError(
           410,
@@ -104,27 +134,37 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({
         ...result.payment,
-        timeLeft: Math.max(
-          0,
-          (result.payment.expiredAt || nowSec + 300) - nowSec,
-        ),
+        expiredAt: originalExpirySec,
+        timeLeft: Math.max(0, originalExpirySec - nowSec),
       });
     }
 
-    const expirySec = nowSec + 300;
     const paymentData = {
       orderCode: result.payosOrderCode,
       amount: result.amount,
       description: String(result.payosOrderCode).slice(0, 25),
       returnUrl: `${origin}${plan ? "/dashboard/licenses" : "/dashboard/wallet"}`,
       cancelUrl: `${origin}${plan ? "/checkout" : "/dashboard/wallet"}`,
-      expiredAt: expirySec,
+      expiredAt: originalExpirySec,
     };
     let link: any;
     try {
       link = await payos.createPaymentLink(paymentData);
     } catch {
+      // Recovery path when createPaymentLink fails or drops response
       try {
+        // First check current database status in case webhook committed during create call
+        const currentSnap = await ref.get();
+        if (currentSnap.data()?.status === "PAID") {
+          return NextResponse.json({
+            ok: true,
+            orderCode: result.payosOrderCode,
+            status: "PAID",
+            amount: currentSnap.data()?.amount || result.amount,
+            licenseKey: currentSnap.data()?.license_key || null,
+          });
+        }
+
         const info = await payos.getPaymentLinkInformation(
           result.payosOrderCode,
         );
@@ -142,6 +182,18 @@ export async function POST(req: NextRequest) {
           throw new ApiError(502, "PAYMENT_ORDER_MISMATCH", "Mã đơn hàng không khớp.");
         }
 
+        // Re-check database status right after fetching provider info (interleaving race check)
+        const recheckSnap = await ref.get();
+        if (recheckSnap.data()?.status === "PAID") {
+          return NextResponse.json({
+            ok: true,
+            orderCode: result.payosOrderCode,
+            status: "PAID",
+            amount: recheckSnap.data()?.amount || result.amount,
+            licenseKey: recheckSnap.data()?.license_key || null,
+          });
+        }
+
         if (info.status === "PAID") {
           if (info.amountPaid !== result.amount) {
             throw new ApiError(
@@ -155,11 +207,13 @@ export async function POST(req: NextRequest) {
             info.amountPaid,
             `create-recovery:${result.payosOrderCode}`,
           );
+          const settledSnap = await ref.get();
           return NextResponse.json({
             ok: true,
             orderCode: result.payosOrderCode,
             status: "PAID",
             amount: info.amountPaid,
+            licenseKey: settledSnap.data()?.license_key || null,
           });
         }
 
@@ -171,9 +225,32 @@ export async function POST(req: NextRequest) {
               "Giá trị đơn hàng không khớp.",
             );
           }
-          const bin = (info as any).bin || process.env.PAYOS_BIN || "970422";
+          const bin = (info as any).bin || process.env.PAYOS_BIN || "";
           const accountNumber = (info as any).accountNumber || process.env.PAYOS_ACCOUNT_NUMBER || "";
           const accountName = (info as any).accountName || process.env.PAYOS_ACCOUNT_NAME || "FAIRY HOUSE";
+          const checkoutUrl = (info as any).checkoutUrl || "";
+          const qrCode = (info as any).qrCode || "";
+
+          // Authentic payment details check:
+          // To consider recovery ready for customer scanning, we must have non-empty bank account credentials or checkoutUrl.
+          const hasAuthenticPayment = (Boolean(bin) && Boolean(accountNumber)) || Boolean(checkoutUrl);
+
+          if (!hasAuthenticPayment) {
+            // SDK v1 returned PENDING without account fields and server lacks environment bank credentials.
+            // Return status: RECOVERING so client can poll or show a friendly synchronization state instead of fake QR.
+            return NextResponse.json({
+              ok: true,
+              orderCode: result.payosOrderCode,
+              status: "RECOVERING",
+              recovered: false,
+              amount: result.amount,
+              message: "Đang đồng bộ thông tin thanh toán từ PayOS. Vui lòng thử lại sau giây lát.",
+              retryAfter: 3,
+              timeLeft: Math.max(0, originalExpirySec - nowSec),
+              expiredAt: originalExpirySec,
+            });
+          }
+
           const payment = {
             orderCode: result.payosOrderCode,
             amount: result.amount,
@@ -185,18 +262,19 @@ export async function POST(req: NextRequest) {
             accountName,
             description: String(result.payosOrderCode),
             transactionCode: result.transactionCode,
-            expiredAt: expirySec,
-            timeLeft: Math.max(0, expirySec - Math.floor(Date.now() / 1000)),
-            checkoutUrl: (info as any).checkoutUrl || "",
-            qrCode: (info as any).qrCode || "",
+            expiredAt: originalExpirySec,
+            timeLeft: Math.max(0, originalExpirySec - nowSec),
+            checkoutUrl,
+            qrCode,
           };
 
           await db.runTransaction(async (tx) => {
             const current = await tx.get(ref);
+            if (current.data()?.status === "PAID") return;
             tx.update(ref, {
               payment,
               paymentLinkId: info.id,
-              expires_at: new Date(expirySec * 1000),
+              expires_at: new Date(originalExpirySec * 1000),
               ...(current.data()?.status === "CREATING" ? { status: "PENDING" } : {}),
             });
           });
@@ -205,9 +283,20 @@ export async function POST(req: NextRequest) {
         }
 
         if (["EXPIRED", "CANCELLED", "CANCELED"].includes(info.status)) {
-          await db.runTransaction(async (tx) => {
-            tx.update(ref, { status: info.status, updated_at: new Date() });
+          const target = info.status === "EXPIRED" ? "EXPIRED" : "CANCELED";
+          const transition = await transitionOrderStatus(ref, target, {
+            paymentLinkId: info.id,
           });
+          if (transition.status === "PAID") {
+            const currentOrder = (await ref.get()).data();
+            return NextResponse.json({
+              ok: true,
+              orderCode: result.payosOrderCode,
+              status: "PAID",
+              amount: currentOrder?.amount || result.amount,
+              licenseKey: currentOrder?.license_key || null,
+            });
+          }
           throw new ApiError(
             410,
             "PAYMENT_LINK_EXPIRED",
@@ -244,25 +333,24 @@ export async function POST(req: NextRequest) {
       amount: result.amount,
       description: link.description || String(result.payosOrderCode),
       transactionCode: result.transactionCode,
-      expiredAt: expirySec,
-      timeLeft: Math.max(0, expirySec - Math.floor(Date.now() / 1000)),
+      expiredAt: originalExpirySec,
+      timeLeft: Math.max(0, originalExpirySec - nowSec),
     };
     await db.runTransaction(
       async (tx) => {
         const current = await tx.get(ref);
+        if (current.data()?.status === "PAID") return;
         tx.update(ref, {
           payment,
-          paymentLinkId: link.paymentLinkId || "",
-          expires_at: new Date(expirySec * 1000),
-          ...(current.data()?.status === "CREATING"
-            ? { status: "PENDING" }
-            : {}),
+          paymentLinkId: link.paymentLinkId || null,
+          expires_at: new Date(originalExpirySec * 1000),
+          status: "PENDING",
         });
       },
       { maxAttempts: 20 },
     );
     return NextResponse.json(payment);
-  } catch (error) {
-    return failure(error, req);
+  } catch (err: any) {
+    return failure(err);
   }
 }

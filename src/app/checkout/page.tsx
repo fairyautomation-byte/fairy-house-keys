@@ -277,6 +277,23 @@ function CheckoutContent() {
         throw new Error(data.error || "Không thể tạo cổng thanh toán PayOS");
       }
 
+      if (data.status === "PAID") {
+        setQrState("success");
+        if (data.licenseKey) {
+          setPurchasedKey(data.licenseKey);
+        }
+        setPaymentStep("success");
+        toastSuccess("Đơn hàng đã được thanh toán thành công!");
+        return;
+      }
+
+      if (data.status === "RECOVERING" || (!data.accountNumber && !data.checkoutUrl)) {
+        setError(data.message || "Hệ thống đang đồng bộ liên kết thanh toán. Vui lòng thử lại sau giây lát.");
+        toastError(data.message || "Đang đồng bộ cổng thanh toán. Vui lòng thử lại sau giây lát.");
+        setPaymentStep("select");
+        return;
+      }
+
       const bankNames: Record<string, string> = {
         "970422": "MB Bank",
         "970436": "Vietcombank",

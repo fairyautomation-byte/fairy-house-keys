@@ -121,6 +121,21 @@ export default function WalletPage() {
         throw new Error(data.error || "Lỗi tạo mã QR");
       }
 
+      if (data.status === "PAID") {
+        toastSuccess("Giao dịch nạp ví đã được xử lý thành công!");
+        setPaymentState("success");
+        setShowQR(false);
+        loadWallet();
+        return;
+      }
+
+      if (data.status === "RECOVERING" || (!data.accountNumber && !data.checkoutUrl)) {
+        toastError(data.message || "Hệ thống đang đồng bộ liên kết thanh toán. Vui lòng thử lại sau giây lát.");
+        setPaymentState("idle");
+        setShowQR(false);
+        return;
+      }
+
       const bankNames: Record<string, string> = {
         "970422": "MB Bank",
         "970436": "Vietcombank",
@@ -132,7 +147,7 @@ export default function WalletPage() {
         "970403": "Sacombank",
       };
 
-      const niceBankName = bankNames[data.bin] || data.bin;
+      const niceBankName = bankNames[data.bin] || data.bin || "MB Bank";
 
       setTransactionInfo({
         orderCode: data.orderCode,
