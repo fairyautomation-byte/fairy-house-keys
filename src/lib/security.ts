@@ -121,16 +121,45 @@ export function sameOrigin(req: NextRequest) {
       req.headers.get("sec-fetch-site") === "same-origin" ||
       process.env.NODE_ENV !== "production"
     );
-  const allowed = new Set([new URL(req.url).origin]);
-  // Next may normalize the internal hostname; use the browser-facing Host too.
-  const host = req.headers.get("host");
-  if (host && /^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/.test(host))
-    allowed.add(new URL(`${req.nextUrl.protocol}//${host}`).origin);
+
+  let originUrl: URL;
+  try {
+    originUrl = new URL(origin);
+  } catch {
+    return false;
+  }
+
+  const allowed = new Set<string>();
+  try {
+    allowed.add(new URL(req.url).origin);
+  } catch {}
+
+  const proto =
+    req.headers.get("x-forwarded-proto") ||
+    req.nextUrl.protocol?.replace(":", "") ||
+    "https";
+
+  for (const h of [
+    req.headers.get("x-forwarded-host"),
+    req.headers.get("host"),
+  ]) {
+    if (h && /^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/.test(h)) {
+      allowed.add(`${proto}://${h}`);
+      allowed.add(`https://${h}`);
+      allowed.add(`http://${h}`);
+    }
+  }
+
   for (const raw of [
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.NEXT_PUBLIC_BASE_URL,
-  ])
-    if (raw) allowed.add(new URL(raw).origin);
+  ]) {
+    if (raw) {
+      try {
+        allowed.add(new URL(raw).origin);
+      } catch {}
+    }
+  }
 
   const expanded = new Set(allowed);
   for (const item of allowed) {
@@ -143,7 +172,19 @@ export function sameOrigin(req: NextRequest) {
       }
     } catch {}
   }
-  return expanded.has(origin);
+
+  if (expanded.has(origin)) return true;
+
+  // Match bare hostname if both are under same root domain
+  const originBare = originUrl.hostname.replace(/^www\./, "").toLowerCase();
+  for (const item of expanded) {
+    try {
+      const itemBare = new URL(item).hostname.replace(/^www\./, "").toLowerCase();
+      if (originBare === itemBare) return true;
+    } catch {}
+  }
+
+  return false;
 }
 export function activeUser(user: any) {
   return (
