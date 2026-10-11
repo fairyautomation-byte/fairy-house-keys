@@ -60,9 +60,26 @@ export function failure(
       { status: error.status, headers },
     );
   }
+  if (error instanceof Error && error.message.endsWith("_CONFIG_MISSING")) {
+    console.error(`[${correlationId}] Configuration missing:`, error.message);
+    return NextResponse.json(
+      {
+        error: `Lỗi cấu hình máy chủ: Thiếu biến môi trường ${error.message.replace("_CONFIG_MISSING", "")} trên Vercel. Vui lòng cấu hình trên Vercel Environment Variables.`,
+        code: error.message,
+        success: false,
+        ok: false,
+        retryable: true,
+        correlationId,
+      },
+      {
+        status: 503,
+        headers: { "x-correlation-id": correlationId },
+      },
+    );
+  }
   console.error(
     `[${correlationId}] API operation failed:`,
-    error instanceof Error ? error.name : "UnknownError",
+    error instanceof Error ? `${error.name}: ${error.message}` : "UnknownError",
   );
   return NextResponse.json(
     {
@@ -114,7 +131,19 @@ export function sameOrigin(req: NextRequest) {
     process.env.NEXT_PUBLIC_BASE_URL,
   ])
     if (raw) allowed.add(new URL(raw).origin);
-  return allowed.has(origin);
+
+  const expanded = new Set(allowed);
+  for (const item of allowed) {
+    try {
+      const u = new URL(item);
+      if (u.hostname.startsWith("www.")) {
+        expanded.add(`${u.protocol}//${u.hostname.slice(4)}${u.port ? `:${u.port}` : ""}`);
+      } else {
+        expanded.add(`${u.protocol}//www.${u.hostname}${u.port ? `:${u.port}` : ""}`);
+      }
+    } catch {}
+  }
+  return expanded.has(origin);
 }
 export function activeUser(user: any) {
   return (
