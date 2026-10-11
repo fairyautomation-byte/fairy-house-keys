@@ -34,9 +34,11 @@ export async function GET(req: NextRequest) {
         return { id: doc.id, ...data };
       });
       const matched = allUsers.filter((u: any) =>
-        u.email?.toLowerCase().includes(search) ||
-        u.full_name?.toLowerCase().includes(search) ||
-        u.zalo?.includes(search)
+        u.status !== "DELETED" && (
+          u.email?.toLowerCase().includes(search) ||
+          u.full_name?.toLowerCase().includes(search) ||
+          u.zalo?.includes(search)
+        )
       );
       const nextCursor =
         snapshot.docs.length === 200 ? snapshot.docs[snapshot.docs.length - 1].id : null;
@@ -62,14 +64,16 @@ export async function GET(req: NextRequest) {
     }
 
     const snapshot = await query.get();
-    const users = snapshot.docs.map((doc: any) => {
-      const data = publicUser(doc.data());
-      if (data.password) delete data.password;
-      return {
-        id: doc.id,
-        ...data,
-      };
-    });
+    const users = snapshot.docs
+      .map((doc: any) => {
+        const data = publicUser(doc.data());
+        if (data.password) delete data.password;
+        return {
+          id: doc.id,
+          ...data,
+        };
+      })
+      .filter((u: any) => u.status !== "DELETED");
 
     const nextCursor =
       snapshot.docs.length === limit ? snapshot.docs[snapshot.docs.length - 1].id : null;

@@ -76,13 +76,17 @@ export default function AdminUsersPage() {
     setDeleteLoading(true);
     
     try {
-      const res = await fetch(`/api/admin/users/${confirmDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/users/${confirmDelete.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
       if (res.ok) {
         success(`Đã xóa vĩnh viễn tài khoản ${confirmDelete.email}!`);
+        setUsers(prev => prev.filter(u => u.id !== confirmDelete.id));
         fetchUsers();
       } else {
         const err = await res.json();
-        throw new Error(err.error);
+        throw new Error(err.error || 'Không thể xóa tài khoản');
       }
     } catch (err: any) {
       error('Lỗi: ' + err.message);
@@ -95,18 +99,23 @@ export default function AdminUsersPage() {
   const handleCleanup = async () => {
     setCleanupLoading(true);
     try {
-      const res = await fetch('/api/admin/cleanup-users', { method: 'POST' });
+      const res = await fetch('/api/admin/cleanup-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dryRun: false }),
+      });
       const data = await res.json();
       if (res.ok) {
         success(`Đã xóa ${data.deletedUsers} tài khoản rác và ${data.deletedSessions} phiên OTP cũ`);
         fetchUsers();
       } else {
-        throw new Error(data.error);
+        throw new Error(data.error || 'Lỗi dọn dẹp');
       }
     } catch (err: any) {
       error('Lỗi: ' + (err.message || 'Lỗi hệ thống'));
     } finally {
       setCleanupLoading(false);
+      setConfirmCleanup(false);
     }
   };
 
@@ -131,9 +140,11 @@ export default function AdminUsersPage() {
       key: 'email_verified',
       title: 'Trạng Thái',
       render: (item) => (
-        item.email_verified 
-          ? <StatusBadge status="ACTIVE" size="sm" /> 
-          : <StatusBadge status="PENDING" size="sm" />
+        item.status === 'DELETED'
+          ? <StatusBadge status="REVOKED" size="sm" />
+          : item.email_verified 
+            ? <StatusBadge status="ACTIVE" size="sm" /> 
+            : <StatusBadge status="PENDING" size="sm" />
       )
     },
     {

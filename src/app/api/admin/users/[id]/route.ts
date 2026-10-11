@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { ApiError, failure } from "@/lib/security";
+import { ApiError, failure, digest } from "@/lib/security";
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -11,18 +11,25 @@ export async function DELETE(
       throw new ApiError(401, "Unauthorized");
     const { id } = await params,
       ref = db.collection("users").doc(id);
+    let userEmail = "";
     await db.runTransaction(
       async (tx) => {
         const snap = await tx.get(ref);
         if (!snap.exists) throw new ApiError(404, "USER_NOT_FOUND");
-        tx.update(ref, {
-          status: "DELETED",
-          disabled: true,
-          auth_version: (snap.data()!.auth_version || 0) + 1,
-        });
+        const userData = snap.data() || {};
+        userEmail = userData.email || "";
+        tx.delete(ref);
+        if (userEmail) {
+          tx.delete(
+            db
+              .collection("email_reservations")
+              .doc(digest(userEmail.toLowerCase().trim())),
+          );
+        }
         tx.set(db.collection("admin_audit").doc(), {
           action: "DELETE_USER",
           user_id: id,
+          user_email: userEmail,
           created_at: new Date(),
         });
       },
